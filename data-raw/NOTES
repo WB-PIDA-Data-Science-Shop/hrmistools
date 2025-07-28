@@ -1,0 +1,83 @@
+#### Harmonization Planning
+
+Overview
+- Purpose of the harmonization (eg improve their strategic HRM and fiscal planning)
+More specifically, we are interested being able to study hiring patterns, dismissals/resignations,
+reassignments, pensions, wage bill and public sector wage premiums.
+- Scope of the data
+- Target Audience (governments, country teams, researchers, donors)
+
+Data Sources and Coverage
+- HRMIS systems included (e.g., SAP HR, Oracle, custom national systems)
+- Time coverage
+- Sector coverage (central government, local government, parastatals)
+
+Variable Definitions
+- Talk about the modules (Organization, Worker and Contract modules)
+
+    Organization
+      - Organization ID (org_id)
+      - Organization Name, Native (org_name_native)
+      - Organization Name, English (org_name_english)
+      - Data corresponding date, (ref_date)
+      - Country Code, (country_code)
+      - Country Name, (country_name)
+      - Administration 1 Name, (adm1_name)
+      - Administration 1 Code, (adm1_code)
+
+
+    Worker
+      - Worker ID (worker_id)
+      - Organization ID (org_id)
+      - Timestamp (org_date)
+      - Date of Birth (birth_day)
+      - Gender (gender)
+      - Education Attainment (educat4, educat5, educat7, and educat10)
+      - Tribe (tribe)
+      - Race (race)
+      - Status (active/retired)
+      - Country Code, (country_code)
+      - Country Name, (country_name)
+      - Administration 1 Name, (adm1_name)
+      - Administration 1 Code, (adm1_code)
+
+
+    Contract
+      - Contract ID (contract_id)
+      - Worker ID (worker_id)
+      - Organization ID (org_id)
+      - Timestamp (org_date)
+      - Compensation (wage)
+      - Modality of Contract (short-term, open-term, permanent) (contract_type)
+      - Occupation Code (ISCO) (occupation_code)
+      - Start Date (start_date)
+      - End Date (end_date)
+      - Country Code, country_code
+      - Country Name, country_name
+      - Administration 1 Name, adm1_name
+      - Administration 1 Code, adm1_code
+      - Hours worked (hours)
+
+
+
+
+** Analytics of interest:
+
+- Wage bill forecasting: wage bill projections and scenario modelling
+modelling payroll trends and simulating the long-term fiscal impacts of hiring or pay reform policies
+
+- staff deployment and capacity analysis
+analyzing staff distribution across ministries or regions and identifying over- or under- staffing patterns
+
+- Turnover and retention tracking
+tracking hires, departures and tenure by unit or manager to highligh retention issues.
+
+- Pay inequality detection
+comparing compensation levels across organizational units to uncover disparities in pay for similar positions
+
+- Absence and overtime analytics
+
+
+
+
+
