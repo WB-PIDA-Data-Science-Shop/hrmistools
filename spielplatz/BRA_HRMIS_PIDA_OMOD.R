@@ -17,13 +17,13 @@ fileloc <- "//egvpi/egvpi/data/harmonization/HRM/BRA/data-raw/6. Wage Bill AL/3.
 
 
 ### read in the data
-actdata_list <-
+active_contract_tbl <-
   list.files(path = fileloc,
              pattern = "^Ativos_[0-9]{4}\\.xlsx$",
              full.names = T) |>
   map(readxl::read_xlsx)
 
-inactdata_list <-
+inactive_contract_tbl <-
   list.files(path = fileloc,
              pattern = "^Inativos_[0-9]{4}\\.xlsx$",
              full.names = T) |>
@@ -84,107 +84,81 @@ inact_list <- c(
   NIVEL = "Level within the class"
 )
 
+####### lets combine the list of datasets into an active and inactive dataframe
+
+#### quickly harmonize column classes
+active_contract_tbl <- harmonize_col_class(active_contract_tbl)
+inactive_contract_tbl <- harmonize_col_class(inactive_contract_tbl)
+
+active_contract_tbl <- bind_rows(active_contract_tbl)
+inactive_contract_tbl <- bind_rows(inactive_contract_tbl)
+
+
+#### ready to prepare the organization module
+
+
+### for active
+active_org_tbl <-
+  active_contract_tbl |>
+  mutate(org_id = paste0(ORGAO, " - ", COD_ORGAO)) |>
+  mutate(org_name_native = ORGAO) |>
+  mutate(country_code = "BRA") |>
+  mutate(country_name = "Brazil") |>
+  mutate(adm1_name = "Alagoas") |>
+  mutate(adm1_code = "AL") |>
+  mutate(org_parent = NA) |>
+  mutate(org_child = NA) |>
+  dplyr::select(org_id, org_name_native,
+                country_code, country_name,
+                starts_with("adm", ignore.case = FALSE),
+                org_parent,
+                org_child) |>
+  unique()
+
+### including organizational name translations
+
+active_org_tbl <-
+  active_org_tbl |>
+  merge(tibble(org_name_native = unique(active_org_tbl$org_name_native),
+               org_name_en = vectorize_gt(vector = unique(active_org_tbl$org_name_native),
+                                          source_language = "pt")),
+        by = "org_name_native",
+        all.x = TRUE) |>
+  as_tibble()
 
 
 
-############### ------ prepare the organization module ------- #################
+### for the inactive
+inactive_org_tbl <-
+  inactive_contract_tbl |>
+  mutate(org_id = paste0(ORGAO, " - ", COD_ORGAO)) |>
+  mutate(org_name_native = ORGAO) |>
+  mutate(country_code = "BRA") |>
+  mutate(country_name = "Brazil") |>
+  mutate(adm1_name = "Alagoas") |>
+  mutate(adm1_code = "AL") |>
+  mutate(org_parent = NA) |>
+  mutate(org_child = NA) |>
+  mutate(org_date = as.Date(paste(ANO_PAGAMENTO,
+                                  sprintf("%2d", MES_REFERENCIA),
+                                  "01",
+                                  sep = "-"))) |>
+  dplyr::select(org_id, org_name_native,
+                country_code, country_name,
+                starts_with("adm", ignore.case = FALSE),
+                org_parent,
+                org_child, org_date) |>
+  unique()
 
-active_omod_list <-
-  actdata_list |>
-  lapply(FUN = function(x){
-
-
-    x <-
-      x |>
-      mutate(org_id = paste0(ORGAO, " - ", COD_ORGAO)) |>
-      mutate(org_name_native = ORGAO) |>
-      mutate(country_code = "BRA") |>
-      mutate(country_name = "Brazil") |>
-      mutate(adm1_name = "Alagoas") |>
-      mutate(adm1_code = "AL") |>
-      mutate(adm2_name = NA) |>
-      mutate(adm2_code = NA) |>
-      mutate(adm3_code = NA) |>
-      mutate(adm3_code = NA) |>
-      mutate(lat = NA) |>
-      mutate(lon = NA) |>
-      dplyr::select(org_id, org_name_native,
-                    country_code, country_name,
-                    starts_with("adm"), lat, lon) |>
-      unique()
-
-    ### including organizational name translations
-
-    org_dt <-
-      x |>
-      mutate(org_name_en = vectorize_gt(vector = org_name_native,
-                                        source_language = "pt"))
-
-
-    return(org_dt)
-
-
-
-  })
-
-
-actomod_dt <- Reduce(f = "rbind",
-                     x = omod_list)
-
-actomod_dt <- actomod_dt |> unique()
-
-### process the inactive data for more organizations
-
-inact_dt <-
-inactdata_list |>
-  lapply(FUN = function(x){
-
-
-    x <-
-      x |>
-      mutate(org_id = NA) |>
-      mutate(org_name_native = ORGAO) |>
-      mutate(org_date = as.Date(paste(ANO_PAGAMENTO,
-                                      sprintf("%2d", MES_REFERENCIA),
-                                      "01",
-                                      sep = "-"))) |>
-      mutate(country_code = "BRA") |>
-      mutate(country_name = "Brazil") |>
-      mutate(adm1_name = "Alagoas") |>
-      mutate(adm1_code = "AL") |>
-      dplyr::select(org_id, org_name_native, org_date,
-                    country_code, country_name,
-                    adm1_name, adm1_code) |>
-      unique()
-
-    ### including organizational name translations
-
-    org_dt <-
-      tibble(org_name_native = unique(x$org_name_native),
-             org_name_en = vectorize_gt(vector = unique(x$org_name_native),
-                                        source_language = "pt"))
-
-    x <- merge(x, org_dt, by = "org_name_native", all.x = TRUE)
-
-    return(x)
-
-
-
-  })
-
-inact_dt <- Reduce(f = "rbind",
-                     x = inact_dt)
-
-actomod_dt <- actomod_dt |> unique()
-
-
-
-saveRDS(actomod_dt, "")
-
-
-
-
-
+# ### including organizational name translations
+#
+# inactive_org_tbl <-
+#   inactive_org_tbl |>
+#   merge(tibble(org_name_native = unique(inactive_org_tbl$org_name_native),
+#                org_name_en = vectorize_gt(vector = unique(inactive_org_tbl$org_name_native),
+#                                           source_language = "pt")),
+#         by = "org_name_native",
+#         all.x = TRUE)
 
 
 
