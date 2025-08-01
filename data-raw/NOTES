@@ -60,8 +60,6 @@ Variable Definitions
       - Hours worked (hours)
 
 
-
-
 ** Analytics of interest:
 
 - Wage bill forecasting: wage bill projections and scenario modelling
@@ -78,7 +76,9 @@ comparing compensation levels across organizational units to uncover disparities
 
 - Absence and overtime analytics
 
+** Harmonization strategy:
 
-
+We need a generalizable approach that enable us to map, for a specific column $x$, all of its values to a predetermined set of values, defined by the team.
+Ideally, this mapping should be dataset and time-period specific.
 
 
