@@ -18,16 +18,16 @@ A data frame with harmonized column names.
 }
 \description{
 This function standardizes column names in a data frame using a dictionary
-that maps inconsistent or time-varying column names to a common naming scheme.
+that maps inconsistent or time-varying column names to a standardized set of column names.
 }
 \examples{
 # Using a named character vector
 dict <- c("age" = "Q1_age", "gender" = "Q2_sex", "income" = "Q3_income")
-df <- tibble(Q1_age = 25, Q2_sex = "M", Q3_income = 50000)
+df <- data.frame(Q1_age = 25, Q2_sex = "M", Q3_income = 50000)
 harmonize_columns(df, dict)
 
 # Using a data frame dictionary
-dict_df <- tibble(
+dict_df <- data.frame(
   from = c("Q1_age", "Q2_sex", "Q3_income"),
   to = c("age", "gender", "income")
 )

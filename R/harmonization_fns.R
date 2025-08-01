@@ -59,6 +59,8 @@ vectorize_gt <- function(vector,
 #' find_inconsistent_colnames(df_list)
 #' # Returns: "b" "c"
 #'
+#' @importFrom tibble tibble
+#' @importFrom dplyr intersect union symdiff
 #' @export
 find_inconsistent_colnames <- function(data_list) {
   shared_cols <- data_list |>
@@ -71,7 +73,7 @@ find_inconsistent_colnames <- function(data_list) {
 
   all_cols <- data_list |>
     purrr::map(
-      \(data) tibble(colnames = colnames(data))
+      \(data) tibble::tibble(colnames = colnames(data))
     ) |>
     purrr::reduce(
       dplyr::union
@@ -95,6 +97,8 @@ find_inconsistent_colnames <- function(data_list) {
 #' detect_inconsistent_cols(df, c("c", "d")) # returns FALSE
 #' detect_inconsistent_cols(df, c("a", "c")) # returns TRUE
 #'
+#' @importFrom dplyr select if_else
+#' @importFrom tidyselect any_of
 #' @export
 detect_inconsistent_cols <- function(data, inconsistent_cols) {
   n_inconsistent_cols <- data |>
@@ -110,14 +114,10 @@ detect_inconsistent_cols <- function(data, inconsistent_cols) {
   )
 }
 
-library(dplyr)
-library(purrr)
-library(rlang)
-
 #' Harmonize column names based on a dictionary
 #'
 #' This function standardizes column names in a data frame using a dictionary
-#' that maps inconsistent or time-varying column names to a common naming scheme.
+#' that maps inconsistent or time-varying column names to a standardized set of column names.
 #'
 #' @param data A data frame whose columns need to be renamed.
 #' @param dict Either a named character vector (names are the desired standardized
@@ -129,11 +129,11 @@ library(rlang)
 #' @examples
 #' # Using a named character vector
 #' dict <- c("age" = "Q1_age", "gender" = "Q2_sex", "income" = "Q3_income")
-#' df <- tibble(Q1_age = 25, Q2_sex = "M", Q3_income = 50000)
+#' df <- data.frame(Q1_age = 25, Q2_sex = "M", Q3_income = 50000)
 #' harmonize_columns(df, dict)
 #'
 #' # Using a data frame dictionary
-#' dict_df <- tibble(
+#' dict_df <- data.frame(
 #'   from = c("Q1_age", "Q2_sex", "Q3_income"),
 #'   to = c("age", "gender", "income")
 #' )
@@ -143,23 +143,23 @@ library(rlang)
 #' @importFrom purrr set_names
 #' @importFrom rlang := !!!
 #' @export
-harmonize_columns <- function(data, dict) {
+harmonize_columns <- function(data, dictionary) {
   # If a data frame is supplied as dict, convert to named vector
-  if (is.data.frame(dict)) {
-    dict <- set_names(dict$from, dict$to)
+  if (is.data.frame(dictionary)) {
+    dictionary <- set_names(dictionary$from, dictionary$to)
   }
 
   # Only include dict entries whose values are actual column names
-  available_dict <- dict[dict %in% names(data)]
+  available_dictionary <- dictionary[dictionary %in% names(data)]
 
   # Rename using dplyr::rename and !!! unquoting for tidy evaluation
   data_renamed <- data %>%
     dplyr::rename(
-      !!!set_names(available_dict, names(available_dict))
+      !!!set_names(available_dictionary, names(available_dictionary))
     ) |>
     select(
       any_of(
-        names(available_dict)
+        names(available_dictionary)
       )
     )
 
