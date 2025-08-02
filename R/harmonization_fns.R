@@ -59,96 +59,110 @@ vectorize_gt <- function(vector,
 #' find_inconsistent_colnames(df_list)
 #' # Returns: "b" "c"
 #'
-#' @importFrom purrr map reduce
 #' @importFrom tibble tibble
+#' @importFrom dplyr intersect union symdiff
 #' @export
 find_inconsistent_colnames <- function(data_list) {
   shared_cols <- data_list |>
-    map(\(data) tibble(colnames = colnames(data))) |>
-    reduce(intersect)
+    purrr::map(
+      \(data) tibble::tibble(colnames = colnames(data))
+    ) |>
+    purrr::reduce(
+      dplyr::intersect
+    )
 
   all_cols <- data_list |>
-    map(\(data) tibble(colnames = colnames(data))) |>
-    reduce(union)
+    purrr::map(
+      \(data) tibble::tibble(colnames = colnames(data))
+    ) |>
+    purrr::reduce(
+      dplyr::union
+    )
 
-  symdiff(shared_cols, all_cols)
+  dplyr::symdiff(shared_cols, all_cols)
 }
 
-
-
-#' Harmonize Column Classes Across Existing Columns in a List of Data Frames
+#' Detect Inconsistent Columns in a Data Frame
 #'
-#' This function takes a list of data frames and ensures that any columns shared
-#' across two or more data frames have consistent classes. If a column has
-#' different classes across data frames, it is coerced to character in those
-#' data frames. Columns that are missing from a data frame are left untouched
-#' (i.e., no new columns are added).
+#' This function checks whether any of the specified column names appear in a given data frame.
+#' It is typically used to identify the presence of inconsistent or unexpected column names across multiple data frames.
 #'
-#' @param df_list A list of data frames to harmonize.
+#' @param data A data frame to inspect.
+#' @param inconsistent_cols A character vector of column names considered inconsistent.
 #'
-#' @return A list of data frames with shared columns coerced to the same class if needed.
+#' @return A logical value: `TRUE` if any inconsistent columns are present in the data frame, `FALSE` otherwise.
 #'
 #' @examples
-#' df1 <- data.frame(a = 1:3, b = letters[1:3])
-#' df2 <- data.frame(b = factor(letters[4:6]), c = c("x", "y", "z"))
-#' result <- harmonize_col_class(list(df1, df2))
-#' lapply(result, str)
+#' df <- data.frame(a = 1:3, b = 4:6)
+#' detect_inconsistent_cols(df, c("c", "d")) # returns FALSE
+#' detect_inconsistent_cols(df, c("a", "c")) # returns TRUE
 #'
+#' @importFrom dplyr select if_else
+#' @importFrom tidyselect any_of
 #' @export
-harmonize_col_class <- function(df_list) {
-  all_cols <- unique(unlist(lapply(df_list, names)))
+detect_inconsistent_cols <- function(data, inconsistent_cols) {
+  n_inconsistent_cols <- data |>
+    dplyr::select(
+      tidyselect::any_of(inconsistent_cols)
+    ) |>
+    ncol()
 
-  # Step 1: Determine column classes for all existing columns
-  col_classes <-
-    lapply(df_list,
-           function(df) {
-
-              setNames(lapply(names(df),
-                              function(col) class(df[[col]])[1]), names(df))
-
-             })
-
-  # Step 2: Find which columns appear in multiple data frames with differing classes
-  all_class_info <-
-    do.call(rbind, lapply(seq_along(col_classes),
-                          function(i) {
-                            df_class <- col_classes[[i]]
-                            data.frame(df = i,
-                                       variable = names(df_class),
-                                       class = unlist(df_class),
-                                       stringsAsFactors = FALSE)
-                            }))
-
-  col_mixed_class <-
-    all_class_info |>
-    dplyr::group_by(variable) |>
-    dplyr::summarise(n = dplyr::n_distinct(class), .groups = "drop") |>
-    dplyr::filter(n > 1) |>
-    dplyr::pull(variable)
-
-  # Step 3: Harmonize classes for conflicting columns
-  df_list <-
-    lapply(df_list,
-           function(df) {
-    for (col in intersect(col_mixed_class, names(df))) {
-      df[[col]] <- as.character(df[[col]])
-    }
-    return(df)
-  })
-
-  return(df_list)
+  dplyr::if_else(
+    n_inconsistent_cols > 0,
+    TRUE,
+    FALSE
+  )
 }
 
+#' Harmonize column names based on a dictionary
+#'
+#' This function standardizes column names in a data frame using a dictionary
+#' that maps inconsistent or time-varying column names to a standardized set of column names.
+#'
+#' @param data A data frame whose columns need to be renamed.
+#' @param dict Either a named character vector (names are the desired standardized
+#'   column names and values are the original column names), or a data frame with
+#'   two columns: `from` (original column names) and `to` (standardized names).
+#'
+#' @return A data frame with harmonized column names.
+#'
+#' @examples
+#' # Using a named character vector
+#' dict <- c("age" = "Q1_age", "gender" = "Q2_sex", "income" = "Q3_income")
+#' df <- data.frame(Q1_age = 25, Q2_sex = "M", Q3_income = 50000)
+#' harmonize_columns(df, dict)
+#'
+#' # Using a data frame dictionary
+#' dict_df <- data.frame(
+#'   from = c("Q1_age", "Q2_sex", "Q3_income"),
+#'   to = c("age", "gender", "income")
+#' )
+#' harmonize_columns(df, dict_df)
+#'
+#' @import dplyr
+#' @importFrom purrr set_names
+#' @importFrom rlang := !!!
+#' @export
+harmonize_columns <- function(data, dictionary) {
+  # If a data frame is supplied as dict, convert to named vector
+  if (is.data.frame(dictionary)) {
+    dictionary <- set_names(dictionary$from, dictionary$to)
+  }
 
+  # Only include dict entries whose values are actual column names
+  available_dictionary <- dictionary[dictionary %in% names(data)]
 
+  # Rename using dplyr::rename and !!! unquoting for tidy evaluation
+  data_renamed <- data %>%
+    dplyr::rename(
+      !!!set_names(available_dictionary, names(available_dictionary))
+    ) |>
+    select(
+      any_of(
+        names(available_dictionary)
+      )
+    )
 
-
-
-
-
-
-
-
-
-
+  return(data_renamed)
+}
 
