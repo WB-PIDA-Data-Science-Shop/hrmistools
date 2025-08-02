@@ -2,7 +2,8 @@
 ######## TESTING THE INTENDED HARMONIZATION PROCESS WITH THE BRAZIL DATA #######
 ################################################################################
 
-paklist <- c("tidyverse", "polyglotr", "readxl", "purrr", "furrr", "writexl")
+paklist <- c("tidyverse", "polyglotr", "readxl", "purrr",
+             "furrr", "writexl")
 
 ## silently load the libraries
 invisible(lapply(paklist,
@@ -101,6 +102,12 @@ inactive_alagoas_tbl <- bind_rows(inactive_alagoastbl_list)
 
 #### ready to prepare the organization module
 
+#### apparently we ought to keep only September
+active_alagoas_tbl <-
+  active_alagoas_tbl |>
+  filter(MES_REFERENCIA == 9)
+
+
 ##### a few diagnostics
 check_dt <-
 active_alagoas_tbl |>
@@ -118,98 +125,54 @@ active_alagoas_tbl |>
 
 names(check_list) <- unique(active_alagoas_tbl$ANO_PAGAMENTO)
 
+#### we are going to create a unique identifier for organization by
+#### combining organization name, code and year
+
+alagoas_org_tbl <-
+  active_alagoas_tbl |>
+  transmute(org_id = paste(ORGAO, COD_ORGAO, ANO_PAGAMENTO, sep = "-"),
+            org_name_native = ORGAO,
+            country_code = "BRA",
+            country_name = "Brazil",
+            adm1_name = "Alagoas",
+            adm1_code = "AL",
+            org_parent = NA,
+            org_child = NA) |>
+  unique()
+
+
+#### include translation for organization name
+alagoas_org_tbl <-
+  alagoas_org_tbl |>
+    merge(tibble(org_name_native = unique(alagoas_org_tbl$org_name_native),
+                 org_name_en = vectorize_gt(vector = unique(alagoas_org_tbl$org_name_native),
+                                            source_language = "pt")),
+          by = "org_name_native",
+          all.x = TRUE) |>
+    as_tibble() |>
+    mutate(org_name_en = tolower(org_name_en))
+
+
+#### include same data for the inactive works
+alagoas_org_tbl <-
+  bind_rows(alagoas_org_tbl,
+            inactive_alagoas_tbl |>
+              transmute(org_id = paste(ORGAO, "000000", sep = "-"),
+                        org_name_native = ORGAO,
+                        country_code = "BRA",
+                        country_name = "Brazil",
+                        adm1_name = "Alagoas",
+                        adm1_code = "AL",
+                        org_parent = NA,
+                        org_child = NA) |>
+              unique() |>
+              mutate(org_name_en = "Alagoas Retirees"))
+
+
+#### write results
+saveRDS(alagoas_org_tbl, "spielplatz/bra_hrmis_organization.rds")
+
 write_xlsx(check_list, "spielplatz/orgao_check.xlsx")
-
-
-
-# ### for active
-# active_alagoas_tbl <-
-#   active_alagoas_tbl |>
-#   mutate(org_id = paste0(ORGAO, " - ", COD_ORGAO)) |>
-#   mutate(org_name_native = ORGAO) |>
-#   mutate(country_code = "BRA") |>
-#   mutate(country_name = "Brazil") |>
-#   mutate(adm1_name = "Alagoas") |>
-#   mutate(adm1_code = "AL") |>
-#   mutate(org_parent = NA) |>
-#   mutate(org_child = NA) |>
-#   dplyr::select(org_id, org_name_native,
-#                 country_code, country_name,
-#                 starts_with("adm", ignore.case = FALSE),
-#                 org_parent,
-#                 org_child) |>
-#   unique()
-#
-# ### including organizational name translations
-#
-# active_org_tbl <-
-#   active_org_tbl |>
-#   merge(tibble(org_name_native = unique(active_org_tbl$org_name_native),
-#                org_name_en = vectorize_gt(vector = unique(active_org_tbl$org_name_native),
-#                                           source_language = "pt")),
-#         by = "org_name_native",
-#         all.x = TRUE) |>
-#   as_tibble()
-#
-#
-#
-# ### for the inactive
-# inactive_org_tbl <-
-#   inactive_contract_tbl |>
-#   mutate(org_id = paste0(ORGAO, " - ", COD_ORGAO)) |>
-#   mutate(org_name_native = ORGAO) |>
-#   mutate(country_code = "BRA") |>
-#   mutate(country_name = "Brazil") |>
-#   mutate(adm1_name = "Alagoas") |>
-#   mutate(adm1_code = "AL") |>
-#   mutate(org_parent = NA) |>
-#   mutate(org_child = NA) |>
-#   mutate(org_date = as.Date(paste(ANO_PAGAMENTO,
-#                                   sprintf("%2d", MES_REFERENCIA),
-#                                   "01",
-#                                   sep = "-"))) |>
-#   dplyr::select(org_id, org_name_native,
-#                 country_code, country_name,
-#                 starts_with("adm", ignore.case = FALSE),
-#                 org_parent,
-#                 org_child, org_date) |>
-#   unique()
-#
-# # ### including organizational name translations
-# #
-# # inactive_org_tbl <-
-# #   inactive_org_tbl |>
-# #   merge(tibble(org_name_native = unique(inactive_org_tbl$org_name_native),
-# #                org_name_en = vectorize_gt(vector = unique(inactive_org_tbl$org_name_native),
-# #                                           source_language = "pt")),
-# #         by = "org_name_native",
-# #         all.x = TRUE)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
