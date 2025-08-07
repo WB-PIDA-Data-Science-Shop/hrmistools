@@ -2,8 +2,15 @@
 ######## CREATING A UNIQUE CONTRACT DATASET FROM THE ALAGOAS HRMIS DATA ########
 ################################################################################
 
+### install package from github if not already available
+remotes::install_github("worldbank/dlw")
+
+
 paklist <- c("tidyverse", "readxl",
-             "purrr", "furrr", "writexl")
+             "purrr", "furrr", "writexl",
+             "dlw", "pointblank")
+
+
 
 ## silently load the libraries
 invisible(lapply(paklist,
@@ -15,6 +22,12 @@ invisible(lapply(paklist,
 
 # read-in data ------------------------------------------------------------
 file_path <- "//egvpi/egvpi/data/harmonization/HRM/BRA/data-raw/6. Wage Bill AL/3. Microdados"
+
+token_chr <- readLines("spielplatz/dlw_token.txt")
+
+dlw_set_token(token_chr)
+
+gmdsupport_dt <- dlw_get_gmd_support()
 
 plan(multisession, workers = 6)
 
@@ -106,6 +119,23 @@ contract_alagoas_tbl <-
                                              origin = "1899-12-30"),
                         end_date = as.Date(as.integer(DATA_APOSENTADORIA),
                                            origin = "1899-12-30")))
+
+contract_alagoas_tbl <-
+  contract_alagoas_tbl %>%
+  mutate(across(
+    c(base_salary_lcu, gross_salary_lcu, net_salary_lcu, whours),
+    ~ as.numeric(.)
+  ))
+
+### include cpi, ppp and temporal and spatial pricing data for Brazil
+year_list <-
+  contract_alagoas_tbl[["start_date"]] |>
+  lubridate::year() |>
+  unique()
+
+
+qualitycheck_contractmod(contract_tbl = contract_alagoas_tbl)
+
 
 saveRDS(contract_alagoas_tbl,
         "spielplatz/bra_hrmis_contract.rds")

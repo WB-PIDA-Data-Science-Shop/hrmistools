@@ -4,12 +4,12 @@
 \alias{harmonize_columns}
 \title{Harmonize column names based on a dictionary}
 \usage{
-harmonize_columns(data, dict)
+harmonize_columns(data, dictionary)
 }
 \arguments{
 \item{data}{A data frame whose columns need to be renamed.}
 
-\item{dict}{Either a named character vector (names are the desired standardized
+\item{dictionary}{Either a named character vector (names are the desired standardized
 column names and values are the original column names), or a data frame with
 two columns: `from` (original column names) and `to` (standardized names).}
 }
