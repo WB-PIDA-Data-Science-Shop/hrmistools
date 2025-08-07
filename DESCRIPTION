@@ -18,5 +18,6 @@ Imports:
     rlang,
     pointblank,
     stringr,
-    tidyr
+    tidyr,
+    countrycode
 RoxygenNote: 7.3.2

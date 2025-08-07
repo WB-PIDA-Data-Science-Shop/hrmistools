@@ -99,3 +99,61 @@ qualitycheck_contractmod <- function(contract_tbl,
   return(agent)
 
 }
+
+
+
+
+
+#' Quality Check for Harmonized Organization Module
+#'
+#' @param org_tbl A data.frame or tibble containing the harmonized organization module
+#'
+#' @return A pointblank agent object
+#' @export
+#'
+#' @import dplyr pointblank countrycode
+#'
+#'
+qualitycheck_orgmod <- function(org_tbl) {
+
+  required_vars <- c(
+    "org_name_native", "org_id", "country_code", "country_name",
+    "adm1_name", "adm1_code", "org_parent", "org_child", "org_name_en"
+  )
+
+  # Check required columns exist
+  missing_vars <- setdiff(required_vars, names(org_tbl))
+  if (length(missing_vars) > 0) {
+    stop("Missing required variables: ", paste(missing_vars, collapse = ", "))
+  }
+
+  al <- action_levels(warn_at = 1)
+  # Begin pointblank checks
+  agent <-
+    org_tbl |>
+    create_agent(label = "QCheck for Organization Module",
+                 actions = al) |>
+    col_exists(columns = required_vars) |>
+    rows_distinct(columns = vars(org_id)) |>
+    col_vals_not_null(columns = required_vars) |>
+    col_is_character(columns = required_vars) |>
+    col_vals_in_set(columns = vars(country_code),
+                    set = unique(na.omit(countrycode::codelist$iso3c)))
+
+  agent <- agent %>% interrogate()
+
+  return(agent)
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
