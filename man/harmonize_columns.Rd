@@ -4,7 +4,7 @@
 \alias{harmonize_columns}
 \title{Harmonize column names based on a dictionary}
 \usage{
-harmonize_columns(data, dict)
+harmonize_columns(data, dictionary)
 }
 \arguments{
 \item{data}{A data frame whose columns need to be renamed.}

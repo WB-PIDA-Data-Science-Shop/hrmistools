@@ -14,8 +14,8 @@ set.seed(1789)
 
 # read-in data ------------------------------------------------------------
 file_path <- "//egvpi/egvpi/data/harmonization/HRM/BRA/data-raw/6. Wage Bill AL/3. Microdados"
-#
-# plan(multisession, workers = 3)
+
+plan(multisession, workers = 3)
 
 workers_active_list <-
   list.files(
@@ -23,7 +23,7 @@ workers_active_list <-
     pattern = "^Ativos_[0-9]{4}\\.xlsx$",
     full.names = T
   ) |>
-  map(
+  future_map(
     \(file) read_xlsx(
       file, na = c("", "-"), col_types = "text"
     ) |>
@@ -42,8 +42,8 @@ workers_inactive_list <-
     ) |>
       clean_names()
   )
-#
-# future::plan(sequential)
+
+future::plan(sequential)
 
 # harmonization -----------------------------------------------------------
 # what we want is two things: (1) uniqueness in the cross-section (entities are uniquely identified) and
@@ -104,7 +104,7 @@ workers_active <- workers_active |>
       as.numeric("years") |>
       floor(),
     educat7 = case_when(
-      educat7 == "ANALFABETO" ~ "No educat7",
+      educat7 == "ANALFABETO" ~ "No education",
       educat7 %in% c(
         "1 A 4 SERIE DO PRIM. GRAU INCOMPLETO",
         "5 A 8 SERIE DO PRIM. GRAU INCOMPLETO"
@@ -128,6 +128,15 @@ workers_active <- workers_active |>
       ) ~ "University incomplete or complete",
       educat7 == "NA" ~ NA_character_,
       TRUE ~ NA_character_
+    ),
+    educat7 = factor(
+      educat7,
+      levels = c(
+        "No education", "Primary incomplete", "Primary complete",
+        "Secondary incomplete", "Secondary complete",
+        "Higher than secondary but not university",
+        "University incomplete or complete"
+      )
     )
   )
 
@@ -189,15 +198,6 @@ workers_active |>
     gender
   )
 
-# generalize into functions
-find_duplicate_ids <- function(data, identifier){
-  data |>
-    add_count(
-      {{identifier}}
-    ) |>
-    filter(n > 1)
-}
-
 contract_id_duplicate_national <- workers_id |>
   group_by(contract_id) |>
   summarise(
@@ -205,21 +205,6 @@ contract_id_duplicate_national <- workers_id |>
     correct_worker_id = first(worker_id),
     .groups = "drop"
   )
-
-workers_active |>
-  inner_join(
-    contract_id_duplicate_national,
-    by = c("contract_id")
-  ) |>
-  arrange(contract_id) |>
-  select(
-    worker_id,
-    contract_id,
-    year,
-    date_birth,
-    gender
-  ) |>
-  distinct(worker_id)
 
 # decision: override national id with the first national id for each contract_id
 # 98 national ids affected
@@ -251,7 +236,18 @@ workers_active <- workers_active |>
 #   - Race (race)
 #   - Status (active/retired)
 workers_module <- workers_active |>
-  distinct(
+  group_by(worker_id, ref_date) |>
+  summarise(
+    date_birth = date_birth,
+    educat7 = levels(educat7)[which.min(as.integer(educat7))]
+  )
+
+workers_active |>
+  distinct(worker_id, ref_date) |>
+  group_by(ref_date) |>
+  find_duplicate_ids(worker_id)
+
+distinct(
     worker_id,
     ref_date,
     date_birth,
@@ -263,9 +259,11 @@ workers_module <- workers_active |>
 # we need to have a set protocol for how to disambiguate between
 # conflicting attributes of the same worker_id
 # if there are multiple educat7 values, we take the lowest one
-workers_module |> 
-  add_count(worker_id, ref_date) |> 
+# basically we need to ensure that for a particular reference date
+# characteristics should be unambiguous
+workers_module |>
+  add_count(worker_id, ref_date) |>
   filter(n > 1)
 
-workers_module |> 
+workers_module |>
   filter(worker_id == "15676013672")
