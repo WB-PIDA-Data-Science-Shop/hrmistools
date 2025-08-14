@@ -192,3 +192,49 @@ find_duplicate_ids <- function(data, identifier){
     filter(n > 1)
 }
 
+#' Deduplicate education level factor values by selecting the minimum
+#'
+#' This function takes a factor vector of education levels and returns
+#' the lowest (minimum) level present. If all values are `NA` or empty,
+#' it returns `NA`. It is useful for collapsing multiple education
+#' responses for an individual into a single representative value.
+#'
+#' @param educat A factor vector representing education levels.
+#'   Factor levels should be ordered from lowest to highest.
+#'
+#' @return A character string corresponding to the lowest education
+#'   level present in `educat`, or `NA` if no valid value exists.
+#'
+#' @examples
+#' edu_levels <- factor(
+#'   c("Primary", "Secondary", "Tertiary"),
+#'   levels = c("Primary", "Secondary", "Tertiary"),
+#'   ordered = TRUE
+#' )
+#' dedup_education(edu_levels)
+#'
+#' # When there are missing values
+#' dedup_education(factor(c(NA, "Secondary"),
+#'   levels = c("Primary", "Secondary", "Tertiary"), ordered = TRUE))
+#'
+#' # When all values are NA
+#' dedup_education(factor(c(NA, NA),
+#'   levels = c("Primary", "Secondary", "Tertiary"), ordered = TRUE))
+#'
+#' @export
+dedup_education <- function(educat) {
+  min_educat <- ifelse(
+    length(which.min(as.integer(educat))) != 0, # all edu values are empty
+    which.min(as.integer(educat)),
+    NA
+  )
+
+  if (is.na(min_educat)) {
+    educat_dedup <- NA
+  } else {
+    educat_dedup <- levels(educat)[min_educat]
+  }
+
+  return(educat_dedup)
+}
+

@@ -228,6 +228,7 @@ workers_active <- workers_active |>
 
 # extract worker module
 # Worker
+#   - Reference date (ref_date)
 #   - Worker ID (contract_id)
 #   - Date of Birth (birth_date)
 #   - Gender (gender)
@@ -238,14 +239,106 @@ workers_active <- workers_active |>
 workers_module <- workers_active |>
   group_by(worker_id, ref_date) |>
   summarise(
-    date_birth = date_birth,
-    educat7 = levels(educat7)[which.min(as.integer(educat7))]
+    date_birth = min(date_birth),
+    educat7 = dedup_education(educat7),
+    .groups = "drop"
   )
 
 workers_active |>
-  distinct(worker_id, ref_date) |>
-  group_by(ref_date) |>
-  find_duplicate_ids(worker_id)
+  as.data.table() |>
+  dedup_value(worker_id, ref_date, gender)
+
+# on gender: disambiguate gender by choosing the modal
+# gender: in case of two separate genders, inherit the legacy gender
+df <- tibble(
+  worker_id = c(1, 1, 1, 2, 2, 2, 2),
+  gender    = c("M", "M", "F", "F", "M", "M", "F"),
+  ref_date  = as.Date(c(
+    "2023-01-01", "2023-01-02", "2023-01-03",
+    "2023-01-01", "2023-01-02", "2023-01-03",
+    "2023-01-03"
+  ))
+)
+#' Deduplicate and disambiguate an attribute using both lag and lead values
+#'
+#' Handles missing values and cases where the same date has conflicting
+#' attribute values by inferring from the closest neighbor (lag first, then lead).
+#'
+#' @param data A data frame.
+#' @param id_col Unique identifier column (unquoted).
+#' @param attr_col Attribute to disambiguate (unquoted).
+#' @param date_col Date column for ordering (unquoted).
+#'
+#' @return A deduplicated data frame with attribute filled from neighbors when missing or conflicting.
+#' @examples
+#' df <- tibble(
+#'   worker_id = c(1, 1, 1, 2, 2, 2, 2),
+#'   gender    = c(NA, "M", "F", "F", NA, "M", "F"),
+#'   ref_date  = as.Date(c(
+#'     "2023-01-01", "2023-01-02", "2023-01-02",
+#'     "2023-01-01", "2023-01-02", "2023-01-03", "2023-01-03"
+#'   ))
+#' )
+#' dedup_neighbor(df, worker_id, gender, ref_date)
+dedup_value <- function(data, id_col, date_col, attr_col) {
+
+  # Step 1: Resolve conflicts per ID/date (multiple distinct values -> NA)
+  resolved <- data %>%
+    arrange({{ id_col }}, {{ date_col }}) %>%
+    group_by({{ id_col }}, {{ date_col }}) %>%
+    summarise(
+      {{ attr_col }} := if (n_distinct({{ attr_col }}, na.rm = TRUE) <= 1) {
+        first({{ attr_col }})
+      } else {
+        NA
+      },
+      .groups = "drop"
+    )
+
+  # Step 2: Fill NAs using lag, then lead within each ID
+  resolved %>%
+    arrange({{ id_col }}, {{ date_col }}) %>%
+    group_by({{ id_col }}) %>%
+    mutate(
+      lag_val  = lag({{ attr_col }}),
+      lead_val = lead({{ attr_col }}),
+      {{ attr_col }} := case_when(
+        !is.na({{ attr_col }}) ~ {{ attr_col }},
+        is.na({{ attr_col }}) & !is.na(lag_val) ~ lag_val,
+        is.na({{ attr_col }}) & is.na(lag_val) & !is.na(lead_val) ~ lead_val,
+        TRUE ~ {{ attr_col }}
+      )
+    ) %>%
+    ungroup() %>%
+    select(-lag_val, -lead_val)
+}
+
+
+df |>
+  group_by(worker_id) |>
+  mutate(
+    lag_gender = lag(gender, n = 1, order_by = ref_date),
+    lead_gender = lead(gender, n = 1, order_by = ref_date)
+  ) |>
+  group_by(worker_id, ref_date) |>
+  summarise(
+    gender = case_when(
+      is.na(lag_gender)
+    )
+  )
+  # group_by(worker_id, ref_date) |>
+  # summarise(
+  #   gender = gender[gender == lag_gender]
+  # )
+
+
+workers_active |>
+  group_by(worker_id, ref_date) |>
+  summarise(
+    gender_distinct = n_distinct(gender),
+    .groups = "drop"
+  ) |>
+  count(gender_distinct)
 
 distinct(
     worker_id,

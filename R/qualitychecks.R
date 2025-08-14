@@ -100,10 +100,6 @@ qualitycheck_contractmod <- function(contract_tbl,
 
 }
 
-
-
-
-
 #' Quality Check for Harmonized Organization Module
 #'
 #' @param org_tbl A data.frame or tibble containing the harmonized organization module
