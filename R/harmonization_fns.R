@@ -120,7 +120,7 @@ detect_inconsistent_cols <- function(data, inconsistent_cols) {
 #' that maps inconsistent or time-varying column names to a standardized set of column names.
 #'
 #' @param data A data frame whose columns need to be renamed.
-#' @param dict Either a named character vector (names are the desired standardized
+#' @param dictionary Either a named character vector (names are the desired standardized
 #'   column names and values are the original column names), or a data frame with
 #'   two columns: `from` (original column names) and `to` (standardized names).
 #'

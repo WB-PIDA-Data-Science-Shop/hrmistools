@@ -16,6 +16,8 @@ Imports:
     tidyselect,
     polyglotr,
     rlang,
-    lubridate,
-    ggplot2
+    pointblank,
+    stringr,
+    tidyr,
+    countrycode
 RoxygenNote: 7.3.2

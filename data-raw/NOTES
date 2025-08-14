@@ -19,10 +19,11 @@ Variable Definitions
       - Organization ID (org_id)
       - Organization Name, Native (org_name_native)
       - Organization Name, English (org_name_english)
-      - Type of organization: Ministry/Department/Agency. # GK note: I am thinking about the level of hierarchy of an institution. Ideally, we would have parent-child relationships, but I suspect that is rare.
+      - Latest date when the organization had that name, (org_date)
+      - Type of organization: Ministry/Department/Agency. # GK note: I am thinking about the level of hierarchy of an institution. Ideally, we would have parent-child relationships, but I suspect that is rare (org_parent, org_child)
       - Data corresponding date, (ref_date)
-      - Country Code, (country_code)
-      - Country Name, (country_name)
+      - Country Code, (country_code) Official World Bank ISO-3 code
+      - Country Name, (country_name) Official World Bank country name
       - Administration 1 Name, (adm1_name) # GK note: we have to be specific about what do we mean by administration here. Is it the level of government?
       - Administration 1 Code, (adm1_code)
 
@@ -48,7 +49,9 @@ Variable Definitions
       - Worker ID (worker_id)
       - Organization ID (org_id)
       - Timestamp (org_date)
-      - Compensation (wage)
+      - Compensation (base_salary, gross_salary, net_salary)
+      - cpi (consumer price index)
+      - ppp (purchasing power parity)
       - Modality of Contract (short-term, open-term, permanent) (contract_type)
       - Occupation Code (ISCO) (occupation_code)
       - Start Date (start_date)
@@ -57,7 +60,7 @@ Variable Definitions
       - Country Name, country_name
       - Administration 1 Name, adm1_name
       - Administration 1 Code, adm1_code
-      - Hours worked (hours)
+      - Hours worked (whours)
 
 
 ** Analytics of interest:
