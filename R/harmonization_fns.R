@@ -153,7 +153,7 @@ harmonize_columns <- function(data, dictionary) {
   available_dictionary <- dictionary[dictionary %in% names(data)]
 
   # Rename using dplyr::rename and !!! unquoting for tidy evaluation
-  data_renamed <- data %>%
+  data_renamed <- data |>
     dplyr::rename(
       !!!set_names(available_dictionary, names(available_dictionary))
     ) |>
@@ -238,3 +238,67 @@ dedup_education <- function(educat) {
   return(educat_dedup)
 }
 
+#' Deduplicate and disambiguate an attribute using both lag and lead values
+#'
+#' Handles missing values and cases where the same date has conflicting
+#' attribute values by inferring from the closest neighbor (lag first, then lead).
+#'
+#' @param data A data frame.
+#' @param id_col Unique identifier column (unquoted).
+#' @param attr_col Attribute to disambiguate (unquoted).
+#' @param date_col Date column for ordering (unquoted).
+#'
+#' @import dplyr
+#'
+#' @return A deduplicated data frame with attribute filled from neighbors when missing or conflicting.
+#' @examples
+#' library(tibble)
+#'
+#' df <- tibble(
+#'   worker_id = c(1, 1, 1, 2, 2, 2, 2),
+#'   gender    = c(NA, "M", "F", "F", NA, "M", "F"),
+#'   ref_date  = as.Date(c(
+#'     "2023-01-01", "2023-01-02", "2023-01-02",
+#'     "2023-01-01", "2023-01-02", "2023-01-03", "2023-01-03"
+#'   ))
+#' )
+#' dedup_value(df, worker_id, gender, ref_date)
+dedup_value <- function(data, attr_col, id_col, date_col) {
+
+  # extract first value if the values are unique
+  data <- data |>
+    arrange({{ id_col }}, {{ date_col }}) |>
+    group_by({{ id_col }}, {{ date_col }}) |>
+    mutate(
+      n_records = n_distinct({{ attr_col }}, na.rm = TRUE)
+    )
+
+  data_resolved <- data |>
+    filter(n_records == 1) |>
+    group_by({{ id_col }}, {{ date_col }}) |>
+    summarise(
+      {{ attr_col }} := first({{ attr_col }})
+    )
+
+  data |>
+    arrange({{ id_col }}, {{ date_col }}) |>
+    group_by({{ id_col }}) |>
+    mutate(
+      lag_val  = lag({{ attr_col }}),
+      lead_val = lead({{ attr_col }})
+    ) |>
+    filter(n_records > 1) |>
+    group_by({{ id_col }}, {{ date_col }}) |>
+    summarise(
+      {{ attr_col }} := first(
+        case_when(
+          !is.na(lag_val) ~ lag_val,
+          is.na(lag_val) & !is.na(lead_val) ~ lead_val,
+          TRUE ~ {{ attr_col }}
+        )
+      )
+    ) |>
+    ungroup() |>
+    bind_rows(data_resolved) |>
+    arrange({{ id_col }}, {{ date_col }})
+}
