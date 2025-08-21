@@ -4,10 +4,14 @@
 \alias{harmonize_columns}
 \title{Harmonize column names based on a dictionary}
 \usage{
-harmonize_columns(data, dictionary)
+harmonize_columns(data, cols)
+
+harmonize_columns(data, cols)
 }
 \arguments{
-\item{data}{A data frame whose columns need to be renamed.}
+\item{data}{A data frame or tibble.}
+
+\item{cols}{A character vector of column names to check.}
 
 \item{dictionary}{Either a named character vector (names are the desired standardized
 column names and values are the original column names), or a data frame with
@@ -15,10 +19,15 @@ two columns: `from` (original column names) and `to` (standardized names).}
 }
 \value{
 A data frame with harmonized column names.
+
+A tibble with all requested columns, missing ones filled with NA.
 }
 \description{
 This function standardizes column names in a data frame using a dictionary
 that maps inconsistent or time-varying column names to a standardized set of column names.
+
+If any column in `cols` is missing from `data`, this function adds it
+and populates it with NA values.
 }
 \examples{
 # Using a named character vector
@@ -33,4 +42,6 @@ dict_df <- data.frame(
 )
 harmonize_columns(df, dict_df)
 
+df <- tibble(a = 1:3, b = letters[1:3])
+ensure_columns(df, c("a", "b", "c"))
 }

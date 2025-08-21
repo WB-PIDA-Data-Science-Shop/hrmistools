@@ -242,7 +242,7 @@ dedup_education <- function(educat) {
 #'   ))
 #' )
 #' dedup_value(df, worker_id, gender, ref_date)
-dedup_value <- function(data, attr_col, id_col, date_col) {
+dedup_value_panel <- function(data, attr_col, id_col, date_col) {
   # extract first value if the values are unique
   data <- data |>
     arrange({{ id_col }}, {{ date_col }}) |>
@@ -342,3 +342,42 @@ dedup_values <- function(data,
       summarise({{value_col}} := first(na.omit({{value_col}})), .groups = "drop")
   }
 }
+
+#' Complete columns in a dataframe
+#'
+#' If any column in `cols` is missing from `data`, this function adds it
+#' and populates it with NA values.
+#'
+#' @param data A data frame or tibble.
+#' @param cols A character vector of column names to check.
+#'
+#' @return A tibble with all requested columns, missing ones filled with NA.
+#'
+#' @examples
+#' library(tibble)
+#'
+#' df <- tibble(a = 1:3, b = letters[1:3])
+#' complete_columns(df, c("a", "b", "c"))
+#'
+#' @importFrom purrr set_names
+#' @import dplyr
+#' @export
+complete_columns <- function(data, cols) {
+  missing_cols <- setdiff(cols, names(data))
+
+  if (length(missing_cols) > 0) {
+    data <- data %>%
+      mutate(
+        !!!set_names(rep(list(NA), length(missing_cols)), missing_cols)
+      )
+  }
+
+  # reorder columns
+  data <- data |>
+    select(
+      all_of(cols)
+    )
+
+  return(data)
+}
+

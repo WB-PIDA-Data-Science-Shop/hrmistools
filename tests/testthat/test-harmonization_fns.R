@@ -24,7 +24,7 @@ test_that("deduplication works", {
   )
 
   expect_equal(
-    df |> dedup_value(gender, worker_id, ref_date),
+    df |> dedup_value_panel(gender, worker_id, ref_date),
     df_expected
     )
 })

@@ -6,6 +6,7 @@ library(janitor)
 library(lubridate)
 library(furrr)
 library(pointblank)
+library(tibble)
 library(ggplot2)
 
 devtools::load_all()
@@ -73,7 +74,7 @@ dictionary_worker <- tibble(
     "ano_pagamento", "orgao", "mes_referencia", "matricula", "cpf", "data_nascimento", "genero", "escolaridade"
   ),
   to = c(
-    "year", "department", "month", "contract_id", "worker_id", "date_birth", "gender", "educat7"
+    "year", "department", "month", "contract_id", "worker_id", "birth_date", "gender", "educat7"
   )
 )
 
@@ -92,14 +93,14 @@ workers_active <- workers_active_list |>
 # does it match our expectations
 workers_active <- workers_active |>
   mutate(
-    date_birth = as_date(
-      as.numeric(date_birth), origin = "1899-12-30"
+    birth_date = as_date(
+      as.numeric(birth_date), origin = "1899-12-30"
     ),
     ref_date = ymd(
       paste(year, month, "01", sep = "-")
     ),
     age = interval(
-      date_birth, ref_date
+      birth_date, ref_date
     ) |>
       as.numeric("years") |>
       floor(),
@@ -194,7 +195,7 @@ workers_active |>
     worker_id,
     contract_id,
     year,
-    date_birth,
+    birth_date,
     gender
   )
 
@@ -239,13 +240,13 @@ workers_active <- workers_active |>
 workers_module <- workers_active |>
   group_by(worker_id, ref_date) |>
   summarise(
-    date_birth = min(date_birth),
+    birth_date = min(birth_date),
     educat7 = dedup_education(educat7),
     .groups = "drop"
   )
 
 workers_module_gender <- workers_active |>
-  dedup_value(
+  dedup_value_panel(
     gender,
     worker_id, ref_date
   )
@@ -255,9 +256,18 @@ workers_module <- workers_module |>
   left_join(
     workers_module_gender,
     by = c("worker_id", "ref_date")
+  ) |>
+  mutate(
+    status = "active"
   )
-
-
 
 # create a function that does a conformity assessment
 # and fill out missing columns with NA
+dictionary_worker_cols <- c(
+  "ref_date", "worker_id", "birth_date", "gender", "educat7", "tribe", "race", "status"
+)
+
+workers_module_clean <- workers_module |>
+  complete_columns(
+    dictionary_worker_cols
+  )
