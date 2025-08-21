@@ -257,5 +257,7 @@ workers_module <- workers_module |>
     by = c("worker_id", "ref_date")
   )
 
+
+
 # create a function that does a conformity assessment
 # and fill out missing columns with NA

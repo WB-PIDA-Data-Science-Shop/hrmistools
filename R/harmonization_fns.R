@@ -16,29 +16,27 @@
 #' @import polyglotr
 #'
 #' @export
-
-
 vectorize_gt <- function(vector,
                          target_language = "en",
-                         source_language){
-
+                         source_language) {
   trans_obj <-
-  lapply(X = vector,
-         FUN = function(x){
+    lapply(
+      X = vector,
+      FUN = function(x) {
+        yy <- google_translate(
+          text = x,
+          target_language = target_language,
+          source_language = source_language
+        )
 
-           yy <- google_translate(text = x,
-                                  target_language = target_language,
-                                  source_language = source_language)
+        return(yy)
 
-           return(yy)
-
-         }) |>
+      }
+    ) |>
     unlist()
 
 
   return(trans_obj)
-
-
 }
 
 #' A function to identify inconsistent column names across data frames
@@ -64,20 +62,12 @@ vectorize_gt <- function(vector,
 #' @export
 find_inconsistent_colnames <- function(data_list) {
   shared_cols <- data_list |>
-    purrr::map(
-      \(data) tibble::tibble(colnames = colnames(data))
-    ) |>
-    purrr::reduce(
-      dplyr::intersect
-    )
+    purrr::map(\(data) tibble::tibble(colnames = colnames(data))) |>
+    purrr::reduce(dplyr::intersect)
 
   all_cols <- data_list |>
-    purrr::map(
-      \(data) tibble::tibble(colnames = colnames(data))
-    ) |>
-    purrr::reduce(
-      dplyr::union
-    )
+    purrr::map(\(data) tibble::tibble(colnames = colnames(data))) |>
+    purrr::reduce(dplyr::union)
 
   dplyr::symdiff(shared_cols, all_cols)
 }
@@ -102,16 +92,10 @@ find_inconsistent_colnames <- function(data_list) {
 #' @export
 detect_inconsistent_cols <- function(data, inconsistent_cols) {
   n_inconsistent_cols <- data |>
-    dplyr::select(
-      tidyselect::any_of(inconsistent_cols)
-    ) |>
+    dplyr::select(tidyselect::any_of(inconsistent_cols)) |>
     ncol()
 
-  dplyr::if_else(
-    n_inconsistent_cols > 0,
-    TRUE,
-    FALSE
-  )
+  dplyr::if_else(n_inconsistent_cols > 0, TRUE, FALSE)
 }
 
 #' Harmonize column names based on a dictionary
@@ -154,14 +138,8 @@ harmonize_columns <- function(data, dictionary) {
 
   # Rename using dplyr::rename and !!! unquoting for tidy evaluation
   data_renamed <- data |>
-    dplyr::rename(
-      !!!set_names(available_dictionary, names(available_dictionary))
-    ) |>
-    select(
-      any_of(
-        names(available_dictionary)
-      )
-    )
+    dplyr::rename(!!!set_names(available_dictionary, names(available_dictionary))) |>
+    select(any_of(names(available_dictionary)))
 
   return(data_renamed)
 }
@@ -186,7 +164,7 @@ harmonize_columns <- function(data, dictionary) {
 #' find_duplicate_ids(df, id)
 #'
 #' @export
-find_duplicate_ids <- function(data, identifier){
+find_duplicate_ids <- function(data, identifier) {
   data |>
     count({{ identifier }}) |>
     filter(n > 1)
@@ -224,7 +202,8 @@ find_duplicate_ids <- function(data, identifier){
 #' @export
 dedup_education <- function(educat) {
   min_educat <- ifelse(
-    length(which.min(as.integer(educat))) != 0, # all edu values are empty
+    length(which.min(as.integer(educat))) != 0,
+    # all edu values are empty
     which.min(as.integer(educat)),
     NA
   )
@@ -264,41 +243,102 @@ dedup_education <- function(educat) {
 #' )
 #' dedup_value(df, worker_id, gender, ref_date)
 dedup_value <- function(data, attr_col, id_col, date_col) {
-
   # extract first value if the values are unique
   data <- data |>
     arrange({{ id_col }}, {{ date_col }}) |>
     group_by({{ id_col }}, {{ date_col }}) |>
-    mutate(
-      n_records = n_distinct({{ attr_col }}, na.rm = TRUE)
-    )
+    mutate(n_records = n_distinct({{ attr_col }}))
 
   data_resolved <- data |>
     filter(n_records == 1) |>
     group_by({{ id_col }}, {{ date_col }}) |>
-    summarise(
-      {{ attr_col }} := first({{ attr_col }})
-    )
+    summarise({{ attr_col }} := first({{ attr_col }}))
 
   data |>
     arrange({{ id_col }}, {{ date_col }}) |>
     group_by({{ id_col }}) |>
-    mutate(
-      lag_val  = lag({{ attr_col }}),
-      lead_val = lead({{ attr_col }})
-    ) |>
+    mutate(lag_val  = lag({{ attr_col }}), lead_val = lead({{ attr_col }})) |>
     filter(n_records > 1) |>
     group_by({{ id_col }}, {{ date_col }}) |>
-    summarise(
-      {{ attr_col }} := first(
-        case_when(
-          !is.na(lag_val) ~ lag_val,
-          is.na(lag_val) & !is.na(lead_val) ~ lead_val,
-          TRUE ~ {{ attr_col }}
-        )
+    summarise({{ attr_col }} := first(
+      case_when(
+        !is.na(lag_val) ~ lag_val,
+        is.na(lag_val) & !is.na(lead_val) ~ lead_val,
+        TRUE ~ {{ attr_col }}
       )
-    ) |>
+    )) |>
     ungroup() |>
     bind_rows(data_resolved) |>
     arrange({{ id_col }}, {{ date_col }})
+}
+
+#' Deduplicate values within grouped data
+#'
+#' This function deduplicates values within groups defined by a combination
+#' of identifier and date columns. It provides three strategies:
+#' \enumerate{
+#'   \item \code{"mode"}: returns the most frequent (modal) value in the group.
+#'   \item \code{"first"}: returns the first value in the group, even if \code{NA}.
+#'   \item \code{"first_nonmissing"}: returns the first non-missing value in the group.
+#' }
+#'
+#' @param data A data frame or tibble containing the data to deduplicate.
+#' @param id_col Column name identifying the grouping unit (e.g., individual, firm).
+#' @param date_col Column name identifying the date or time grouping variable.
+#' @param value_col Column name containing the values to deduplicate.
+#' @param method A string specifying the deduplication method.
+#'   Must be one of \code{"mode"}, \code{"first"}, or \code{"first_nonmissing"}.
+#'
+#' @details
+#' For \code{method = "mode"}, ties are broken arbitrarily by selecting the
+#' first encountered maximum. Missing values are ignored when computing the mode.
+#'
+#' @return A tibble with one row per unique combination of \code{id_col} and \code{date_col},
+#' containing the deduplicated \code{value_col}.
+#'
+#' @examples
+#' library(dplyr)
+#'
+#' df <- tibble(
+#'   id = c(1,1,1, 2,2,2, 3,3,3),
+#'   date = c("2020-01","2020-01","2020-01",
+#'            "2020-02","2020-02","2020-02",
+#'            "2021-01","2021-01","2021-01"),
+#'   gender = c("M","M","F", NA,"F","M", "M","F",NA)
+#' )
+#'
+#' dedup_values(df, id, date, gender, method = "mode")
+#' dedup_values(df, id, date, gender, method = "first")
+#' dedup_values(df, id, date, gender, method = "first_nonmissing")
+#'
+#'#' @import dplyr
+#'
+#' @export
+dedup_values <- function(data,
+                         id_col,
+                         date_col,
+                         value_col,
+                         method = c("mode", "first", "first_nonmissing")) {
+  method <- match.arg(method)
+
+  if (method == "mode") {
+    # Mode-based deduplication using count()
+    data %>%
+      group_by({{id_col}}, {{date_col}}, {{value_col}}) %>%
+      summarise(n = n(), .groups = "drop_last") %>%
+      filter(!is.na({{value_col}})) %>%
+      slice_max(order_by = n, with_ties = FALSE) %>%
+      select(-n) %>%
+      ungroup()
+
+  } else if (method == "first") {
+    data %>%
+      group_by({{id_col}}, {{date_col}}) %>%
+      summarise({{value_col}} := first({{value_col}}), .groups = "drop")
+
+  } else if (method == "first_nonmissing") {
+    data %>%
+      group_by({{id_col}}, {{date_col}}) %>%
+      summarise({{value_col}} := first(na.omit({{value_col}})), .groups = "drop")
+  }
 }
