@@ -33,5 +33,7 @@ df <- tibble(
     "2023-01-01", "2023-01-02", "2023-01-03", "2023-01-03"
   ))
 )
-dedup_value(df, worker_id, gender, ref_date)
+
+dedup_value_panel(df, gender, worker_id, ref_date)
+
 }

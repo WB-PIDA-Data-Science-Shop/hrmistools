@@ -56,6 +56,4 @@ dedup_values(df, id, date, gender, method = "mode")
 dedup_values(df, id, date, gender, method = "first")
 dedup_values(df, id, date, gender, method = "first_nonmissing")
 
-#' @import dplyr
-
 }

@@ -227,7 +227,6 @@ dedup_education <- function(educat) {
 #' @param attr_col Attribute to disambiguate (unquoted).
 #' @param date_col Date column for ordering (unquoted).
 #'
-#' @import dplyr
 #'
 #' @return A deduplicated data frame with attribute filled from neighbors when missing or conflicting.
 #' @examples
@@ -241,7 +240,11 @@ dedup_education <- function(educat) {
 #'     "2023-01-01", "2023-01-02", "2023-01-03", "2023-01-03"
 #'   ))
 #' )
-#' dedup_value(df, worker_id, gender, ref_date)
+#'
+#' dedup_value_panel(df, gender, worker_id, ref_date)
+#'
+#' @import dplyr
+#' @export
 dedup_value_panel <- function(data, attr_col, id_col, date_col) {
   # extract first value if the values are unique
   data <- data |>
@@ -311,7 +314,7 @@ dedup_value_panel <- function(data, attr_col, id_col, date_col) {
 #' dedup_values(df, id, date, gender, method = "first")
 #' dedup_values(df, id, date, gender, method = "first_nonmissing")
 #'
-#'#' @import dplyr
+#' @import dplyr
 #'
 #' @export
 dedup_values <- function(data,
