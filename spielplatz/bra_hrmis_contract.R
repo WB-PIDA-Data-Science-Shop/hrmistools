@@ -5,20 +5,13 @@
 ### install package from github if not already available
 remotes::install_github("worldbank/dlw")
 
-
-paklist <- c("tidyverse", "readxl",
-             "purrr", "furrr", "writexl",
-             "dlw", "pointblank")
-
-
-
-## silently load the libraries
-invisible(lapply(paklist,
-                 function(x){
-
-                   library(x, character.only = TRUE, verbose = FALSE)
-
-                 }))
+library(dplyr)
+library(readxl)
+library(purrr)
+library(furrr)
+library(writexl)
+library(dlw)
+library(pointblank)
 
 # read-in data ------------------------------------------------------------
 file_path <- "//egvpi/egvpi/data/harmonization/HRM/BRA/data-raw/6. Wage Bill AL/3. Microdados"
