@@ -3,24 +3,24 @@
 ################################################################################
 
 ### install package from github if not already available
-remotes::install_github("worldbank/dlw")
+# remotes::install_github("worldbank/dlw")
 
 library(dplyr)
 library(readxl)
 library(purrr)
 library(furrr)
 library(writexl)
-library(dlw)
+# library(dlw)
 library(pointblank)
 
 # read-in data ------------------------------------------------------------
-file_path <- "//egvpi/egvpi/data/harmonization/HRM/BRA/data-raw/6. Wage Bill AL/3. Microdados"
-
-token_chr <- readLines("spielplatz/dlw_token.txt")
-
-dlw_set_token(token_chr)
-
-gmdsupport_dt <- dlw_get_gmd_support()
+# file_path <- "//egvpi/egvpi/data/harmonization/HRM/BRA/data-raw/6. Wage Bill AL/3. Microdados"
+#
+# token_chr <- readLines("spielplatz/dlw_token.txt")
+#
+# dlw_set_token(token_chr)
+#
+# gmdsupport_dt <- dlw_get_gmd_support()
 
 plan(multisession, workers = 6)
 
@@ -47,7 +47,6 @@ contract_inactive_list <-
       file, na = c("", "-"), col_types = "text"
     )
   )
-
 
 #### quickly harmonize column classes
 active_alagoas_tbl <- bind_rows(contract_active_list)
