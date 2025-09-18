@@ -14,7 +14,7 @@ library(writexl)
 library(pointblank)
 
 # read-in data ------------------------------------------------------------
-# file_path <- "//egvpi/egvpi/data/harmonization/HRM/BRA/data-raw/6. Wage Bill AL/3. Microdados"
+file_path <- "//egvpi/egvpi/data/harmonization/HRM/BRA/data-raw/6. Wage Bill AL/3. Microdados"
 #
 # token_chr <- readLines("spielplatz/dlw_token.txt")
 #
@@ -77,11 +77,11 @@ contract_alagoas_tbl <-
                         worker_id = CPF,
                         org_id = paste(ORGAO, COD_ORGAO, ANO_PAGAMENTO, sep = "-"),
                         org_date = as.Date(paste(ANO_PAGAMENTO, MES_REFERENCIA, "01", sep = "-")),
+                        country_code = "BRA",
+                        year = ANO_PAGAMENTO,
                         base_salary_lcu = SALARIO_BASE,
                         gross_salary_lcu = SALARIO_BRUTO,
                         net_salary_lcu = SALARIO_LIQUIDO,
-                        cpi = NA,
-                        ppp = NA,
                         spdef = NA,
                         whours = as.numeric(JORNADA),
                         country_code = "BRA",
@@ -96,11 +96,11 @@ contract_alagoas_tbl <-
                         worker_id = CPF,
                         org_id = paste(ORGAO, "000000", sep = "-"),
                         org_date = as.Date(paste(ANO_PAGAMENTO, MES_REFERENCIA, "01", sep = "-")),
+                        country_code = "BRA",
+                        year = ANO_PAGAMENTO,
                         base_salary_lcu = NA,
                         gross_salary_lcu = VALOR_BRUTO,
                         net_salary_lcu = VALOR_LIQUIDO,
-                        cpi = NA,
-                        ppp = NA,
                         spdef = NA,
                         whours = 0,
                         country_code = "BRA",
@@ -119,15 +119,19 @@ contract_alagoas_tbl <-
     ~ as.numeric(.)
   ))
 
+contract_alagoas_tbl <-
+  contract_alagoas_tbl |>
+  convert_wage_to_real(
+    base_salary_lcu
+  )
+
 ### include cpi, ppp and temporal and spatial pricing data for Brazil
 year_list <-
   contract_alagoas_tbl[["start_date"]] |>
   lubridate::year() |>
   unique()
 
-
 qualitycheck_contractmod(contract_tbl = contract_alagoas_tbl)
-
 
 saveRDS(contract_alagoas_tbl,
         "spielplatz/bra_hrmis_contract.rds")

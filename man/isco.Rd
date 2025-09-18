@@ -18,7 +18,7 @@ A data frame with 619 rows and 8 variables:
 }
 }
 \source{
-https://ilostat.ilo.org/methods/concepts-and-definitions/classification-occupation/
+<https://ilostat.ilo.org/methods/concepts-and-definitions/classification-occupation/>
 }
 \usage{
 isco

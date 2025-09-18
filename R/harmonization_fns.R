@@ -384,3 +384,69 @@ complete_columns <- function(data, cols) {
   return(data)
 }
 
+#' Convert nominal wages to real PPP-adjusted wages (2017 base year)
+#'
+#' Convert nominal wages (LCU at survey-year prices) into real wages expressed
+#' in 2017 PPP international dollars using:
+#' \deqn{Real_{h}^{PPP} = (CPI_t / CPI_{2017}) * (Nominal_{h,t} / PPP_{2017})}
+#'
+#' Assumes
+#' - `df` has columns: country_code, year, wage
+#' - `cpi` has columns: country_code, year, cpi
+#' - `ppp` has columns: country_code, ppp  (ppp = LCU per 2017 Intl$)
+#'
+#' @param df Data frame with columns (country_code, year, wage).
+#' @param wage_col Column name to convert to constant PPP.
+#' @param cpi Data frame with columns (country_code, year, cpi).
+#' @param ppp Data frame with columns (country_code, ppp).
+#' @return `df` augmented with `real_wage_ppp` column (2017 PPP$).
+#' @examples
+#' library(tibble)
+#' hh <- tibble::tibble(country_code = c("A","A"), year = c(2010,2017),
+#'                      wage = c(20000, 25000))
+#' cpi <- tibble::tibble(country_code = "A", year = c(2010,2017), cpi = c(85,100))
+#' ppp <- tibble::tibble(country_code = "A", ppp = 3.5)
+#' convert_wage_to_real(hh, cpi, ppp)
+#'
+#' @importFrom dplyr filter select rename left_join mutate
+#' @importFrom magrittr %>%
+#' @export
+convert_wage_to_real <- function(data, wage_col) {
+
+  ## Basic input checks
+  required_df  <- c("country_code", "year")
+
+  if (!all(required_df %in% names(data))) {
+    stop("`data` must contain columns: country_code, year")
+  }
+
+  # extract CPI in base year (2017) by country
+  base_cpi <- cpi %>%
+    filter(year == 2017) %>%
+    select(country_code, cpi) %>%
+    rename(base_cpi = cpi)
+
+  # join and compute using the exact formula
+  out <- data %>%
+    left_join(cpi, by = c("country_code", "year")) %>%
+    left_join(base_cpi, by = "country_code") %>%
+    left_join(
+      ppp %>%
+        filter(year == 2017) |>
+        rename(ppp_2017 = ppp),
+      by = "country_code"
+    ) %>%
+    mutate(
+      "{{wage_col}}_constant_ppp" = (cpi / base_cpi) * ({{wage_col}} / ppp_2017)
+    ) |>
+    select(-c(ppp_2017, base_cpi))
+
+  # helpful warning if anything produced NA
+  if (any(is.na(out$real_wage_ppp))) {
+    warning("Some rows have NA in real_wage_ppp. Check that CPI (obs), CPI (2017), and PPP (2017) are present for each country.")
+  }
+
+  return(out)
+}
+
+
