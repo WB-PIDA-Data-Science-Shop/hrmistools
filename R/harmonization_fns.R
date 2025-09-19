@@ -326,22 +326,22 @@ dedup_values <- function(data,
 
   if (method == "mode") {
     # Mode-based deduplication using count()
-    data %>%
-      group_by({{id_col}}, {{date_col}}, {{value_col}}) %>%
-      summarise(n = n(), .groups = "drop_last") %>%
-      filter(!is.na({{value_col}})) %>%
-      slice_max(order_by = n, with_ties = FALSE) %>%
-      select(-n) %>%
+    data |>
+      group_by({{id_col}}, {{date_col}}, {{value_col}}) |>
+      summarise(n = n(), .groups = "drop_last") |>
+      filter(!is.na({{value_col}})) |>
+      slice_max(order_by = n, with_ties = FALSE) |>
+      select(-n) |>
       ungroup()
 
   } else if (method == "first") {
-    data %>%
-      group_by({{id_col}}, {{date_col}}) %>%
+    data |>
+      group_by({{id_col}}, {{date_col}}) |>
       summarise({{value_col}} := first({{value_col}}), .groups = "drop")
 
   } else if (method == "first_nonmissing") {
-    data %>%
-      group_by({{id_col}}, {{date_col}}) %>%
+    data |>
+      group_by({{id_col}}, {{date_col}}) |>
       summarise({{value_col}} := first(na.omit({{value_col}})), .groups = "drop")
   }
 }
@@ -369,7 +369,7 @@ complete_columns <- function(data, cols) {
   missing_cols <- setdiff(cols, names(data))
 
   if (length(missing_cols) > 0) {
-    data <- data %>%
+    data <- data |>
       mutate(
         !!!set_names(rep(list(NA), length(missing_cols)), missing_cols)
       )
@@ -406,12 +406,12 @@ complete_columns <- function(data, cols) {
 #'                      wage = c(20000, 25000))
 #' cpi <- tibble::tibble(country_code = "A", year = c(2010,2017), cpi = c(85,100))
 #' ppp <- tibble::tibble(country_code = "A", ppp = 3.5)
-#' convert_wage_to_real(hh, cpi, ppp)
+#' convert_constant_ppp(hh, cpi, ppp)
 #'
 #' @importFrom dplyr filter select rename left_join mutate
-#' @importFrom magrittr %>%
+#' @import glue
 #' @export
-convert_wage_to_real <- function(data, wage_col) {
+convert_constant_ppp <- function(data, cols) {
 
   ## Basic input checks
   required_df  <- c("country_code", "year")
@@ -421,32 +421,32 @@ convert_wage_to_real <- function(data, wage_col) {
   }
 
   # extract CPI in base year (2017) by country
-  base_cpi <- cpi %>%
-    filter(year == 2017) %>%
-    select(country_code, cpi) %>%
+  base_cpi <- cpi |>
+    filter(year == 2017) |>
+    select(country_code, cpi) |>
     rename(base_cpi = cpi)
 
   # join and compute using the exact formula
-  out <- data %>%
-    left_join(cpi, by = c("country_code", "year")) %>%
-    left_join(base_cpi, by = "country_code") %>%
+  data_out <- data |>
+    left_join(cpi, by = c("country_code", "year")) |>
+    left_join(base_cpi, by = "country_code") |>
     left_join(
-      ppp %>%
+      ppp |>
         filter(year == 2017) |>
+        select(-year) |>
         rename(ppp_2017 = ppp),
       by = "country_code"
-    ) %>%
+    ) |>
     mutate(
-      "{{wage_col}}_constant_ppp" = (cpi / base_cpi) * ({{wage_col}} / ppp_2017)
+      across(
+        {{cols}},
+        ~ (cpi / base_cpi) * (.x / ppp_2017),
+        .names = "{.col}_ppp"
+      )
     ) |>
     select(-c(ppp_2017, base_cpi))
 
-  # helpful warning if anything produced NA
-  if (any(is.na(out$real_wage_ppp))) {
-    warning("Some rows have NA in real_wage_ppp. Check that CPI (obs), CPI (2017), and PPP (2017) are present for each country.")
-  }
-
-  return(out)
+  return(data_out)
 }
 
 

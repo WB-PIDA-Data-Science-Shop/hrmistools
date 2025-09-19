@@ -69,7 +69,6 @@ active_alagoas_tbl |>
   group_by(ANO_PAGAMENTO) |>
   summarize(unique_mtr = length(unique(MATRICULA)), nobs = length(MATRICULA))
 
-
 ### first let us figure out how many contracts each person has per year
 contract_alagoas_tbl <-
   bind_rows(active_alagoas_tbl |>
@@ -119,10 +118,13 @@ contract_alagoas_tbl <-
     ~ as.numeric(.)
   ))
 
-contract_alagoas_tbl <-
+contract_alagoas_tbl_clean <-
   contract_alagoas_tbl |>
-  convert_wage_to_real(
-    base_salary_lcu
+  convert_constant_ppp(
+    ends_with("_lcu")
+  ) |>
+  rename_with(
+    ~ str_replace(., "_lcu", "")
   )
 
 ### include cpi, ppp and temporal and spatial pricing data for Brazil
@@ -135,27 +137,3 @@ qualitycheck_contractmod(contract_tbl = contract_alagoas_tbl)
 
 saveRDS(contract_alagoas_tbl,
         "spielplatz/bra_hrmis_contract.rds")
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
