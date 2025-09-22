@@ -1,17 +1,13 @@
 ################################################################################
 ######## TESTING THE INTENDED HARMONIZATION PROCESS WITH THE BRAZIL DATA #######
 ################################################################################
-
-paklist <- c("tidyverse", "polyglotr", "readxl", "purrr",
-             "furrr", "writexl")
-
-## silently load the libraries
-invisible(lapply(paklist,
-                 function(x){
-
-                   library(x, character.only = TRUE, verbose = FALSE)
-
-                   }))
+library(dplyr)
+library(readr)
+library(polyglotr)
+library(readxl)
+library(purrr)
+library(furrr)
+library(writexl)
 
 plan(multisession, workers = 6)
 set.seed(1789)
@@ -102,7 +98,6 @@ inact_list <- c(
 active_alagoas_tbl <- bind_rows(active_alagoastbl_list)
 inactive_alagoas_tbl <- bind_rows(inactive_alagoastbl_list)
 
-
 #### ready to prepare the organization module
 
 #### apparently we ought to keep only September
@@ -170,7 +165,6 @@ alagoas_org_tbl <-
                         org_child = NA) |>
               unique() |>
               mutate(org_name_en = "Alagoas Retirees"))
-
 
 #### write results
 saveRDS(alagoas_org_tbl, "spielplatz/bra_hrmis_organization.rds")

@@ -100,10 +100,6 @@ qualitycheck_contractmod <- function(contract_tbl,
 
 }
 
-
-
-
-
 #' Quality Check for Harmonized Organization Module
 #'
 #' @param org_tbl A data.frame or tibble containing the harmonized organization module
@@ -145,15 +141,38 @@ qualitycheck_orgmod <- function(org_tbl) {
   return(agent)
 }
 
+qualitycheck_worker <- function(worker_tbl){
 
+  required_vars <- c(
+    "ref_date", "worker_id", "birth_date", "gender", "educat7", "tribe",
+    "race", "status"
+  )
 
+  al <- action_levels(warn_at = 1)
 
+  agent <-
+    worker_tbl |>
+    create_agent(
+      label = "Quality check for Worker Module",
+      actions = al
+    ) |>
+    col_exists(
+      label = "All required columns are present",
+      columns = vars(!!!syms(required_vars))
+    ) |>
+    rows_distinct(
+      label = "Worker ID is unique.",
+      columns = c(worker_id, ref_date),
+    ) |>
+    col_vals_not_null(
+      label = "Values are not missing.",
+      columns = vars(!!!syms(required_vars))
+    ) |>
+    col_vals_between(
+      "Date of birth is valid",
+      columns = vars(birth_date),
+      as_date("1900-01-01"), as_date("2000-01-01")
+    )
 
-
-
-
-
-
-
-
-
+  agent %>% interrogate()
+}

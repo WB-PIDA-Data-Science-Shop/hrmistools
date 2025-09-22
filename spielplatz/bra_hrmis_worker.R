@@ -6,6 +6,9 @@ library(janitor)
 library(lubridate)
 library(furrr)
 library(pointblank)
+library(tibble)
+library(here)
+library(readr)
 library(ggplot2)
 
 devtools::load_all()
@@ -17,7 +20,7 @@ file_path <- "//egvpi/egvpi/data/harmonization/HRM/BRA/data-raw/6. Wage Bill AL/
 
 plan(multisession, workers = 3)
 
-workers_active_list <-
+worker_active_list <-
   list.files(
     path = file_path,
     pattern = "^Ativos_[0-9]{4}\\.xlsx$",
@@ -30,13 +33,13 @@ workers_active_list <-
       clean_names()
   )
 
-workers_inactive_list <-
+worker_inactive_list <-
   list.files(
     path = file_path,
     pattern = "^Inativos_[0-9]{4}\\.xlsx$",
     full.names = T
   ) |>
-  future_map(
+  map(
     \(file) read_xlsx(
       file, na = c("", "-"), col_types = "text"
     ) |>
@@ -49,42 +52,27 @@ future::plan(sequential)
 # what we want is two things: (1) uniqueness in the cross-section (entities are uniquely identified) and
 # (2) consistency (those unique ids refer to the same entities across the panel)
 
-inactive_inconsistent_cols <- workers_inactive_list |>
+inactive_inconsistent_cols <- worker_inactive_list |>
   find_inconsistent_colnames() |>
   pull(colnames)
 
-# Worker
-#   - Worker ID (worker_id)
-#   - Organization ID (org_id)
-#   - Timestamp (org_date)
-#   - Date of Birth (birth_date)
-#   - Gender (gender)
-#   - Education Attainment (educat7)
-#   - Tribe (tribe)
-#   - Race (race)
-#   - Status (active/retired)
-#   - Country Code, (country_code)
-#   - Country Name, (country_name)
-#   - Administration 1 Name, (adm1_name)
-#   - Administration 1 Code, (adm1_code)
-
 # identify if a dataset contains inconsistent colnames
-workers_inactive_list |>
+worker_inactive_list |>
   keep(
     ~ detect_inconsistent_cols(.x, inactive_inconsistent_cols)
   )
 
+# harmonize column names
 dictionary_worker <- tibble(
   from = c(
     "ano_pagamento", "orgao", "mes_referencia", "matricula", "cpf", "data_nascimento", "genero", "escolaridade"
   ),
   to = c(
-    "year", "department", "month", "worker_id", "national_id", "date_birth", "gender", "educat7"
+    "year", "department", "month", "contract_id", "worker_id", "birth_date", "gender", "education"
   )
 )
 
-# extract worker module
-workers_active <- workers_active_list |>
+worker_active <- worker_active_list |>
   map(
     \(data){
       data |>
@@ -92,53 +80,63 @@ workers_active <- workers_active_list |>
     }
   ) |>
   bind_rows() |>
+  # extract the month of september
   filter(month == 9)
 
 # we need to create quality-checks that are specific to each standardized column
 # does it match our expectations
-workers_active <- workers_active |>
+worker_active <- worker_active |>
   mutate(
-    date_birth = as_date(
-      as.numeric(date_birth), origin = "1899-12-30"
+    birth_date = as_date(
+      as.numeric(birth_date), origin = "1899-12-30"
     ),
     ref_date = ymd(
       paste(year, month, "01", sep = "-")
     ),
     age = interval(
-      date_birth, ref_date
+      birth_date, ref_date
     ) |>
       as.numeric("years") |>
       floor(),
     educat7 = case_when(
-      educat7 == "ANALFABETO" ~ "No educat7",
-      educat7 %in% c(
+      education == "ANALFABETO" ~ "No education",
+      education %in% c(
         "1 A 4 SERIE DO PRIM. GRAU INCOMPLETO",
         "5 A 8 SERIE DO PRIM. GRAU INCOMPLETO"
       ) ~ "Primary incomplete",
-      educat7 %in% c(
+      education %in% c(
         "1 A 4 SERIE DO PRIM. GRAU COMPLETO",
         "5 A 8 SERIE DO PRIM. GRAU COMPLETO"
       ) ~ "Primary complete",
-      educat7 == "SEGUNDO GRAU INCOMPLETO" ~ "Secondary incomplete",
-      educat7 == "SEGUNDO GRAU COMPLETO" ~ "Secondary complete",
-      educat7 %in% c(
+      education == "SEGUNDO GRAU INCOMPLETO" ~ "Secondary incomplete",
+      education == "SEGUNDO GRAU COMPLETO" ~ "Secondary complete",
+      education %in% c(
         "ESPECIALIZAÇÃO COMPLETO",
         "ESPECIALIZAÇÃO INCOMPLETO",
         "ESPECIALIZA«√O COMPLETO",
         "ESPECIALIZA«√O INCOMPLETO"
       ) ~ "Higher than secondary, not university",
-      educat7 %in% c(
+      education %in% c(
         "CURSO SUPERIOR COMPLETO",
         "CURSO SUPERIOR INCOMPLETO",
         "MESTRADO INCOMPLETO"
       ) ~ "University incomplete or complete",
-      educat7 == "NA" ~ NA_character_,
+      education == "NA" ~ NA_character_,
       TRUE ~ NA_character_
+    ),
+    educat7 = factor(
+      educat7,
+      levels = c(
+        "No education", "Primary incomplete", "Primary complete",
+        "Secondary incomplete", "Secondary complete",
+        "Higher than secondary but not university",
+        "University incomplete or complete"
+      )
     )
   )
 
 # check age
-workers_active <- workers_active |>
+worker_active <- worker_active |>
   mutate(
     age = if_else(
       age <= 17 & is.na(educat7),
@@ -148,52 +146,130 @@ workers_active <- workers_active |>
   )
 
 # check for uniqueness per year
-worker_quality_check <- create_agent(tbl = workers_active) |>
+worker_quality_check <- create_agent(tbl = worker_active) |>
   rows_distinct(
-    columns = c(year, worker_id),
-    step_id = "check_unique_worker_id",
+    columns = contract_id,
+    segments = vars(year),
+    step_id = "check_unique_contract_id",
     label = "Check for uniqueness of worker ID per year"
   ) |>
   rows_distinct(
-    columns = c(worker_id),
-    preconditions = . %>% distinct(worker_id, national_id),
-    step_id = "check_unique_worker_and_national_id",
+    columns = c(contract_id),
+    preconditions = . %>% distinct(contract_id, worker_id),
+    step_id = "check_unique_worker_and_worker_id",
     label = "Check for uniqueness of worker ID and national ID combinations"
   )
 
 worker_quality_check |>
   interrogate()
 
-workers_id <- workers_active |>
+# deduplicate -------------------------------------------------------------
+# matricula is the contract ID
+worker_id <- worker_active |>
   distinct(
-    worker_id, national_id
+    contract_id,
+    worker_id
   )
 
-# matricula is the worker ID
-
-national_id_duplicate <- workers_id |>
-  group_by(national_id) |>
-  summarise(
-    n = n_distinct(worker_id),
-    .groups = "drop"
-  ) |>
-  filter(n > 1)
-
-workers_id |>
+worker_id_duplicate <- worker_id |>
   group_by(worker_id) |>
   summarise(
-    n = n_distinct(national_id),
+    n = n_distinct(contract_id),
     .groups = "drop"
   ) |>
   filter(n > 1)
 
-national_id_duplicate |>
+worker_active |>
   inner_join(
-    workers_active
+    worker_id_duplicate,
+    by = c("worker_id")
   ) |>
-  arrange(
-    national_id
+  arrange(worker_id) |>
+  select(
+    worker_id,
+    contract_id,
+    year,
+    birth_date,
+    gender
   )
 
-workers_active |>
-  filter(worker_id == "12946")
+contract_id_duplicate_national <- worker_id |>
+  group_by(contract_id) |>
+  summarise(
+    n_worker_id = n_distinct(worker_id),
+    correct_worker_id = first(worker_id),
+    .groups = "drop"
+  )
+
+# decision: override national id with the first national id for each contract_id
+# 98 national ids affected
+worker_active <- worker_active |>
+  left_join(
+    contract_id_duplicate_national,
+    by = "contract_id"
+  ) |>
+  mutate(
+    worker_id = if_else(
+      n_worker_id > 1,
+      correct_worker_id,
+      worker_id
+    )
+  ) |>
+  ungroup() |>
+  select(
+    -n_worker_id,
+    -correct_worker_id
+  )
+
+# extract worker module
+# Worker
+#   - Reference date (ref_date)
+#   - Worker ID (contract_id)
+#   - Date of Birth (birth_date)
+#   - Gender (gender)
+#   - Education Attainment (educat7)
+#   - Tribe (tribe)
+#   - Race (race)
+#   - Status (active/retired)
+worker_module <- worker_active |>
+  group_by(worker_id, ref_date) |>
+  summarise(
+    birth_date = case_when(
+      birth_date <= as_date("2010-01-01") ~ min(birth_date),
+      TRUE ~ NA_Date_
+    ),
+    educat7 = dedup_education(educat7),
+    .groups = "drop"
+  )
+
+worker_module_gender <- worker_active |>
+  dedup_value_panel(
+    gender,
+    worker_id, ref_date
+  )
+
+# if the number of rows for both match, left join
+worker_module <- worker_module |>
+  left_join(
+    worker_module_gender,
+    by = c("worker_id", "ref_date")
+  ) |>
+  mutate(
+    status = "active"
+  )
+
+# create a function that does a conformity assessment
+# and fill out missing columns with NA
+dictionary_worker_cols <- c(
+  "ref_date", "worker_id", "birth_date", "gender", "educat7", "tribe", "race", "status"
+)
+
+worker_module_clean <- worker_module |>
+  complete_columns(
+    dictionary_worker_cols
+  )
+
+worker_module_clean |>
+  write_rds(
+    here("spielplatz/bra_hrmis_worker.rds")
+  )
