@@ -14,27 +14,6 @@
 #' @source <https://ilostat.ilo.org/methods/concepts-and-definitions/classification-occupation/>
 "isco"
 
-#' @title Consumer Price Index
-#' @description Index of the prices of consumption goods and services, as compared to a certain reference period (2010=100).
-#' @format A data frame with 9078 rows and 3 variables:
-#' \describe{
-#'   \item{\code{country_code}}{character World Bank country code}
-#'   \item{\code{year}}{character Year}
-#'   \item{\code{cpi}}{character Consumer Price Index (2010 = 100)}
-#'}
-#' @source <https://data360.worldbank.org/en/int/indicator/WB_WDI_FP_CPI_TOTL>
-"cpi"
-
-#' @title PPP Conversion Factor
-#' @description The purchasing power parity (PPP) conversion factor is a currency conversion factor and a spatial price deflator. They convert different currencies to a common currency and, in the process of conversion, equalize their purchasing power by eliminating the differences in price levels between countries, thereby allowing volume or output comparisons of gross domestic product (GDP) and its expenditure components. This conversion factor is for household final consumption expenditure and the base currency is the US dollar.
-#' @format A data frame with 6172 rows and 3 variables:
-#' \describe{
-#'   \item{\code{country_code}}{character World Bank country code}
-#'   \item{\code{year}}{character Year}
-#'   \item{\code{ppp}}{character PPP conversion factor, private consumption (LCU per international $)}
-#'}
-#' @source <https://data360.worldbank.org/en/int/indicator/WB_WDI_PA_NUS_PRVT_PP>
-"ppp"
 
 #' World Bank Country and Lending Groups
 #'
@@ -52,34 +31,36 @@
 #' @source <https://ddh-openapi.worldbank.org/resources/DR0095333/download/>
 "countryclass"
 
-#' Economy-wide Indicators
+
+#' Macro-level World Bank WDI indicators
 #'
-#' A country-year panel dataset of selected economy-wide indicators from the
-#' World Bank World Development Indicators (WDI) database, prepared for use in
-#' wage diagnostics and related analyses.
+#' This dataset contains a selection of macroeconomic and labor market indicators
+#' for multiple countries and years. The data are primarily sourced from the World
+#' Bank World Development Indicators (WDI) via the Data360 API. The variables have
+#' been renamed for convenience, but the original WDI variable codes are provided
+#' for reference.
 #'
-#' @format A tibble with 17,195 rows and 9 variables:
+#' @format A tibble with 17,195 rows and 11 columns:
 #' \describe{
-#'   \item{country_code}{Character. ISO3 country code.}
-#'   \item{year}{Character. Year of observation (1960 onward).}
-#'   \item{wb_wdi_ny_gdp_mktp_cn}{Character. Gross Domestic Product at market prices (current local currency units). Source: WDI \code{NY.GDP.MKTP.CN}.}
-#'   \item{wb_wdi_gc_xpn_totl_cn}{Character. General government total expenditure (current local currency units). Source: WDI \code{GC.XPN.TOTL.CN}.}
-#'   \item{wb_wdi_gc_rev_xgrt_cn}{Character. General government total revenue, excluding grants (current local currency units). Source: WDI \code{GC.REV.XGRT.CN}.}
-#'   \item{wb_wdi_gc_tax_totl_cn}{Character. Tax revenue (current local currency units). Source: WDI \code{GC.TAX.TOTL.CN}.}
-#'   \item{wb_wdi_sl_emp_totl_sp_ne_zs}{Character. Employment-to-population ratio, total (percent, modeled ILO estimate). Source: WDI \code{SL.EMP.TOTL.SP.NE.ZS}.}
-#'   \item{wb_wdi_sp_pop_totl}{Character. Total population. Source: WDI \code{SP.POP.TOTL}.}
-#'   \item{wb_wdi_sl_emp_work_zs}{Character. Employees (salaried workers) as share of total employment (percent). Source: WDI \code{SL.EMP.WORK.ZS}.}
+#'   \item{country_code}{ISO3 country code (originally from Data360 API).}
+#'   \item{year}{Year of observation (character, originally from Data360 API).}
+#'   \item{gdp_lcu}{Gross Domestic Product (local currency units). Original WDI code: WB_WDI_NY_GDP_MKTP_CN.}
+#'   \item{pexpenditure_lcu}{Total government expenditure (local currency units). Original WDI code: WB_WDI_GC_XPN_TOTL_CN.}
+#'   \item{prevenue_lcu}{Total government revenue (local currency units). Original WDI code: WB_WDI_GC_REV_XGRT_CN.}
+#'   \item{taxrevenue_lcu}{Total government tax revenue (local currency units). Original WDI code: WB_WDI_GC_TAX_TOTL_CN.}
+#'   \item{emp_pop_rate}{Employment-to-population ratio (in percent). Original WDI code: WB_WDI_SL_EMP_TOTL_SP_NE_ZS.}
+#'   \item{tot_pop}{Total population. Original WDI code: WB_WDI_SP_POP_TOTL.}
+#'   \item{salaried_rate}{Share of employed people who are salaried (in percent). Original WDI code: WB_WDI_SL_EMP_WORK_ZS.}
+#'   \item{cpi}{Consumer Price Index, total. Original WDI code: WB_WDI_FP_CPI_TOTL.}
+#'   \item{ppp}{Purchasing Power Parity (local currency units per international USD). Original WDI code: WB_WDI_PA_NUS_PRVT_PP.}
 #' }
 #'
 #' @details
-#' Data are pulled from the Data360 API wrapper for the World Bank WDI dataset.
-#' Variables are stored as character vectors to preserve alignment across
-#' country-years, and may require type conversion (e.g., `as.numeric`) before
-#' analysis.
+#' This dataset was prepared to support wage bill diagnostics and other fiscal
+#' and labor market analysis. All numeric variables have been coerced to numeric
+#' type. Missing values may exist for certain countries and years.
 #'
-#' @source World Bank, World Development Indicators (via Data360 API).
+#' @source Data360 API, World Bank World Development Indicators (WDI)
+#' \url{https://data.worldbank.org/indicator}
 #'
-#' @examples
-#' data(econwide_indicators)
-#' dplyr::glimpse(econwide_indicators)
-"econwide_indicators"
+"macro_indicators"
