@@ -391,22 +391,21 @@ complete_columns <- function(data, cols) {
 #' \deqn{Real_{h}^{PPP} = (CPI_t / CPI_{2017}) * (Nominal_{h,t} / PPP_{2017})}
 #'
 #' Assumes
-#' - `df` has columns: country_code, year, wage
+#' - `data` has columns: country_code, year, wage
 #' - `cpi` has columns: country_code, year, cpi
-#' - `ppp` has columns: country_code, ppp  (ppp = LCU per 2017 Intl$)
+#' - `ppp` has columns: country_code, ppp  (ppp = LCU per 2021 Intl$)
 #'
-#' @param df Data frame with columns (country_code, year, wage).
-#' @param wage_col Column name to convert to constant PPP.
-#' @param cpi Data frame with columns (country_code, year, cpi).
-#' @param ppp Data frame with columns (country_code, ppp).
-#' @return `df` augmented with `real_wage_ppp` column (2017 PPP$).
+#' @param data Data frame with columns (country_code, year, wage).
+#' @param cols Column name to convert to constant PPP in international 2021 dollars.
+#' @return `data_out` augmented with columns converted to international 2021 dollars.
 #' @examples
 #' library(tibble)
-#' hh <- tibble::tibble(country_code = c("A","A"), year = c(2010,2017),
+#' hh <- tibble(country_code = c("A","A"), year = c(2010,20202117),
 #'                      wage = c(20000, 25000))
-#' cpi <- tibble::tibble(country_code = "A", year = c(2010,2017), cpi = c(85,100))
-#' ppp <- tibble::tibble(country_code = "A", ppp = 3.5)
-#' convert_constant_ppp(hh, cpi, ppp)
+#' cpi <- tibble(country_code = "A", year = c(2010,2021), cpi = c(85,100))
+#' ppp <- tibble(country_code = "A", ppp = 3.5)
+#'
+#' convert_constant_ppp(hh, wage)
 #'
 #' @importFrom dplyr filter select rename left_join mutate
 #' @import glue

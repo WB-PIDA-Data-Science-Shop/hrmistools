@@ -25,28 +25,16 @@ file_path <- "//egvpi/egvpi/data/harmonization/HRM/BRA/data-raw/6. Wage Bill AL/
 plan(multisession, workers = 6)
 
 contract_active_list <-
-  list.files(
-    path = file_path,
-    pattern = "^Ativos_[0-9]{4}\\.xlsx$",
-    full.names = T
-  ) |>
-  future_map(
-    \(file) read_xlsx(
-      file, na = c("", "-"), col_types = "text"
-    )
-  )
+  list.files(path = file_path,
+             pattern = "^Ativos_[0-9]{4}\\.xlsx$",
+             full.names = T) |>
+  future_map(\(file) read_xlsx(file, na = c("", "-"), col_types = "text"))
 
 contract_inactive_list <-
-  list.files(
-    path = file_path,
-    pattern = "^Inativos_[0-9]{4}\\.xlsx$",
-    full.names = T
-  ) |>
-  future_map(
-    \(file) read_xlsx(
-      file, na = c("", "-"), col_types = "text"
-    )
-  )
+  list.files(path = file_path,
+             pattern = "^Inativos_[0-9]{4}\\.xlsx$",
+             full.names = T) |>
+  future_map(\(file) read_xlsx(file, na = c("", "-"), col_types = "text"))
 
 #### quickly harmonize column classes
 active_alagoas_tbl <- bind_rows(contract_active_list)
@@ -71,43 +59,46 @@ active_alagoas_tbl |>
 
 ### first let us figure out how many contracts each person has per year
 contract_alagoas_tbl <-
-  bind_rows(active_alagoas_tbl |>
-              transmute(contract_id = MATRICULA,
-                        worker_id = CPF,
-                        org_id = paste(ORGAO, COD_ORGAO, ANO_PAGAMENTO, sep = "-"),
-                        org_date = as.Date(paste(ANO_PAGAMENTO, MES_REFERENCIA, "01", sep = "-")),
-                        year = ANO_PAGAMENTO,
-                        base_salary_lcu = SALARIO_BASE,
-                        gross_salary_lcu = SALARIO_BRUTO,
-                        net_salary_lcu = SALARIO_LIQUIDO,
-                        spdef = NA,
-                        whours = as.numeric(JORNADA),
-                        country_code = "BRA",
-                        country_name = "Brazil",
-                        adm1_name = "Alagoas",
-                        adm1_code = "AL",
-                        start_date = as.Date(as.integer(DATA_ADMISSAO),
-                                             origin = "1899-12-30"),
-                        end_date = NA),
-            inactive_alagoas_tbl |>
-              transmute(contract_id = MATRICULA,
-                        worker_id = CPF,
-                        org_id = paste(ORGAO, "000000", sep = "-"),
-                        org_date = as.Date(paste(ANO_PAGAMENTO, MES_REFERENCIA, "01", sep = "-")),
-                        year = ANO_PAGAMENTO,
-                        base_salary_lcu = NA,
-                        gross_salary_lcu = VALOR_BRUTO,
-                        net_salary_lcu = VALOR_LIQUIDO,
-                        spdef = NA,
-                        whours = 0,
-                        country_code = "BRA",
-                        country_name = "Brazil",
-                        adm1_name = "Alagoas",
-                        adm1_code = "AL",
-                        start_date = as.Date(as.integer(DATA_ADMISSAO),
-                                             origin = "1899-12-30"),
-                        end_date = as.Date(as.integer(DATA_APOSENTADORIA),
-                                           origin = "1899-12-30")))
+  bind_rows(
+    active_alagoas_tbl |>
+      transmute(
+        contract_id = MATRICULA,
+        worker_id = CPF,
+        org_id = paste(ORGAO, COD_ORGAO, ANO_PAGAMENTO, sep = "-"),
+        org_date = as.Date(paste(ANO_PAGAMENTO, MES_REFERENCIA, "01", sep = "-")),
+        year = ANO_PAGAMENTO,
+        base_salary_lcu = SALARIO_BASE,
+        gross_salary_lcu = SALARIO_BRUTO,
+        net_salary_lcu = SALARIO_LIQUIDO,
+        spdef = NA,
+        whours = as.numeric(JORNADA),
+        country_code = "BRA",
+        country_name = "Brazil",
+        adm1_name = "Alagoas",
+        adm1_code = "AL",
+        start_date = as.Date(as.integer(DATA_ADMISSAO), origin = "1899-12-30"),
+        end_date = NA
+      ),
+    inactive_alagoas_tbl |>
+      transmute(
+        contract_id = MATRICULA,
+        worker_id = CPF,
+        org_id = paste(ORGAO, "000000", sep = "-"),
+        org_date = as.Date(paste(ANO_PAGAMENTO, MES_REFERENCIA, "01", sep = "-")),
+        year = ANO_PAGAMENTO,
+        base_salary_lcu = NA,
+        gross_salary_lcu = VALOR_BRUTO,
+        net_salary_lcu = VALOR_LIQUIDO,
+        spdef = NA,
+        whours = 0,
+        country_code = "BRA",
+        country_name = "Brazil",
+        adm1_name = "Alagoas",
+        adm1_code = "AL",
+        start_date = as.Date(as.integer(DATA_ADMISSAO), origin = "1899-12-30"),
+        end_date = as.Date(as.integer(DATA_APOSENTADORIA), origin = "1899-12-30")
+      )
+  )
 
 contract_alagoas_tbl <-
   contract_alagoas_tbl %>%
@@ -118,12 +109,8 @@ contract_alagoas_tbl <-
 
 contract_alagoas_tbl_clean <-
   contract_alagoas_tbl |>
-  convert_constant_ppp(
-    ends_with("_lcu")
-  ) |>
-  rename_with(
-    ~ str_replace(., "_lcu", "")
-  )
+  convert_constant_ppp(ends_with("_lcu")) |>
+  rename_with(~ str_replace(., "_lcu", ""))
 
 ### include cpi, ppp and temporal and spatial pricing data for Brazil
 year_list <-
@@ -133,5 +120,8 @@ year_list <-
 
 qualitycheck_contractmod(contract_tbl = contract_alagoas_tbl)
 
-saveRDS(contract_alagoas_tbl,
-        "spielplatz/bra_hrmis_contract.rds")
+contract_alagoas_tbl |>
+  write_rds(
+    here("data", "bra", "bra_hrmis_contract.rds"),
+    compress = "gz"
+  )

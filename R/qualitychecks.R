@@ -108,7 +108,7 @@ qualitycheck_contractmod <- function(contract_tbl,
 #' @export
 #'
 #' @import dplyr pointblank countrycode
-#'
+#' @importFrom stats na.omit
 #'
 qualitycheck_orgmod <- function(org_tbl) {
 
@@ -141,6 +141,16 @@ qualitycheck_orgmod <- function(org_tbl) {
   return(agent)
 }
 
+#' Quality Check for Harmonized Worker Module
+#'
+#' @param org_tbl A data.frame or tibble containing the harmonized worker module
+#'
+#' @return A pointblank agent object
+#' @export
+#'
+#' @import dplyr pointblank countrycode
+#' @importFrom stats na.omit
+#'
 qualitycheck_worker <- function(worker_tbl){
 
   required_vars <- c(
