@@ -76,12 +76,10 @@ contract_alagoas_tbl <-
                         worker_id = CPF,
                         org_id = paste(ORGAO, COD_ORGAO, ANO_PAGAMENTO, sep = "-"),
                         org_date = as.Date(paste(ANO_PAGAMENTO, MES_REFERENCIA, "01", sep = "-")),
-                        country_code = "BRA",
                         year = ANO_PAGAMENTO,
                         base_salary_lcu = SALARIO_BASE,
                         gross_salary_lcu = SALARIO_BRUTO,
                         net_salary_lcu = SALARIO_LIQUIDO,
-                        spdef = NA,
                         whours = as.numeric(JORNADA),
                         country_code = "BRA",
                         country_name = "Brazil",
@@ -95,12 +93,10 @@ contract_alagoas_tbl <-
                         worker_id = CPF,
                         org_id = paste(ORGAO, "000000", sep = "-"),
                         org_date = as.Date(paste(ANO_PAGAMENTO, MES_REFERENCIA, "01", sep = "-")),
-                        country_code = "BRA",
                         year = ANO_PAGAMENTO,
                         base_salary_lcu = NA,
                         gross_salary_lcu = VALOR_BRUTO,
                         net_salary_lcu = VALOR_LIQUIDO,
-                        spdef = NA,
                         whours = 0,
                         country_code = "BRA",
                         country_name = "Brazil",
@@ -128,12 +124,47 @@ contract_alagoas_tbl_clean <-
   )
 
 ### include cpi, ppp and temporal and spatial pricing data for Brazil
-year_list <-
-  contract_alagoas_tbl[["start_date"]] |>
-  lubridate::year() |>
-  unique()
+# year_list <-
+#   contract_alagoas_tbl[["start_date"]] |>
+#   lubridate::year() |>
+#   unique()
+
+### include the ppp values
+contract_alagoas_tbl_clean <-
+  contract_alagoas_tbl_clean |>
+  merge(ppp |>
+          dplyr::filter(country_code == "BRA" &
+                        year >= min(contract_alagoas_tbl_clean$year) &
+                        year <= max(contract_alagoas_tbl_clean$year)),
+        by = c("country_code", "year"),
+        all.x = TRUE) |>
+  as_tibble()
+
 
 qualitycheck_contractmod(contract_tbl = contract_alagoas_tbl)
 
 saveRDS(contract_alagoas_tbl,
         "spielplatz/bra_hrmis_contract.rds")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

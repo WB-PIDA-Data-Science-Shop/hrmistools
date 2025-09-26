@@ -51,3 +51,35 @@
 #' }
 #' @source <https://ddh-openapi.worldbank.org/resources/DR0095333/download/>
 "countryclass"
+
+#' Economy-wide Indicators
+#'
+#' A country-year panel dataset of selected economy-wide indicators from the
+#' World Bank World Development Indicators (WDI) database, prepared for use in
+#' wage diagnostics and related analyses.
+#'
+#' @format A tibble with 17,195 rows and 9 variables:
+#' \describe{
+#'   \item{country_code}{Character. ISO3 country code.}
+#'   \item{year}{Character. Year of observation (1960 onward).}
+#'   \item{wb_wdi_ny_gdp_mktp_cn}{Character. Gross Domestic Product at market prices (current local currency units). Source: WDI \code{NY.GDP.MKTP.CN}.}
+#'   \item{wb_wdi_gc_xpn_totl_cn}{Character. General government total expenditure (current local currency units). Source: WDI \code{GC.XPN.TOTL.CN}.}
+#'   \item{wb_wdi_gc_rev_xgrt_cn}{Character. General government total revenue, excluding grants (current local currency units). Source: WDI \code{GC.REV.XGRT.CN}.}
+#'   \item{wb_wdi_gc_tax_totl_cn}{Character. Tax revenue (current local currency units). Source: WDI \code{GC.TAX.TOTL.CN}.}
+#'   \item{wb_wdi_sl_emp_totl_sp_ne_zs}{Character. Employment-to-population ratio, total (percent, modeled ILO estimate). Source: WDI \code{SL.EMP.TOTL.SP.NE.ZS}.}
+#'   \item{wb_wdi_sp_pop_totl}{Character. Total population. Source: WDI \code{SP.POP.TOTL}.}
+#'   \item{wb_wdi_sl_emp_work_zs}{Character. Employees (salaried workers) as share of total employment (percent). Source: WDI \code{SL.EMP.WORK.ZS}.}
+#' }
+#'
+#' @details
+#' Data are pulled from the Data360 API wrapper for the World Bank WDI dataset.
+#' Variables are stored as character vectors to preserve alignment across
+#' country-years, and may require type conversion (e.g., `as.numeric`) before
+#' analysis.
+#'
+#' @source World Bank, World Development Indicators (via Data360 API).
+#'
+#' @examples
+#' data(econwide_indicators)
+#' dplyr::glimpse(econwide_indicators)
+"econwide_indicators"

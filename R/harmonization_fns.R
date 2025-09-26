@@ -450,3 +450,23 @@ convert_constant_ppp <- function(data, cols) {
 }
 
 
+#' Merge Wrapper Function
+#'
+#' A simple wrapper around [base::merge()] that performs a full outer join
+#' (i.e., keeps all rows from both data frames).
+#'
+#' @param ... Arguments passed to [base::merge()], such as \code{x}, \code{y},
+#'   \code{by}, \code{by.x}, \code{by.y}, etc.
+#'
+#' @return A data frame containing the merged result with all rows preserved.
+#' @examples
+#' df1 <- data.frame(id = 1:3, value1 = c("A", "B", "C"))
+#' df2 <- data.frame(id = 2:4, value2 = c("X", "Y", "Z"))
+#' merge_wrapper(df1, df2, by = "id")
+#'
+#' @export
+merge_wrapper <- function(...){
+  df <- merge(all = TRUE, ...)
+  return(df)
+}
+
