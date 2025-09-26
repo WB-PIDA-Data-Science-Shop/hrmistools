@@ -1,5 +1,7 @@
 utils::globalVariables(c(
   "contract_id", "org_date", "worker_id", "org_id", "country_code",
   "start_date", "end_date", "base_salary_lcu", "gross_salary_lcu",
-  "net_salary_lcu", "whours"
+  "net_salary_lcu", "whours", "cpi", "year", "ppp", "ppp_2017",
+  "REF_AREA", "TIME_PERIOD", "OBS_VALUE", "INDICATOR", "n_records",
+  "ref_date", "birth_date"
 ))

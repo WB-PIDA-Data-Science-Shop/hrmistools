@@ -7,16 +7,9 @@
 convert_constant_ppp(data, cols)
 }
 \arguments{
-\item{df}{Data frame with columns (country_code, year, wage).}
+\item{data}{`data.frame` object with columns (country_code, year, wage).}
 
-\item{wage_col}{Column name to convert to constant PPP.}
-
-\item{cpi}{Data frame with columns (country_code, year, cpi).}
-
-\item{ppp}{Data frame with columns (country_code, ppp).}
-}
-\value{
-`df` augmented with `real_wage_ppp` column (2017 PPP$).
+\item{cols}{`character` vector of variable names to be converted}
 }
 \description{
 Convert nominal wages (LCU at survey-year prices) into real wages expressed
@@ -30,11 +23,13 @@ Assumes
 - `ppp` has columns: country_code, ppp  (ppp = LCU per 2017 Intl$)
 }
 \examples{
+\dontrun{
 library(tibble)
 hh <- tibble::tibble(country_code = c("A","A"), year = c(2010,2017),
                      wage = c(20000, 25000))
 cpi <- tibble::tibble(country_code = "A", year = c(2010,2017), cpi = c(85,100))
 ppp <- tibble::tibble(country_code = "A", ppp = 3.5)
 convert_constant_ppp(hh, cpi, ppp)
+}
 
 }

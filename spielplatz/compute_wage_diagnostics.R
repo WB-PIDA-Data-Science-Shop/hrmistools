@@ -105,4 +105,3 @@ ggplot(wagebill_long, aes(x = year, y = ratio, color = wage_type)) +
 
 
 
-

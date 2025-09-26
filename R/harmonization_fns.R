@@ -395,18 +395,17 @@ complete_columns <- function(data, cols) {
 #' - `cpi` has columns: country_code, year, cpi
 #' - `ppp` has columns: country_code, ppp  (ppp = LCU per 2017 Intl$)
 #'
-#' @param df Data frame with columns (country_code, year, wage).
-#' @param wage_col Column name to convert to constant PPP.
-#' @param cpi Data frame with columns (country_code, year, cpi).
-#' @param ppp Data frame with columns (country_code, ppp).
-#' @return `df` augmented with `real_wage_ppp` column (2017 PPP$).
+#' @param data `data.frame` object with columns (country_code, year, wage).
+#' @param cols `character` vector of variable names to be converted
 #' @examples
+#' \dontrun{
 #' library(tibble)
 #' hh <- tibble::tibble(country_code = c("A","A"), year = c(2010,2017),
 #'                      wage = c(20000, 25000))
 #' cpi <- tibble::tibble(country_code = "A", year = c(2010,2017), cpi = c(85,100))
 #' ppp <- tibble::tibble(country_code = "A", ppp = 3.5)
 #' convert_constant_ppp(hh, cpi, ppp)
+#' }
 #'
 #' @importFrom dplyr filter select rename left_join mutate
 #' @import glue

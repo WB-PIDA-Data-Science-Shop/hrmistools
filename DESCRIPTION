@@ -19,7 +19,12 @@ Imports:
     pointblank,
     stringr,
     tidyr,
-    countrycode
+    countrycode,
+    httr,
+    janitor,
+    jsonlite,
+    glue,
+    stats
 RoxygenNote: 7.3.2
 Suggests: 
     testthat (>= 3.0.0)
