@@ -2,7 +2,7 @@
 % Please edit documentation in R/harmonization_fns.R
 \name{convert_constant_ppp}
 \alias{convert_constant_ppp}
-\title{Convert nominal wages to real PPP-adjusted wages (2017 base year)}
+\title{Convert nominal wages to real PPP-adjusted wages (2021 base year)}
 \usage{
 convert_constant_ppp(data, cols)
 }
@@ -16,8 +16,8 @@ convert_constant_ppp(data, cols)
 }
 \description{
 Convert nominal wages (LCU at survey-year prices) into real wages expressed
-in 2017 PPP international dollars using:
-\deqn{Real_{h}^{PPP} = (CPI_t / CPI_{2017}) * (Nominal_{h,t} / PPP_{2017})}
+in 2021 PPP international dollars using:
+\deqn{Real_{h}^{PPP} = (CPI_t / CPI_{2021}) * (Nominal_{h,t} / PPP_{2021})}
 }
 \details{
 Assumes
@@ -27,10 +27,10 @@ Assumes
 }
 \examples{
 library(tibble)
-hh <- tibble(country_code = c("A","A"), year = c(2010,20202117),
+hh <- tibble(country_code = c("A","A"), year = c(2010, 2021),
                      wage = c(20000, 25000))
 cpi <- tibble(country_code = "A", year = c(2010,2021), cpi = c(85,100))
-ppp <- tibble(country_code = "A", ppp = 3.5)
+ppp <- tibble(country_code = "A", year = 2021, ppp = 3.5)
 
 convert_constant_ppp(hh, wage)
 

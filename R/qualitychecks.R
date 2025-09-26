@@ -143,13 +143,14 @@ qualitycheck_orgmod <- function(org_tbl) {
 
 #' Quality Check for Harmonized Worker Module
 #'
-#' @param org_tbl A data.frame or tibble containing the harmonized worker module
+#' @param worker_tbl A data.frame or tibble containing the harmonized worker module
 #'
 #' @return A pointblank agent object
 #' @export
 #'
 #' @import dplyr pointblank countrycode
 #' @importFrom stats na.omit
+#' @importFrom lubridate as_date
 #'
 qualitycheck_worker <- function(worker_tbl){
 

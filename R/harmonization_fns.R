@@ -384,11 +384,11 @@ complete_columns <- function(data, cols) {
   return(data)
 }
 
-#' Convert nominal wages to real PPP-adjusted wages (2017 base year)
+#' Convert nominal wages to real PPP-adjusted wages (2021 base year)
 #'
 #' Convert nominal wages (LCU at survey-year prices) into real wages expressed
-#' in 2017 PPP international dollars using:
-#' \deqn{Real_{h}^{PPP} = (CPI_t / CPI_{2017}) * (Nominal_{h,t} / PPP_{2017})}
+#' in 2021 PPP international dollars using:
+#' \deqn{Real_{h}^{PPP} = (CPI_t / CPI_{2021}) * (Nominal_{h,t} / PPP_{2021})}
 #'
 #' Assumes
 #' - `data` has columns: country_code, year, wage
@@ -400,10 +400,10 @@ complete_columns <- function(data, cols) {
 #' @return `data_out` augmented with columns converted to international 2021 dollars.
 #' @examples
 #' library(tibble)
-#' hh <- tibble(country_code = c("A","A"), year = c(2010,20202117),
+#' hh <- tibble(country_code = c("A","A"), year = c(2010, 2021),
 #'                      wage = c(20000, 25000))
 #' cpi <- tibble(country_code = "A", year = c(2010,2021), cpi = c(85,100))
-#' ppp <- tibble(country_code = "A", ppp = 3.5)
+#' ppp <- tibble(country_code = "A", year = 2021, ppp = 3.5)
 #'
 #' convert_constant_ppp(hh, wage)
 #'
@@ -419,9 +419,9 @@ convert_constant_ppp <- function(data, cols) {
     stop("`data` must contain columns: country_code, year")
   }
 
-  # extract CPI in base year (2017) by country
+  # extract CPI in base year (2021) by country
   base_cpi <- cpi |>
-    filter(year == 2017) |>
+    filter(year == 2021) |>
     select(country_code, cpi) |>
     rename(base_cpi = cpi)
 
@@ -431,19 +431,19 @@ convert_constant_ppp <- function(data, cols) {
     left_join(base_cpi, by = "country_code") |>
     left_join(
       ppp |>
-        filter(year == 2017) |>
+        filter(year == 2021) |>
         select(-year) |>
-        rename(ppp_2017 = ppp),
+        rename(ppp_2021 = ppp),
       by = "country_code"
     ) |>
     mutate(
       across(
         {{cols}},
-        ~ (cpi / base_cpi) * (.x / ppp_2017),
+        ~ (cpi / base_cpi) * (.x / ppp_2021),
         .names = "{.col}_ppp"
       )
     ) |>
-    select(-c(ppp_2017, base_cpi))
+    select(-c(ppp_2021, base_cpi))
 
   return(data_out)
 }
