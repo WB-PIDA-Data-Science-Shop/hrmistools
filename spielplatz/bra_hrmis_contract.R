@@ -83,20 +83,30 @@ occup_df <-
 chat <- chat_openai(model = "gpt-4")
 
 
-prompt_chr <- paste0("You are an expert in labor statistics. ",
-                     "Classify the given occupation into one of the following ",
-                     "ISCO-08 4-digit unit group descriptions. Return EXACTLY ",
-                     "one description from the list below, with no extra text ",
-                     "no explanations. Choices: {paste(isco$description, collapse = ', ')} ",
-                     "Now classify: ")
 
 Sys.time()
+
+labels <- isco$description
+
+prompt_chr <- paste0("You are an expert in labor statistics. ",
+                     "Classify the given occupation into one of the ISCO-08 ",
+                     "4-digit unit group descriptions. Return EXACTLY ",
+                     "one description from the list below, with no extra text ",
+                     "no explanations. Choices: {paste(labels, collapse = ', ')} ",
+                     "Now classify: ")
+
+
 occup_df <-
   occup_df |>
-  mutate(occupation_isconame = mall::llm_vec_classify(x = occupation_english,
-                                                      labels = isco$description,
-                                                      additional_prompt = prompt_chr))
+  mutate(occupation_isconame = hrm_classify(data = occup_df,
+                                            occupation_col = "occupation_english",
+                                            labels = labels,
+                                            additional_prompt = prompt_chr,
+                                            chunk_size = 60))
+
 Sys.time()
+
+
 
 ## lets write to csv and input directly into chatgpt to return the classifications
 write.csv(occup_df, "spielplatz/occup.csv")
@@ -120,7 +130,9 @@ contract_alagoas_tbl <-
                         adm1_code = "AL",
                         start_date = as.Date(as.integer(DATA_ADMISSAO),
                                              origin = "1899-12-30"),
-                        end_date = NA),
+                        end_date = NA,
+                        paygrade = CLASSE,
+                        level = NIVEL),
             inactive_alagoas_tbl |>
               transmute(contract_id = MATRICULA,
                         worker_id = CPF,
@@ -138,7 +150,9 @@ contract_alagoas_tbl <-
                         start_date = as.Date(as.integer(DATA_ADMISSAO),
                                              origin = "1899-12-30"),
                         end_date = as.Date(as.integer(DATA_APOSENTADORIA),
-                                           origin = "1899-12-30")))
+                                           origin = "1899-12-30"),
+                        paygrade = CLASSE,
+                        level = NIVEL))
 
 contract_alagoas_tbl <-
   contract_alagoas_tbl %>%
