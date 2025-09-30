@@ -13,6 +13,7 @@ library(writexl)
 # library(dlw)
 library(pointblank)
 
+
 # read-in data ------------------------------------------------------------
 file_path <- "//egvpi/egvpi/data/harmonization/HRM/BRA/data-raw/6. Wage Bill AL/3. Microdados"
 #
@@ -68,6 +69,38 @@ active_alagoas_tbl |>
 active_alagoas_tbl |>
   group_by(ANO_PAGAMENTO) |>
   summarize(unique_mtr = length(unique(MATRICULA)), nobs = length(MATRICULA))
+
+
+occup_df <-
+  active_alagoas_tbl |>
+  dplyr::select(CARREIRA, CARGO) |>
+  unique() |>
+  mutate(
+    occupation_native  = tolower(CARREIRA),
+    occupation_english = tolower(vectorize_gt_parallel(vector = CARREIRA,
+                                                       source_language = "pt")))
+
+chat <- chat_openai(model = "gpt-4")
+
+
+prompt_chr <- paste0("You are an expert in labor statistics. ",
+                     "Classify the given occupation into one of the following ",
+                     "ISCO-08 4-digit unit group descriptions. Return EXACTLY ",
+                     "one description from the list below, with no extra text ",
+                     "no explanations. Choices: {paste(isco$description, collapse = ', ')} ",
+                     "Now classify: ")
+
+Sys.time()
+occup_df <-
+  occup_df |>
+  mutate(occupation_isconame = mall::llm_vec_classify(x = occupation_english,
+                                                      labels = isco$description,
+                                                      additional_prompt = prompt_chr))
+Sys.time()
+
+## lets write to csv and input directly into chatgpt to return the classifications
+write.csv(occup_df, "spielplatz/occup.csv")
+
 
 ### first let us figure out how many contracts each person has per year
 contract_alagoas_tbl <-

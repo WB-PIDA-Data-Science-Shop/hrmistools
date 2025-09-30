@@ -39,6 +39,95 @@ vectorize_gt <- function(vector,
   return(trans_obj)
 }
 
+
+#' Parallelized Google Translate Wrapper
+#'
+#' This function wraps `polyglotr::google_translate()` and adds support for
+#' parallel processing. The input vector is split into chunks, which are
+#' translated in parallel using `future.apply::future_lapply()`. This can be
+#' useful for large vectors or when API rate limits allow concurrent requests.
+#'
+#' @param vector Character vector to be translated.
+#' @param target_language Two-letter ISO language code for the translation target.
+#'   Defaults to `"en"`.
+#' @param source_language Two-letter ISO language code for the translation source.
+#'   Required.
+#' @param workers Integer. Number of parallel workers to use. Defaults to `4`.
+#' @param chunk_size Integer. Number of elements in each chunk (batch) to send per
+#'   request. Defaults to `50`.
+#'
+#' @return A character vector of translated text, in the same order as the input.
+#'
+#' @details
+#' The function splits the input vector into chunks of size `chunk_size` and
+#' sends each chunk to `polyglotr::google_translate()`. Each chunk is translated
+#' in parallel across `workers` processes. This approach reduces API overhead
+#' compared to sending one request per element.
+#'
+#' Note: Using parallel workers will open multiple sessions. Be mindful of API
+#' usage limits or quotas when increasing `workers`.
+#'
+#' @examples
+#' \dontrun{
+#' # Translate a few Spanish phrases into English in parallel
+#' phrases <- c("hola", "buenos días", "¿cómo estás?")
+#' vectorize_gt_parallel(phrases, target_language = "en", source_language = "es")
+#' }
+#'
+#' @import polyglotr
+#' @importFrom future.apply future_lapply
+#' @export
+
+
+vectorize_gt_parallel <- function(vector,
+                                  target_language = "en",
+                                  source_language,
+                                  workers = 4,
+                                  chunk_size = 50) {
+  plan(multisession, workers = workers)
+
+  chunks <- split(vector, ceiling(seq_along(vector) / chunk_size))
+
+  res <- future.apply::future_lapply(chunks, function(chunk) {
+    google_translate(
+      text = chunk,
+      target_language = target_language,
+      source_language = source_language
+    )
+  }, future.seed = TRUE)
+
+  unlist(res, use.names = FALSE)
+
+}
+
+
+
+#' Classify raw job titles into given categories using LLM
+#'
+#' @param x Character vector of raw job titles
+#' @param y Character vector of categories to classify into (e.g., ISCO descriptions)
+#' @param model LLM model to use (default "gpt-4")
+#' @return Character vector of predicted categories, same length as x
+#' @export
+
+hrm_classify <- function(x, y, model = "gpt-4") {
+
+  chat <- chat_openai(model = model)
+
+  # Map over each title
+  map_chr(x, function(title) {
+    chat$chat_structured(
+      message = title,
+      type = type_object(predicted_category = type_string()),
+      system_prompt = paste0(
+        "Classify the following job title into one of these categories:\n",
+        paste0("- ", y, collapse = "\n"),
+        "\nReturn ONLY the predicted_category field."
+      )
+    )$predicted_category
+  })
+}
+
 #' A function to identify inconsistent column names across data frames
 #'
 #' This function checks for consistency in column names across a list of data frames.
