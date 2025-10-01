@@ -171,14 +171,19 @@ worker_id <- worker_active |>
     worker_id
   )
 
-worker_id_duplicate <- worker_id |>
+worker_id_multiple_contracts <- worker_id |>
   group_by(worker_id) |>
   summarise(
-    n = n_distinct(contract_id),
+    n_contract = n_distinct(contract_id),
     .groups = "drop"
   ) |>
-  filter(n > 1)
+  filter(n_contract > 1)
 
+# there are 9.4 thousand workers with multiple contracts
+worker_id_multiple_contracts |>
+  count(n_contract)
+
+# verify worker ids
 worker_active |>
   inner_join(
     worker_id_duplicate,
@@ -221,7 +226,7 @@ worker_active <- worker_active |>
     -correct_worker_id
   )
 
-# extract worker module
+# extract worker module ---------------------------------------------------
 # Worker
 #   - Reference date (ref_date)
 #   - Worker ID (contract_id)
@@ -242,6 +247,7 @@ worker_module <- worker_active |>
     .groups = "drop"
   )
 
+#
 worker_module_gender <- worker_active |>
   dedup_value_panel(
     gender,
