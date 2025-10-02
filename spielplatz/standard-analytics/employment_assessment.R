@@ -27,7 +27,8 @@ contract <- read_rds(
 # 3.6.2. annual, within-grade pay increases
 contract_ppp <- contract |>
   convert_constant_ppp(
-    ends_with("lcu")
+    ends_with("lcu"),
+    macro_indicators
   )
 
 contract_ppp |>
@@ -105,3 +106,6 @@ contract_ppp |>
 # 3.6.3. percentage of staff receiving a performance bonus
 
 # 3.6.4. performance bonus as a percentage of basic pay
+
+# 3.6.6. hardship allowance and percentage of staff receiving it
+

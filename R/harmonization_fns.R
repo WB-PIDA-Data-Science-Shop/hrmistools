@@ -462,17 +462,17 @@ complete_columns <- function(data, cols) {
 #' @return `data_out` augmented with columns converted to international 2021 dollars.
 #' @examples
 #' library(tibble)
-#' hh <- tibble(country_code = c("A","A"), year = c(2010, 2021),
+#' hh <- tibble(country_code = c("A","A"), year = c("2010", "2021"),
 #'                      wage = c(20000, 25000))
-#' cpi <- tibble(country_code = "A", year = c(2010,2021), cpi = c(85,100))
-#' ppp <- tibble(country_code = "A", year = 2021, ppp = 3.5)
+#' cpi <- tibble(country_code = "A", year = c("2010","2021"), cpi = c(85,100))
+#' ppp <- tibble(country_code = "A", year = "2021", ppp = 3.5)
 #'
 #' convert_constant_ppp(hh, wage)
 #'
 #' @importFrom dplyr filter select rename left_join mutate
 #' @import glue
 #' @export
-convert_constant_ppp <- function(data, cols) {
+convert_constant_ppp <- function(data, cols, macro_indicators) {
 
   ## Basic input checks
   required_df  <- c("country_code", "year")

@@ -4,7 +4,7 @@
 \alias{convert_constant_ppp}
 \title{Convert nominal wages to real PPP-adjusted wages (2021 base year)}
 \usage{
-convert_constant_ppp(data, cols)
+convert_constant_ppp(data, cols, macro_indicators)
 }
 \arguments{
 \item{data}{Data frame with columns (country_code, year, wage).}
@@ -27,10 +27,10 @@ Assumes
 }
 \examples{
 library(tibble)
-hh <- tibble(country_code = c("A","A"), year = c(2010, 2021),
+hh <- tibble(country_code = c("A","A"), year = c("2010", "2021"),
                      wage = c(20000, 25000))
-cpi <- tibble(country_code = "A", year = c(2010,2021), cpi = c(85,100))
-ppp <- tibble(country_code = "A", year = 2021, ppp = 3.5)
+cpi <- tibble(country_code = "A", year = c("2010","2021"), cpi = c(85,100))
+ppp <- tibble(country_code = "A", year = "2021", ppp = 3.5)
 
 convert_constant_ppp(hh, wage)
 

@@ -21,6 +21,8 @@
 #' )
 #' }
 #'
+#' @import ggplot2
+#'
 #' @export
 ggplot_point_line <- function(data, x, y, group = NULL, ...) {
   data |>
