@@ -10,7 +10,6 @@ library(readxl)
 library(purrr)
 library(furrr)
 library(writexl)
-# library(dlw)
 library(pointblank)
 library(labourR)
 
@@ -64,17 +63,21 @@ inactive_alagoas_tbl <-
   mutate(CARREIRA = CARGO)
 
 occup_df <-
-  bind_rows(active_alagoas_tbl |>
-              dplyr::select(CARREIRA, CARGO) |>
-              mutate(status = "active"),
-            inactive_alagoas_tbl |>
-              dplyr::select(CARREIRA, CARGO) |>
-              mutate(status = "inactive")) |>
+  bind_rows(
+    active_alagoas_tbl |>
+      dplyr::select(CARREIRA, CARGO) |>
+      mutate(status = "active"),
+    inactive_alagoas_tbl |>
+      dplyr::select(CARREIRA, CARGO) |>
+      mutate(status = "inactive")
+  ) |>
   unique() |>
   mutate(
     occupation_native  = tolower(CARREIRA),
-    occupation_english = tolower(vectorize_gt_parallel(vector = CARREIRA,
-                                                       source_language = "pt")))
+    occupation_english = tolower(
+      vectorize_gt_parallel(vector = CARREIRA, source_language = "pt")
+    )
+  )
 
 
 # df <-
@@ -91,47 +94,57 @@ occup_df <-
 
 class_occup_df <-
   occup_df |>
-  mutate(id = 1:n(),
-         text = occupation_english) |>
+  mutate(id = 1:n(), text = occupation_english) |>
   dplyr::select(id, text) |>
-  classify_occupation(isco_level = 4,
-                      lang = "en",
-                      num_leaves = 1)
-
+  classify_occupation(
+    isco_level = 4,
+    lang = "en",
+    num_leaves = 1
+  )
 
 occup_df <-
   occup_df |>
   mutate(id = 1:n()) |>
-  merge(y = class_occup_df |>
-          dplyr::select(id, iscoGroup),
-        by = "id",
-        all.x = TRUE) |>
+  merge(
+    y = class_occup_df |>
+      dplyr::select(id, iscoGroup),
+    by = "id",
+    all.x = TRUE
+  ) |>
   rename(occupation_iscocode = "iscoGroup") |>
-  merge(isco |>
-          dplyr::select(unit, description) |>
-          rename(occupation_isconame = "description"),
-        by.x = "occupation_iscocode",
-        by.y = "unit",
-        all.x = TRUE) |>
+  merge(
+    isco |>
+      dplyr::select(unit, description) |>
+      rename(occupation_isconame = "description"),
+    by.x = "occupation_iscocode",
+    by.y = "unit",
+    all.x = TRUE
+  ) |>
   as_tibble()
 
 ## bring the classified occupations to the original data
 active_alagoas_tbl <-
   active_alagoas_tbl |>
-  merge(occup_df |>
-          dplyr::filter(status == "active" & !is.na(occupation_iscocode)) |>
-          dplyr::select(CARGO, CARREIRA, starts_with("occupation_")),
-        by = c("CARGO", "CARREIRA"),
-        all.x = TRUE) |>
+  merge(
+    occup_df |>
+      dplyr::filter(status == "active" &
+                      !is.na(occupation_iscocode)) |>
+      dplyr::select(CARGO, CARREIRA, starts_with("occupation_")),
+    by = c("CARGO", "CARREIRA"),
+    all.x = TRUE
+  ) |>
   as_tibble()
 
 inactive_alagoas_tbl <-
   inactive_alagoas_tbl |>
-  merge(occup_df |>
-          dplyr::filter(status == "inactive" & !is.na(occupation_iscocode)) |>
-          dplyr::select(CARGO, CARREIRA, starts_with("occupation_")),
-        by = c("CARGO", "CARREIRA"),
-        all.x = TRUE) |>
+  merge(
+    occup_df |>
+      dplyr::filter(status == "inactive" &
+                      !is.na(occupation_iscocode)) |>
+      dplyr::select(CARGO, CARREIRA, starts_with("occupation_")),
+    by = c("CARGO", "CARREIRA"),
+    all.x = TRUE
+  ) |>
   as_tibble()
 
 
@@ -187,28 +200,4 @@ contract_alagoas_tbl <-
 
 qualitycheck_contractmod(contract_tbl = contract_alagoas_tbl)
 
-saveRDS(contract_alagoas_tbl,
-        "spielplatz/bra_hrmis_contract.rds")
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+saveRDS(contract_alagoas_tbl, "spielplatz/bra_hrmis_contract.rds")

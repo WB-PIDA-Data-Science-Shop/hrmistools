@@ -482,19 +482,19 @@ convert_constant_ppp <- function(data, cols) {
   }
 
   # extract CPI in base year (2021) by country
-  base_cpi <- cpi |>
+  base_cpi <- macro_indicators |>
     filter(year == 2021) |>
     select(country_code, cpi) |>
     rename(base_cpi = cpi)
 
   # join and compute using the exact formula
   data_out <- data |>
-    left_join(cpi, by = c("country_code", "year")) |>
+    left_join(macro_indicators, by = c("country_code", "year")) |>
     left_join(base_cpi, by = "country_code") |>
     left_join(
-      ppp |>
+      macro_indicators |>
         filter(year == 2021) |>
-        select(-year) |>
+        select(country_code, ppp) |>
         rename(ppp_2021 = ppp),
       by = "country_code"
     ) |>
@@ -502,7 +502,7 @@ convert_constant_ppp <- function(data, cols) {
       across(
         {{cols}},
         ~ (cpi / base_cpi) * (.x / ppp_2021),
-        .names = "{.col}_ppp"
+        .names = "{sub('_lcu$', '_ppp', .col)}"
       )
     ) |>
     select(-c(ppp_2021, base_cpi))
