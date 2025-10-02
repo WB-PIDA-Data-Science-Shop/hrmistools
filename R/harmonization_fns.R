@@ -102,88 +102,8 @@ vectorize_gt_parallel <- function(vector,
 
 
 
-#' Classify Occupations Using LLM in Parallel
-#'
-#' This function classifies occupation descriptions in a data frame using
-#' a large language model via `mall::llm_vec_classify()`. It splits the
-#' occupations into chunks and runs classification in parallel to speed up
-#' processing. The results are appended to the original data frame, and
-#' optionally written to an Excel file.
-#'
-#' @param data A data frame containing the occupations to classify.
-#' @param occupation_col Character. The name of the column in `data` that contains occupation descriptions.
-#' @param labels A character vector of classification labels to be used by the LLM.
-#' @param additional_prompt Optional character string. An additional prompt to guide the LLM classification.
-#' @param chunk_size Integer. Number of occupations to process per chunk. Default is 200.
-#' @param outfile Optional character string. Path to an Excel file where the classified results will be saved. Default is `NULL` (no file written).
-#' @param workers Integer. Number of parallel workers to use. Default is all available cores minus one.
-#'
-#' @return A data frame identical to `data` with an additional column
-#'   named `<occupation_col>_isconame` containing the predicted classifications.
-#'
-#' @details
-#' - Requires the `dplyr`, `future.apply`, and `writexl` packages.
-#' - Uses `future::plan(multisession)` to run classification in parallel.
-#' - Occupations are split into chunks to avoid overloading the LLM.
-#' - The output Excel file (if specified) contains all original columns plus the classification column.
-#'
-#' @examples
-#' \dontrun{
-#' df <- data.frame(job = c("Software Engineer", "Farmer", "Teacher"))
-#' labels <- c("ISCO-08: 213", "ISCO-08: 611", "ISCO-08: 234")
-#' classified_df <- hrm_classify(
-#'   data = df,
-#'   occupation_col = "job",
-#'   labels = labels,
-#'   chunk_size = 100,
-#'   outfile = "classified_jobs.xlsx"
-#' )
-#' }
-#'
-#' @export
-#'
-hrm_classify <- function(data,
-                         occupation_col,
-                         labels,
-                         additional_prompt = NULL,
-                         chunk_size = 200,
-                         outfile = NULL,
-                         workers = parallel::detectCores() - 1) {
-  # dependencies
-  require(dplyr)
-  require(future.apply)
-  require(writexl)
-
-  # Plan parallel execution
-  future::plan(multisession, workers = workers)
-
-  # Extract the occupation text
-  occupations <- data[[occupation_col]]
-
-  # Split into chunks
-  occupation_chunks <- split(
-    occupations,
-    ceiling(seq_along(occupations) / chunk_size)
-  )
-
-  # Classify in parallel
-  results_list <- future_lapply(
-    occupation_chunks,
-    function(chunk) {
-      mall::llm_vec_classify(
-        x = chunk,
-        labels = labels,
-        additional_prompt = additional_prompt
-      )
-    }
-  )
-
-  # Combine results
-  result_vector <- unlist(results_list, use.names = FALSE)
 
 
-  return(result_vector)
-}
 
 #' A function to identify inconsistent column names across data frames
 #'

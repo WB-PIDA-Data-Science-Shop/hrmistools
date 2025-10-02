@@ -12,7 +12,7 @@ library(furrr)
 library(writexl)
 # library(dlw)
 library(pointblank)
-
+library(labourR)
 
 # read-in data ------------------------------------------------------------
 file_path <- "//egvpi/egvpi/data/harmonization/HRM/BRA/data-raw/6. Wage Bill AL/3. Microdados"
@@ -70,46 +70,81 @@ active_alagoas_tbl |>
   group_by(ANO_PAGAMENTO) |>
   summarize(unique_mtr = length(unique(MATRICULA)), nobs = length(MATRICULA))
 
+### reclassify isco occupations for the contracted or retired workers
+inactive_alagoas_tbl <-
+  inactive_alagoas_tbl |>
+  mutate(CARREIRA = CARGO)
 
 occup_df <-
-  active_alagoas_tbl |>
-  dplyr::select(CARREIRA, CARGO) |>
+  bind_rows(active_alagoas_tbl |>
+              dplyr::select(CARREIRA, CARGO) |>
+              mutate(status = "active"),
+            inactive_alagoas_tbl |>
+              dplyr::select(CARREIRA, CARGO) |>
+              mutate(status = "inactive")) |>
   unique() |>
   mutate(
     occupation_native  = tolower(CARREIRA),
     occupation_english = tolower(vectorize_gt_parallel(vector = CARREIRA,
                                                        source_language = "pt")))
 
-chat <- chat_openai(model = "gpt-4")
 
+# df <-
+#   occup_df |>
+#   mutate(id = 1:n(),
+#          text = occupation_english) |>
+#   dplyr::select(id, text)
+#
+# class_occup_df <-
+#   classify_occupation(corpus = df,
+#                       isco_level = 4,
+#                       lang = "en",
+#                       num_leaves = 5)
 
-
-Sys.time()
-
-labels <- isco$description
-
-prompt_chr <- paste0("You are an expert in labor statistics. ",
-                     "Classify the given occupation into one of the ISCO-08 ",
-                     "4-digit unit group descriptions. Return EXACTLY ",
-                     "one description from the list below, with no extra text ",
-                     "no explanations. Choices: {paste(labels, collapse = ', ')} ",
-                     "Now classify: ")
+class_occup_df <-
+  occup_df |>
+  mutate(id = 1:n(),
+         text = occupation_english) |>
+  dplyr::select(id, text) |>
+  classify_occupation(isco_level = 4,
+                      lang = "en",
+                      num_leaves = 1)
 
 
 occup_df <-
   occup_df |>
-  mutate(occupation_isconame = hrm_classify(data = occup_df,
-                                            occupation_col = "occupation_english",
-                                            labels = labels,
-                                            additional_prompt = prompt_chr,
-                                            chunk_size = 60))
+  mutate(id = 1:n()) |>
+  merge(y = class_occup_df |>
+          dplyr::select(id, iscoGroup),
+        by = "id",
+        all.x = TRUE) |>
+  rename(occupation_iscocode = "iscoGroup") |>
+  merge(isco |>
+          dplyr::select(unit, description) |>
+          rename(occupation_isconame = "description"),
+        by.x = "occupation_iscocode",
+        by.y = "unit",
+        all.x = TRUE) |>
+  as_tibble()
 
-Sys.time()
+## bring the classified occupations to the original data
+active_alagoas_tbl <-
+  active_alagoas_tbl |>
+  merge(occup_df |>
+          dplyr::filter(status == "active" & !is.na(occupation_iscocode)) |>
+          dplyr::select(CARGO, CARREIRA, starts_with("occupation_")),
+        by = c("CARGO", "CARREIRA"),
+        all.x = TRUE) |>
+  as_tibble()
 
-
-
-## lets write to csv and input directly into chatgpt to return the classifications
-write.csv(occup_df, "spielplatz/occup.csv")
+inactive_alagoas_tbl <-
+  inactive_alagoas_tbl |>
+  merge(occup_df |>
+          dplyr::filter(status == "inactive" & !is.na(occupation_iscocode)) |>
+          dplyr::select(CARGO, CARREIRA, starts_with("occupation_")),
+        by = c("CARGO", "CARREIRA"),
+        all.x = TRUE) |>
+  as_tibble()
 
 
 ### first let us figure out how many contracts each person has per year
@@ -132,7 +167,11 @@ contract_alagoas_tbl <-
                                              origin = "1899-12-30"),
                         end_date = NA,
                         paygrade = CLASSE,
-                        level = NIVEL),
+                        seniority = NIVEL,
+                        occupation_native = occupation_native,
+                        occupation_english = occupation_english,
+                        occupation_iscocode = occupation_native,
+                        occupation_isconame = occupation_isconame),
             inactive_alagoas_tbl |>
               transmute(contract_id = MATRICULA,
                         worker_id = CPF,
@@ -152,7 +191,11 @@ contract_alagoas_tbl <-
                         end_date = as.Date(as.integer(DATA_APOSENTADORIA),
                                            origin = "1899-12-30"),
                         paygrade = CLASSE,
-                        level = NIVEL))
+                        seniority = NIVEL,
+                        occupation_native = occupation_native,
+                        occupation_english = occupation_english,
+                        occupation_iscocode = occupation_native,
+                        occupation_isconame = occupation_isconame))
 
 contract_alagoas_tbl <-
   contract_alagoas_tbl %>%
@@ -161,14 +204,14 @@ contract_alagoas_tbl <-
     ~ as.numeric(.)
   ))
 
-contract_alagoas_tbl_clean <-
-  contract_alagoas_tbl |>
-  convert_constant_ppp(
-    ends_with("_lcu")
-  ) |>
-  rename_with(
-    ~ str_replace(., "_lcu", "")
-  )
+# contract_alagoas_tbl_clean <-
+#   contract_alagoas_tbl |>
+#   convert_constant_ppp(
+#     ends_with("_lcu")
+#   ) |>
+#   rename_with(
+#     ~ str_replace(., "_lcu", "")
+#   )
 
 ### include cpi, ppp and temporal and spatial pricing data for Brazil
 # year_list <-
@@ -177,15 +220,15 @@ contract_alagoas_tbl_clean <-
 #   unique()
 
 ### include the ppp values
-contract_alagoas_tbl_clean <-
-  contract_alagoas_tbl_clean |>
-  merge(ppp |>
-          dplyr::filter(country_code == "BRA" &
-                        year >= min(contract_alagoas_tbl_clean$year) &
-                        year <= max(contract_alagoas_tbl_clean$year)),
-        by = c("country_code", "year"),
-        all.x = TRUE) |>
-  as_tibble()
+# contract_alagoas_tbl_clean <-
+#   contract_alagoas_tbl_clean |>
+#   merge(ppp |>
+#           dplyr::filter(country_code == "BRA" &
+#                         year >= min(contract_alagoas_tbl_clean$year) &
+#                         year <= max(contract_alagoas_tbl_clean$year)),
+#         by = c("country_code", "year"),
+#         all.x = TRUE) |>
+#   as_tibble()
 
 
 qualitycheck_contractmod(contract_tbl = contract_alagoas_tbl)
