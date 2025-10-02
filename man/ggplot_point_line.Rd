@@ -15,6 +15,8 @@ ggplot_point_line(data, x, y, group = NULL, ...)
 
 \item{group}{Column specifying the grouping variable.
 This will be mapped to color.}
+
+\item{...}{Any other arguments passed to aes().}
 }
 \value{
 A \code{ggplot} object representing the grouped line chart.

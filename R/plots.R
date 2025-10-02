@@ -8,6 +8,7 @@
 #' @param y Column to be mapped to the y-axis.
 #' @param group Column specifying the grouping variable.
 #'   This will be mapped to color.
+#' @param ... Any other arguments passed to aes().
 #'
 #' @return A \code{ggplot} object representing the grouped line chart.
 #'

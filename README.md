@@ -2,6 +2,7 @@
 # hrmistools
 
 <!-- badges: start -->
+[![R-CMD-check](https://github.com/WB-PIDA-Data-Science-Shop/hrmistools/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/WB-PIDA-Data-Science-Shop/hrmistools/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
 The goal of hrmistools is to ...

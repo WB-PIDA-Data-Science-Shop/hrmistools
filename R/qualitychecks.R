@@ -200,7 +200,7 @@ qualitycheck_worker <- function(worker_tbl){
 #'
 #' @examples
 #' x <- c(1, 2, 2, 3, 4, 5, 100)
-#' compute_outlier_flag(x)
+#' flag_outlier(x)
 #' # Returns TRUE only for the value 100
 #'
 #' @export
