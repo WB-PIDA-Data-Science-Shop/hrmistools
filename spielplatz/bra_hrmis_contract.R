@@ -89,18 +89,6 @@ occup_df <-
                                                        source_language = "pt")))
 
 
-# df <-
-#   occup_df |>
-#   mutate(id = 1:n(),
-#          text = occupation_english) |>
-#   dplyr::select(id, text)
-#
-# class_occup_df <-
-#   classify_occupation(corpus = df,
-#                       isco_level = 4,
-#                       lang = "en",
-#                       num_leaves = 5)
-
 class_occup_df <-
   occup_df |>
   mutate(id = 1:n(),
@@ -170,7 +158,7 @@ contract_alagoas_tbl <-
                         seniority = NIVEL,
                         occupation_native = occupation_native,
                         occupation_english = occupation_english,
-                        occupation_iscocode = occupation_native,
+                        occupation_iscocode = occupation_iscocode,
                         occupation_isconame = occupation_isconame),
             inactive_alagoas_tbl |>
               transmute(contract_id = MATRICULA,
@@ -194,7 +182,7 @@ contract_alagoas_tbl <-
                         seniority = NIVEL,
                         occupation_native = occupation_native,
                         occupation_english = occupation_english,
-                        occupation_iscocode = occupation_native,
+                        occupation_iscocode = occupation_iscocode,
                         occupation_isconame = occupation_isconame))
 
 contract_alagoas_tbl <-
@@ -203,32 +191,6 @@ contract_alagoas_tbl <-
     c(base_salary_lcu, gross_salary_lcu, net_salary_lcu, whours),
     ~ as.numeric(.)
   ))
-
-# contract_alagoas_tbl_clean <-
-#   contract_alagoas_tbl |>
-#   convert_constant_ppp(
-#     ends_with("_lcu")
-#   ) |>
-#   rename_with(
-#     ~ str_replace(., "_lcu", "")
-#   )
-
-### include cpi, ppp and temporal and spatial pricing data for Brazil
-# year_list <-
-#   contract_alagoas_tbl[["start_date"]] |>
-#   lubridate::year() |>
-#   unique()
-
-### include the ppp values
-# contract_alagoas_tbl_clean <-
-#   contract_alagoas_tbl_clean |>
-#   merge(ppp |>
-#           dplyr::filter(country_code == "BRA" &
-#                         year >= min(contract_alagoas_tbl_clean$year) &
-#                         year <= max(contract_alagoas_tbl_clean$year)),
-#         by = c("country_code", "year"),
-#         all.x = TRUE) |>
-#   as_tibble()
 
 
 qualitycheck_contractmod(contract_tbl = contract_alagoas_tbl)
