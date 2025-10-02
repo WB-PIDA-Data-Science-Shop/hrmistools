@@ -2,39 +2,36 @@
 % Please edit documentation in R/harmonization_fns.R
 \name{convert_constant_ppp}
 \alias{convert_constant_ppp}
-\title{Convert nominal wages to real PPP-adjusted wages (2017 base year)}
+\title{Convert nominal wages to real PPP-adjusted wages (2021 base year)}
 \usage{
 convert_constant_ppp(data, cols)
 }
 \arguments{
-\item{df}{Data frame with columns (country_code, year, wage).}
+\item{data}{Data frame with columns (country_code, year, wage).}
 
-\item{wage_col}{Column name to convert to constant PPP.}
-
-\item{cpi}{Data frame with columns (country_code, year, cpi).}
-
-\item{ppp}{Data frame with columns (country_code, ppp).}
+\item{cols}{Column name to convert to constant PPP in international 2021 dollars.}
 }
 \value{
-`df` augmented with `real_wage_ppp` column (2017 PPP$).
+`data_out` augmented with columns converted to international 2021 dollars.
 }
 \description{
 Convert nominal wages (LCU at survey-year prices) into real wages expressed
-in 2017 PPP international dollars using:
-\deqn{Real_{h}^{PPP} = (CPI_t / CPI_{2017}) * (Nominal_{h,t} / PPP_{2017})}
+in 2021 PPP international dollars using:
+\deqn{Real_{h}^{PPP} = (CPI_t / CPI_{2021}) * (Nominal_{h,t} / PPP_{2021})}
 }
 \details{
 Assumes
-- `df` has columns: country_code, year, wage
+- `data` has columns: country_code, year, wage
 - `cpi` has columns: country_code, year, cpi
-- `ppp` has columns: country_code, ppp  (ppp = LCU per 2017 Intl$)
+- `ppp` has columns: country_code, ppp  (ppp = LCU per 2021 Intl$)
 }
 \examples{
 library(tibble)
-hh <- tibble::tibble(country_code = c("A","A"), year = c(2010,2017),
+hh <- tibble(country_code = c("A","A"), year = c(2010, 2021),
                      wage = c(20000, 25000))
-cpi <- tibble::tibble(country_code = "A", year = c(2010,2017), cpi = c(85,100))
-ppp <- tibble::tibble(country_code = "A", ppp = 3.5)
-convert_constant_ppp(hh, cpi, ppp)
+cpi <- tibble(country_code = "A", year = c(2010,2021), cpi = c(85,100))
+ppp <- tibble(country_code = "A", year = 2021, ppp = 3.5)
+
+convert_constant_ppp(hh, wage)
 
 }
