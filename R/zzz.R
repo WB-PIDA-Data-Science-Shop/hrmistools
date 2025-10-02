@@ -4,5 +4,6 @@ utils::globalVariables(c(
   "net_salary_lcu", "whours", "cpi", "year", "ppp", "ppp_2017",
   "REF_AREA", "TIME_PERIOD", "OBS_VALUE", "INDICATOR", "n_records",
   "ref_date", "birth_date", "na.omit", "multisession", "plan",
-  "ppp_2021"
+  "ppp_2021", "occupation_isconame", "occupation_iscocode",
+  "occupation_native", "occupation_english", "country_name"
 ))
