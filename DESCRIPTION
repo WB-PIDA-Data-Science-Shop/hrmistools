@@ -24,7 +24,8 @@ Imports:
     httr,
     janitor,
     jsonlite,
-    future.apply
+    future.apply,
+    lubridate
 RoxygenNote: 7.3.2
 Suggests: 
     testthat (>= 3.0.0)

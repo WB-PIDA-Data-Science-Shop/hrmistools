@@ -3,82 +3,54 @@
 \docType{data}
 \name{isco}
 \alias{isco}
-\title{International Standard Classification of Occupations}
+\title{International Standard Classification of Occupations (ISCO-08)}
 \format{
-A data frame with 619 rows and 8 variables:
-\describe{
-  \item{\code{level}}{character Level of occupation: (1) Major Group, (2) Sub-Major Group, (3) Minor Group, (4) Unit Group}
-  \item{\code{isco_08_code}}{character Occupation code}
-  \item{\code{title_en}}{character Title in English}
-  \item{\code{definition}}{character Definition}
-  \item{\code{tasks_include}}{character Tasks included}
-  \item{\code{included_occupations}}{character Included occupations}
-  \item{\code{excluded_occupations}}{character Excluded occupations}
-  \item{\code{notes}}{character Notes}
-}
-
 A data frame with 436 rows and 9 variables:
 \describe{
-  \item{ISCO_version}{Character. Version of the ISCO classification (e.g., "ISCO-08").}
+  \item{isco_version}{Character. Version of the ISCO classification (e.g., `"ISCO-08"`).}
   \item{major}{Character. One-digit major group code.}
-  \item{major_label}{Character. Title of the major group (e.g., "Managers").}
-  \item{sub_major}{Integer. Two-digit sub-major group code.}
+  \item{major_label}{Character. Title of the major group (e.g., `"Managers"`).}
+  \item{sub_major}{Character. Two-digit sub-major group code.}
   \item{sub_major_label}{Character. Title of the sub-major group (e.g.,
-  "Chief Executives, Senior Officials and Legislators").}
+  `"Chief Executives, Senior Officials and Legislators"`).}
   \item{minor}{Character. Three-digit minor group code.}
   \item{minor_label}{Character. Title of the minor group (e.g.,
-  "Legislators and Senior Officials").}
+  `"Legislators and Senior Officials"`).}
   \item{unit}{Character. Four-digit unit group code.}
-  \item{description}{Character. Definition of the occupation, following
-  the official ILO ISCO-08 descriptions (e.g., "Legislators",
-  "Senior Government Officials").}
+  \item{description}{Character. Definition or title of the occupation
+  at the unit group level (e.g., `"Legislators"`, `"Senior Government Officials"`).}
 }
 }
 \source{
-<https://ilostat.ilo.org/methods/concepts-and-definitions/classification-occupation/>
-
 International Labour Organization (ILO),
-\url{https://www.ilo.org/public/english/bureau/stat/isco/}.
+\url{https://www.ilo.org/public/english/bureau/stat/isco/}
 }
 \usage{
 isco
-
-isco
 }
 \description{
-The International Classification of Occupations (ISCO) seeks to facilitate international communication about occupations by providing statisticians with a framework to make internationally comparable occupational data available, and by allowing international occupational data to be produced in a form that can be useful for research as well as for specific decision-making and action-oriented activities. The current version, known as ISCO-08, was published in 2008 and is the fourth iteration, following ISCO-58, ISCO-68 and ISCO-88.
-
-A dataset containing the structure and definitions of the International
+A dataset containing the structure of the International
 Standard Classification of Occupations (ISCO-08), as published by the
 International Labour Organization (ILO).
 }
 \details{
 The ISCO provides a system for classifying and aggregating occupational
-information in order to facilitate international comparisons and
-harmonization of occupational statistics. It is widely used in labor
-statistics, survey design, and for policy analysis.
+information to facilitate international comparisons and harmonization of
+occupational statistics. It is widely used in labor statistics, survey design,
+and policy analysis.
 
 
-According to the ILO:
+ISCO-08 is structured hierarchically:
+- \strong{Major groups} (1 digit) – broad occupational categories
+- \strong{Sub-major groups} (2 digits) – subdivisions of major groups
+- \strong{Minor groups} (3 digits) – subdivisions of sub-major groups
+- \strong{Unit groups} (4 digits) – most detailed level, individual occupations
 
-*ISCO is designed for international comparability of occupational
-statistics and for classification of jobs in censuses, household surveys,
-and administrative records. ISCO-08 is structured hierarchically with:*
-
-- \strong{Major groups} (1 digit) – broad occupational categories such as
-  "Professionals" or "Service and Sales Workers".
-- \strong{Sub-major groups} (2 digits) – more detailed categories that
-  subdivide major groups.
-- \strong{Minor groups} (3 digits) – further disaggregation of sub-major groups.
-- \strong{Unit groups} (4 digits) – the most detailed level, specifying
-  occupations with similar tasks and duties.
-
-Each unit group includes a definition outlining the tasks and duties that
-characterize that occupation, as provided by the ILO ISCO documentation.
+Each unit group includes a description outlining the scope of the occupation
+according to ILO’s ISCO-08 documentation.
 }
 \examples{
 data(isco)
 head(isco)
-
 }
 \keyword{datasets}

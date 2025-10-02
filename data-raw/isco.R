@@ -3,6 +3,8 @@
 # library(janitor)
 # library(readxl)
 library(dplyr)
+library(readr)
+library(janitor)
 
 # isco_url <- "https://www.ilo.org/ilostat-files/ISCO/newdocs-08-2021/ISCO-08/ISCO-08%20EN%20Structure%20and%20definitions.xlsx"
 # isco_path <- file.path(tempdir(), "isco.xlsx")
@@ -22,8 +24,9 @@ library(dplyr)
 #   clean_names()
 
 isco <-
-  read.csv("https://www.ilo.org/ilostat-files/Documents/ISCO.csv") |>
+  read_csv("https://www.ilo.org/ilostat-files/Documents/ISCO.csv") |>
   as_tibble() |>
-  filter(ISCO_version == "ISCO-08")
+  filter(ISCO_version == "ISCO-08") |>
+  clean_names()
 
 usethis::use_data(isco, overwrite = TRUE)

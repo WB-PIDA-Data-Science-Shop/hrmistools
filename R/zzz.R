@@ -3,5 +3,6 @@ utils::globalVariables(c(
   "start_date", "end_date", "base_salary_lcu", "gross_salary_lcu",
   "net_salary_lcu", "whours", "cpi", "year", "ppp", "ppp_2017",
   "REF_AREA", "TIME_PERIOD", "OBS_VALUE", "INDICATOR", "n_records",
-  "ref_date", "birth_date"
+  "ref_date", "birth_date", "na.omit", "multisession", "plan",
+  "ppp_2021"
 ))
