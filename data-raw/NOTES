@@ -50,10 +50,8 @@ Variable Definitions
       - Organization ID (org_id)
       - Timestamp (org_date)
       - Compensation (base_salary, gross_salary, net_salary)
-      - cpi (consumer price index)
-      - ppp (purchasing power parity)
       - Modality of Contract (short-term, open-term, permanent) (contract_type)
-      - Occupation Code (ISCO) (occupation_code)
+      - Occupation (occupation_native, occupation_english, occupation_isconame, occupation_iscocode)
       - Start Date (start_date)
       - End Date (end_date)
       - Country Code, country_code
@@ -61,6 +59,8 @@ Variable Definitions
       - Administration 1 Name, adm1_name
       - Administration 1 Code, adm1_code
       - Hours worked (whours)
+      - paygrade
+      - seniority
 
 
 ** Analytics of interest:
