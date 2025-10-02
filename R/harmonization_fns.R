@@ -175,7 +175,7 @@ find_duplicate_ids <- function(data, identifier) {
 #' This function takes a factor vector of education levels and returns
 #' the lowest (minimum) level present. If all values are `NA` or empty,
 #' it returns `NA`. It is useful for collapsing multiple education
-#' responses for an individual into a single representative value.
+#' responses for an individual into a single value.
 #'
 #' @param educat A factor vector representing education levels.
 #'   Factor levels should be ordered from lowest to highest.

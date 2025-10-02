@@ -239,19 +239,20 @@ worker_active <- worker_active |>
 worker_module <- worker_active |>
   group_by(worker_id, ref_date) |>
   summarise(
-    birth_date = case_when(
-      birth_date <= as_date("2010-01-01") ~ min(birth_date),
-      TRUE ~ NA_Date_
-    ),
+    # birth_date = case_when(
+    #   birth_date <= as_date("2010-01-01") ~ min(birth_date),
+    #   TRUE ~ NA_Date_
+    # ),
     educat7 = dedup_education(educat7),
     .groups = "drop"
   )
 
-#
+# deduplicate gender
 worker_module_gender <- worker_active |>
   dedup_value_panel(
     gender,
-    worker_id, ref_date
+    worker_id,
+    ref_date
   )
 
 # if the number of rows for both match, left join
@@ -277,6 +278,6 @@ worker_module_clean <- worker_module |>
 
 worker_module_clean |>
   write_rds(
-    here("data", "bra", "bra_hrmis_worker.rds"),
+    here("inst", "extdata", "bra_hrmis_worker.rds"),
     compress = "gz"
   )
