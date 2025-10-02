@@ -20,11 +20,10 @@ Imports:
     stringr,
     tidyr,
     countrycode,
+    glue,
     httr,
     janitor,
-    jsonlite,
-    glue,
-    stats
+    jsonlite
 RoxygenNote: 7.3.2
 Suggests: 
     testthat (>= 3.0.0)
