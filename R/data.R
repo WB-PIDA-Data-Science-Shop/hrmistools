@@ -1,20 +1,3 @@
-#' @title International Standard Classification of Occupations
-#' @description The International Classification of Occupations (ISCO) seeks to facilitate international communication about occupations by providing statisticians with a framework to make internationally comparable occupational data available, and by allowing international occupational data to be produced in a form that can be useful for research as well as for specific decision-making and action-oriented activities. The current version, known as ISCO-08, was published in 2008 and is the fourth iteration, following ISCO-58, ISCO-68 and ISCO-88.
-#' @format A data frame with 619 rows and 8 variables:
-#' \describe{
-#'   \item{\code{level}}{character Level of occupation: (1) Major Group, (2) Sub-Major Group, (3) Minor Group, (4) Unit Group}
-#'   \item{\code{isco_08_code}}{character Occupation code}
-#'   \item{\code{title_en}}{character Title in English}
-#'   \item{\code{definition}}{character Definition}
-#'   \item{\code{tasks_include}}{character Tasks included}
-#'   \item{\code{included_occupations}}{character Included occupations}
-#'   \item{\code{excluded_occupations}}{character Excluded occupations}
-#'   \item{\code{notes}}{character Notes}
-#'}
-#' @source <https://ilostat.ilo.org/methods/concepts-and-definitions/classification-occupation/>
-"isco"
-
-
 #' World Bank Country and Lending Groups
 #'
 #' This dataset is produced by the World Bank Group to classify countries as to their income levels and other groups.
@@ -79,7 +62,7 @@
 #'
 #' @format A data frame with 436 rows and 9 variables:
 #' \describe{
-#'   \item{ISCO_version}{Character. Version of the ISCO classification (e.g., "ISCO-08").}
+#'   \item{isco_version}{Character. Version of the ISCO classification (e.g., "ISCO-08").}
 #'   \item{major}{Character. One-digit major group code.}
 #'   \item{major_label}{Character. Title of the major group (e.g., "Managers").}
 #'   \item{sub_major}{Integer. Two-digit sub-major group code.}

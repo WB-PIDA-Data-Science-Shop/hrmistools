@@ -76,6 +76,7 @@ vectorize_gt <- function(vector,
 #'
 #' @import polyglotr
 #' @importFrom future.apply future_lapply
+#' @importFrom future plan multisession
 #' @export
 
 
@@ -84,7 +85,7 @@ vectorize_gt_parallel <- function(vector,
                                   source_language,
                                   workers = 4,
                                   chunk_size = 50) {
-  plan(multisession, workers = workers)
+  future::plan(future::multisession, workers = workers)
 
   chunks <- split(vector, ceiling(seq_along(vector) / chunk_size))
 
@@ -99,11 +100,6 @@ vectorize_gt_parallel <- function(vector,
   unlist(res, use.names = FALSE)
 
 }
-
-
-
-
-
 
 #' A function to identify inconsistent column names across data frames
 #'
