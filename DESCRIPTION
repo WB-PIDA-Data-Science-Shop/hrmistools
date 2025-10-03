@@ -23,7 +23,11 @@ Imports:
     glue,
     httr,
     janitor,
-    jsonlite
+    jsonlite,
+    lubridate,
+    future.apply,
+    future,
+    ggplot2
 RoxygenNote: 7.3.2
 Suggests: 
     testthat (>= 3.0.0)

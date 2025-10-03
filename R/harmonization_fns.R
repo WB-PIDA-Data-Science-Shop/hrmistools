@@ -39,6 +39,68 @@ vectorize_gt <- function(vector,
   return(trans_obj)
 }
 
+
+#' Parallelized Google Translate Wrapper
+#'
+#' This function wraps `polyglotr::google_translate()` and adds support for
+#' parallel processing. The input vector is split into chunks, which are
+#' translated in parallel using `future.apply::future_lapply()`. This can be
+#' useful for large vectors or when API rate limits allow concurrent requests.
+#'
+#' @param vector Character vector to be translated.
+#' @param target_language Two-letter ISO language code for the translation target.
+#'   Defaults to `"en"`.
+#' @param source_language Two-letter ISO language code for the translation source.
+#'   Required.
+#' @param workers Integer. Number of parallel workers to use. Defaults to `4`.
+#' @param chunk_size Integer. Number of elements in each chunk (batch) to send per
+#'   request. Defaults to `50`.
+#'
+#' @return A character vector of translated text, in the same order as the input.
+#'
+#' @details
+#' The function splits the input vector into chunks of size `chunk_size` and
+#' sends each chunk to `polyglotr::google_translate()`. Each chunk is translated
+#' in parallel across `workers` processes. This approach reduces API overhead
+#' compared to sending one request per element.
+#'
+#' Note: Using parallel workers will open multiple sessions. Be mindful of API
+#' usage limits or quotas when increasing `workers`.
+#'
+#' @examples
+#' \dontrun{
+#' # Translate a few Spanish phrases into English in parallel
+#' phrases <- c("hola", "buenos días", "¿cómo estás?")
+#' vectorize_gt_parallel(phrases, target_language = "en", source_language = "es")
+#' }
+#'
+#' @import polyglotr
+#' @importFrom future.apply future_lapply
+#' @importFrom future plan multisession
+#' @export
+
+
+vectorize_gt_parallel <- function(vector,
+                                  target_language = "en",
+                                  source_language,
+                                  workers = 4,
+                                  chunk_size = 50) {
+  future::plan(future::multisession, workers = workers)
+
+  chunks <- split(vector, ceiling(seq_along(vector) / chunk_size))
+
+  res <- future.apply::future_lapply(chunks, function(chunk) {
+    google_translate(
+      text = chunk,
+      target_language = target_language,
+      source_language = source_language
+    )
+  }, future.seed = TRUE)
+
+  unlist(res, use.names = FALSE)
+
+}
+
 #' A function to identify inconsistent column names across data frames
 #'
 #' This function checks for consistency in column names across a list of data frames.
@@ -175,7 +237,7 @@ find_duplicate_ids <- function(data, identifier) {
 #' This function takes a factor vector of education levels and returns
 #' the lowest (minimum) level present. If all values are `NA` or empty,
 #' it returns `NA`. It is useful for collapsing multiple education
-#' responses for an individual into a single representative value.
+#' responses for an individual into a single value.
 #'
 #' @param educat A factor vector representing education levels.
 #'   Factor levels should be ordered from lowest to highest.
@@ -397,20 +459,27 @@ complete_columns <- function(data, cols) {
 #'
 #' @param data Data frame with columns (country_code, year, wage).
 #' @param cols Column name to convert to constant PPP in international 2021 dollars.
+#' @param macro_indicators Macroeconomic indicators, can be lazy loaded.
 #' @return `data_out` augmented with columns converted to international 2021 dollars.
 #' @examples
 #' library(tibble)
-#' hh <- tibble(country_code = c("A","A"), year = c(2010, 2021),
-#'                      wage = c(20000, 25000))
-#' cpi <- tibble(country_code = "A", year = c(2010,2021), cpi = c(85,100))
-#' ppp <- tibble(country_code = "A", year = 2021, ppp = 3.5)
+#' hh <- tibble(
+#'   country_code = c("A","A"),
+#'   year = c("2010", "2021"),
+#'   wage = c(20000, 25000)
+#' )
 #'
-#' convert_constant_ppp(hh, wage)
+#' macro_indicators <- tibble(
+#'   country_code = "A", year = "2010", "2021",
+#'   cpi = c(85, 100), ppp = c(1.5, 3.5)
+#' )
+#'
+#' convert_constant_ppp(hh, wage, macro_indicators)
 #'
 #' @importFrom dplyr filter select rename left_join mutate
 #' @import glue
 #' @export
-convert_constant_ppp <- function(data, cols) {
+convert_constant_ppp <- function(data, cols, macro_indicators) {
 
   ## Basic input checks
   required_df  <- c("country_code", "year")
@@ -420,19 +489,19 @@ convert_constant_ppp <- function(data, cols) {
   }
 
   # extract CPI in base year (2021) by country
-  base_cpi <- cpi |>
+  base_cpi <- macro_indicators |>
     filter(year == 2021) |>
     select(country_code, cpi) |>
     rename(base_cpi = cpi)
 
   # join and compute using the exact formula
   data_out <- data |>
-    left_join(cpi, by = c("country_code", "year")) |>
+    left_join(macro_indicators, by = c("country_code", "year")) |>
     left_join(base_cpi, by = "country_code") |>
     left_join(
-      ppp |>
+      macro_indicators |>
         filter(year == 2021) |>
-        select(-year) |>
+        select(country_code, ppp) |>
         rename(ppp_2021 = ppp),
       by = "country_code"
     ) |>
@@ -440,7 +509,7 @@ convert_constant_ppp <- function(data, cols) {
       across(
         {{cols}},
         ~ (cpi / base_cpi) * (.x / ppp_2021),
-        .names = "{.col}_ppp"
+        .names = "{sub('_lcu$', '_ppp', .col)}"
       )
     ) |>
     select(-c(ppp_2021, base_cpi))

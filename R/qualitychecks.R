@@ -108,7 +108,7 @@ qualitycheck_contractmod <- function(contract_tbl,
 #' @export
 #'
 #' @import dplyr pointblank countrycode
-#'
+#' @importFrom stats na.omit
 #'
 qualitycheck_orgmod <- function(org_tbl) {
 
@@ -141,6 +141,17 @@ qualitycheck_orgmod <- function(org_tbl) {
   return(agent)
 }
 
+#' Quality Check for Harmonized Worker Module
+#'
+#' @param worker_tbl A data.frame or tibble containing the harmonized worker module
+#'
+#' @return A pointblank agent object
+#' @export
+#'
+#' @import dplyr pointblank countrycode
+#' @importFrom stats na.omit
+#' @importFrom lubridate as_date
+#'
 qualitycheck_worker <- function(worker_tbl){
 
   required_vars <- c(
@@ -176,3 +187,31 @@ qualitycheck_worker <- function(worker_tbl){
 
   agent %>% interrogate()
 }
+
+#' Flag outliers based on the IQR rule
+#'
+#' This function flags values in a numeric vector as outliers if they
+#' fall below Q1 - 1.5 * IQR or above Q3 + 1.5 * IQR.
+#'
+#' @param x A numeric vector.
+#'
+#' @return A logical vector of the same length as `x`, where `TRUE`
+#'   indicates the observation is an outlier.
+#'
+#' @examples
+#' x <- c(1, 2, 2, 3, 4, 5, 100)
+#' flag_outlier(x)
+#' # Returns TRUE only for the value 100
+#'
+#' @export
+flag_outlier <- function(x) {
+  q1 <- quantile(x, 0.25, na.rm = TRUE)
+  q3 <- quantile(x, 0.75, na.rm = TRUE)
+  iqr <- q3 - q1
+
+  lower <- q1 - (1.5 * iqr)
+  upper <- q3 + (1.5 * iqr)
+
+  x < lower | x > upper
+}
+
