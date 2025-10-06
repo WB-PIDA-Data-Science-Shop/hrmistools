@@ -15,12 +15,6 @@ library(labourR)
 
 # read-in data ------------------------------------------------------------
 file_path <- "//egvpi/egvpi/data/harmonization/HRM/BRA/data-raw/6. Wage Bill AL/3. Microdados"
-#
-# token_chr <- readLines("spielplatz/dlw_token.txt")
-#
-# dlw_set_token(token_chr)
-#
-# gmdsupport_dt <- dlw_get_gmd_support()
 
 plan(multisession, workers = 6)
 

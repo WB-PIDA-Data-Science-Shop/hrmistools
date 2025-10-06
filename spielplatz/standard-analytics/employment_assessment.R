@@ -9,8 +9,10 @@ library(ggplot2)
 library(ggthemes)
 
 theme_set(
-  theme_solarized()
+  theme_clean()
 )
+
+devtools::load_all()
 
 # read-in data ------------------------------------------------------------
 worker <- read_rds(
@@ -21,16 +23,18 @@ contract <- read_rds(
   here("spielplatz", "bra_hrmis_contract.rds")
 )
 
-# analysis ----------------------------------------------------------------
-# 3.6.1. percentage of staff receiving highest performance ratings
-
-# 3.6.2. annual, within-grade pay increases
+# process data ------------------------------------------------------------
 contract_ppp <- contract |>
   convert_constant_ppp(
     ends_with("lcu"),
     macro_indicators
   )
 
+# analysis ----------------------------------------------------------------
+# 3.6.1. percentage of staff receiving highest performance ratings
+# N/A
+
+# 3.6.2. annual, within-grade pay increases
 contract_ppp |>
   filter(
     paygrade %in% seq(1, 4, 1)
@@ -83,7 +87,12 @@ contract_ppp |>
   ) |>
   ggplot_point_line(
     year,
-    pct_change
+    pct_change,
+    label = round(pct_change, 1)
+  ) +
+  geom_hline(
+    yintercept = 0,
+    linetype = "dashed"
   ) +
   scale_color_brewer(
     name = "Paygrade", palette = "Paired"
@@ -97,6 +106,9 @@ contract_ppp |>
   facet_wrap(
     vars(paygrade)
   ) +
+  coord_cartesian(
+    ylim = c(-10, 40)
+  ) +
   labs(
     x = "Year",
     y = "Annual Change (%)",
@@ -104,6 +116,7 @@ contract_ppp |>
   )
 
 # 3.6.3. percentage of staff receiving a performance bonus
+# n/a: no data on allowances for performance
 
 # 3.6.4. performance bonus as a percentage of basic pay
 
