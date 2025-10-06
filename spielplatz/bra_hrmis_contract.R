@@ -190,7 +190,7 @@ contract_alagoas_tbl <-
 contract_alagoas_tbl <-
   contract_alagoas_tbl %>%
   mutate(across(
-    c(base_salary_lcu, gross_salary_lcu, net_salary_lcu, whours),
+    c(ends_with("_lcu"), whours),
     ~ as.numeric(.)
   ))
 

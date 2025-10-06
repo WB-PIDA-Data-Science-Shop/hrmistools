@@ -116,7 +116,35 @@ contract_ppp |>
   )
 
 # 3.6.3. percentage of staff receiving a performance bonus
-# n/a: no data on allowances for performance
+performance_bonus_worker <- contract |>
+  filter(
+    !is.na(allowance_lcu)
+  ) |>
+  group_by(year) |>
+  summarise(
+    total_performance = n_distinct(worker_id)
+  )
+
+contract |>
+  group_by(year) |>
+  summarise(
+    total = n_distinct(worker_id)
+  ) |>
+  left_join(
+    performance_bonus_worker,
+    by = "year"
+  ) |>
+  mutate(
+    year = as.numeric(year),
+    share_performance = total_performance/total
+  ) |>
+  ggplot_point_line(
+    year,
+    share_performance
+  ) +
+  scale_y_continuous(
+    labels = scales::percent_format()
+  )
 
 # 3.6.4. performance bonus as a percentage of basic pay
 # n/a: no data on allowances for performance
