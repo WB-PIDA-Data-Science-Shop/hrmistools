@@ -7,6 +7,7 @@
 
 library(dplyr)
 library(readxl)
+library(readr)
 library(purrr)
 library(furrr)
 library(writexl)
@@ -155,6 +156,7 @@ contract_alagoas_tbl <-
         base_salary_lcu = SALARIO_BASE,
         gross_salary_lcu = SALARIO_BRUTO,
         net_salary_lcu = SALARIO_LIQUIDO,
+        allowance_lcu = ABONO_PERMANENCIA,
         spdef = NA,
         whours = as.numeric(JORNADA),
         country_code = "BRA",
@@ -174,6 +176,7 @@ contract_alagoas_tbl <-
         base_salary_lcu = NA,
         gross_salary_lcu = VALOR_BRUTO,
         net_salary_lcu = VALOR_LIQUIDO,
+        allowance_lcu = NA,
         spdef = NA,
         whours = 0,
         country_code = "BRA",
@@ -194,4 +197,6 @@ contract_alagoas_tbl <-
 
 qualitycheck_contractmod(contract_tbl = contract_alagoas_tbl)
 
-saveRDS(contract_alagoas_tbl, "spielplatz/bra_hrmis_contract.rds")
+save_rds(
+  contract_alagoas_tbl, "spielplatz/bra_hrmis_contract.rds"
+)

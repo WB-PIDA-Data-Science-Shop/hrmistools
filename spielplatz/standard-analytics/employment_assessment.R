@@ -119,6 +119,7 @@ contract_ppp |>
 # n/a: no data on allowances for performance
 
 # 3.6.4. performance bonus as a percentage of basic pay
+# n/a: no data on allowances for performance
 
 # 3.6.6. hardship allowance and percentage of staff receiving it
-
+# n/a: no data on hardship available
