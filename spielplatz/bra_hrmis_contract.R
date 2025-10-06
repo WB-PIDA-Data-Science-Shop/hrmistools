@@ -7,7 +7,6 @@
 
 library(dplyr)
 library(readxl)
-library(readr)
 library(purrr)
 library(furrr)
 library(writexl)
@@ -197,6 +196,6 @@ contract_alagoas_tbl <-
 
 qualitycheck_contractmod(contract_tbl = contract_alagoas_tbl)
 
-save_rds(
+saveRDS(
   contract_alagoas_tbl, "spielplatz/bra_hrmis_contract.rds"
 )

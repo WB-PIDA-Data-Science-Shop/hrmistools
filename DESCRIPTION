@@ -27,7 +27,8 @@ Imports:
     lubridate,
     future.apply,
     future,
-    ggplot2
+    ggplot2,
+    ggrepel
 RoxygenNote: 7.3.2
 Suggests: 
     testthat (>= 3.0.0)
