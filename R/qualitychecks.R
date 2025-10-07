@@ -22,7 +22,11 @@ qualitycheck_contractmod <- function(contract_tbl,
     required_vars <- c(
       "contract_id", "worker_id", "org_id", "org_date",
       "base_salary_lcu", "gross_salary_lcu", "net_salary_lcu",
-      "whours", "country_code", "start_date", "end_date"
+      "whours", "country_code", "start_date", "end_date",
+      "occupation_native", "occupation_english", "year",
+      "occupation_iscocode", "occupation_isconame",
+      "country_name", "adm1_name", "adm1_code", "paygrade",
+      "seniority"
     )
   }
 
@@ -61,37 +65,65 @@ qualitycheck_contractmod <- function(contract_tbl,
 
   al <- action_levels(warn_at = 1)
 
+  isco <-
+    isco %>%
+    dplyr::mutate(across(where(is.character),
+                         ~iconv(.x, from = "", to = "UTF-8", sub = "")))
+
   # Create pointblank agent and run checks
   agent <-
     contract_tbl %>%
     create_agent(label = "QCheck for Contract Module",
                  actions = al) %>%
     # Column existence
-    col_exists(vars(!!!syms(required_vars))) %>%
+    col_exists(label = "All required columns are present",
+               vars(!!!syms(required_vars))) %>%
     # contract data should be unique at the contract id level for each year of data
-    rows_distinct(columns = c(contract_id, org_date)) %>%
+    rows_distinct(label = "Unique at the contract-year level",
+                  columns = c(contract_id, org_date)) %>%
     # Type checks
-    col_is_character(vars(contract_id, worker_id, org_id, country_code)) %>%
-    col_is_date(vars(org_date, start_date, end_date)) %>%
-    col_is_numeric(columns = c(base_salary_lcu,
+    col_is_character(label = "Character variables are the correct type",
+                     vars(contract_id, worker_id, org_id, country_code,
+                          occupation_isconame, occupation_iscocode,
+                          occupation_native, occupation_english,
+                          country_name)) %>%
+    col_is_date(label = "Date variables are the appropriate type",
+                vars(org_date, start_date, end_date)) %>%
+    col_is_numeric(label = "Numeric variables are the right class",
+                   columns = c(base_salary_lcu,
                                gross_salary_lcu,
                                net_salary_lcu,
                                whours)) %>%
     #### logical salary checks
-    col_vals_between(base_salary_lcu,
+    col_vals_between(label = "Base salary is within the expected range",
+                     base_salary_lcu,
                      left = bounds_list$base_salary_lcu$lower,
                      right = bounds_list$base_salary_lcu$upper) %>%
-    col_vals_between(gross_salary_lcu,
+    col_vals_between(label = "Gross salary is within the expected range",
+                     gross_salary_lcu,
                      left = bounds_list$gross_salary_lcu$lower,
                      right = bounds_list$gross_salary_lcu$upper) %>%
-    col_vals_between(net_salary_lcu,
+    col_vals_between(label = "Net salary is within the expected range",
+                     net_salary_lcu,
                      left = bounds_list$net_salary_lcu$lower,
                      right = bounds_list$net_salary_lcu$upper) %>%
-    col_vals_lte(whours, value = 60) %>%
-    col_vals_gte(whours, value = 0) %>%
+    col_vals_lte(label = "Hours worked is less than 60",
+                 whours, value = 60) %>%
+    col_vals_gte(label = "Hours worked is greater than 0",
+                 whours, value = 0) %>%
     # ISO3 country code format
-    col_vals_regex(columns = vars(country_code),
+    col_vals_regex(label = "Country Code is the 3 letters",
+                   columns = vars(country_code),
                    regex = "^[A-Z]{3}$") %>%
+    # check isco names and isco codes are part of the official ISCO classifications
+    col_vals_in_set(label = "All `occupation_isconame` values are valid",
+                    columns = vars(occupation_isconame),
+                    preconditions = ~ . %>% dplyr::filter(!is.na(occupation_isconame)),
+                    set = isco$description) %>%
+    col_vals_in_set(label = "All `occupation_iscocode` values are valid",
+                    columns = vars(occupation_iscocode),
+                    preconditions = ~ . %>% dplyr::filter(!is.na(occupation_iscocode)),
+                    set = isco$unit) %>%
     interrogate()
 
   # Return agent and summary
@@ -141,17 +173,65 @@ qualitycheck_orgmod <- function(org_tbl) {
   return(agent)
 }
 
-#' Quality Check for Harmonized Worker Module
+#' Quality checks for Worker Module data
 #'
-#' @param worker_tbl A data.frame or tibble containing the harmonized worker module
+#' This function runs a set of data quality checks on a worker dataset
+#' using the \pkg{pointblank} framework. It verifies that all required
+#' columns are present, worker IDs are unique, and that values are valid
+#' and within expected ranges.
 #'
-#' @return A pointblank agent object
-#' @export
+#' @param worker_tbl A data frame or tibble containing worker module data.
+#'   Must include the following columns:
+#'   \itemize{
+#'     \item \code{ref_date} – Reference date
+#'     \item \code{worker_id} – Unique worker identifier
+#'     \item \code{birth_date} – Date of birth
+#'     \item \code{gender} – Gender
+#'     \item \code{educat7} – Education (7-category classification)
+#'     \item \code{tribe} – Tribe
+#'     \item \code{race} – Race
+#'     \item \code{status} – Employment or marital status
+#'   }
 #'
-#' @import dplyr pointblank countrycode
-#' @importFrom stats na.omit
+#' @return A \code{pointblank_agent} object with the results of the
+#'   quality checks, after interrogation.
+#'
+#' @details
+#' The following checks are performed:
+#' \enumerate{
+#'   \item All required columns exist in the input data.
+#'   \item \code{worker_id} is unique for each \code{ref_date}.
+#'   \item Required columns are not missing.
+#'   \item \code{birth_date} falls between 1900-01-01 and 2000-01-01.
+#' }
+#'
+#' The checks use \pkg{pointblank} validation steps and produce warnings
+#' when violations are found.
+#'
 #' @importFrom lubridate as_date
+#' @importFrom pointblank action_levels create_agent col_exists
+#'   rows_distinct col_vals_not_null col_vals_between interrogate
 #'
+#' @examples
+#' \dontrun{
+#' library(dplyr)
+#' test_tbl <- tibble::tibble(
+#'   ref_date = as.Date("2020-01-01") + 0:2,
+#'   worker_id = 1:3,
+#'   birth_date = as.Date(c("1980-01-01", "1990-01-01", "1975-01-01")),
+#'   gender = c("M", "F", "M"),
+#'   educat7 = c("Primary", "Secondary", "Tertiary"),
+#'   tribe = c("A", "B", "C"),
+#'   race = c("X", "Y", "Z"),
+#'   status = c("Employed", "Unemployed", "Employed")
+#' )
+#'
+#' qualitycheck_worker(test_tbl)
+#' }
+#'
+#' @export
+
+
 qualitycheck_worker <- function(worker_tbl){
 
   required_vars <- c(

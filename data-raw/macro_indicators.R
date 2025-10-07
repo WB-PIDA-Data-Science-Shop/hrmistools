@@ -12,20 +12,30 @@ idvar_list <- list(
   "ppp" = "WB_WDI_PA_NUS_PRVT_PP"
 )
 
-macro_indicators <- lapply(X = idvar_list,
+
+
+df <- lapply(X = idvar_list,
              FUN = get_data360_api,
              dataset_id = "WB_WDI") |>
-  Reduce(f = "merge_wrapper") |>
-  as_tibble() |>
-  setNames(c("country_code", "year", names(idvar_list)))
+      Reduce(f = "merge_wrapper") |>
+      as_tibble() |>
+      setNames(c("country_code", "year", names(idvar_list)))
 
-fiscal_balance <- get_data360_api(
-  dataset_id = "WB_MPO",
-  indicator_id = "WB_MPO_GGBALOVRLCD_"
-)
+macro_indicators <- df
+
+rm(df)
 
 macro_indicators <-
   macro_indicators |>
   mutate(across(names(idvar_list), as.numeric))
+
+macro_indicators <-
+  macro_indicators |>
+  mutate(emp_pop = emp_pop_rate * tot_pop)
+
+macro_indicators <-
+  macro_indicators |>
+  mutate(salaried_pop = salaried_rate * emp_pop)
+
 
 usethis::use_data(macro_indicators, overwrite = TRUE)

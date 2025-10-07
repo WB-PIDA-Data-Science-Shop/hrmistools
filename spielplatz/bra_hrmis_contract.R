@@ -74,18 +74,6 @@ occup_df <-
   )
 
 
-# df <-
-#   occup_df |>
-#   mutate(id = 1:n(),
-#          text = occupation_english) |>
-#   dplyr::select(id, text)
-#
-# class_occup_df <-
-#   classify_occupation(corpus = df,
-#                       isco_level = 4,
-#                       lang = "en",
-#                       num_leaves = 5)
-
 class_occup_df <-
   occup_df |>
   mutate(id = 1:n(), text = occupation_english) |>
