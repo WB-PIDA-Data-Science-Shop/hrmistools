@@ -79,3 +79,12 @@ get_data360_api <- function(dataset_id, indicator_id) {
   return(data_360_clean)
 }
 
+get_metadata360 <- function(dataset_id) {
+  base_url <- "https://data360api.worldbank.org/data360/metadata"
+  md_url <- httr::modify_url(base_url,
+                             query = list(DATABASE_ID = dataset_id))
+  res <- httr::GET(md_url)
+  httr::stop_for_status(res)
+  js <- httr::content(res, as = "text", encoding = "UTF-8")
+  jsonlite::fromJSON(js)
+}

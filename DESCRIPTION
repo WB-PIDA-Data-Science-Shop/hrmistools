@@ -25,7 +25,8 @@ Imports:
     janitor,
     jsonlite,
     future.apply,
-    lubridate
+    lubridate,
+    data.table
 RoxygenNote: 7.3.2
 Suggests: 
     testthat (>= 3.0.0)
