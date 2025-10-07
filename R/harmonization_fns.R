@@ -516,3 +516,11 @@ convert_constant_ppp <- function(data, cols, macro_indicators) {
 
   return(data_out)
 }
+
+merge_wrapper <- function(...){
+
+  y <- merge(all.x = TRUE, ...)
+
+  return(y)
+
+}
