@@ -28,7 +28,7 @@
 #'
 #' @export
 ggplot_point_line <- function(data, x, y, group = NULL, label = NULL, ...) {
-  p <- ggplot(
+  plot <- ggplot(
     data,
     aes(
       x = {{ x }},
@@ -42,7 +42,7 @@ ggplot_point_line <- function(data, x, y, group = NULL, label = NULL, ...) {
 
   # Add labels if provided
   if (!rlang::quo_is_null(rlang::enquo(label))) {
-    p <- p +
+    plot <- plot +
       ggrepel::geom_text_repel(
         aes(label = {{ label }}),
         size = 3.5,
@@ -55,7 +55,9 @@ ggplot_point_line <- function(data, x, y, group = NULL, label = NULL, ...) {
       )
   }
 
-  p +
+  plot <- plot +
     theme_minimal(base_size = 14) +
     theme(legend.position = "bottom")
+
+  return(plot)
 }

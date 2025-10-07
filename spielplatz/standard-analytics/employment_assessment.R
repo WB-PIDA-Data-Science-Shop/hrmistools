@@ -151,10 +151,40 @@ contract |>
   ) +
   scale_y_continuous(
     labels = scales::percent_format()
+  ) +
+  labs(
+    x = "Year",
+    y = "Share of personnel"
   )
 
 # 3.6.4. performance bonus as a percentage of basic pay
-# n/a: no data on allowances for performance
+contract_summary_ppp |>
+  mutate(
+    share_allowance = mean_allowance_ppp/mean_base_salary_ppp
+  ) |>
+  filter(
+    paygrade %in% seq(1, 4, 1)
+  ) |>
+  ggplot_point_line(
+    year,
+    share_allowance,
+    group = paygrade
+  ) +
+  facet_wrap(
+    vars(paygrade)
+  ) +
+  scale_color_brewer(
+    name = "Paygrade", palette = "Paired"
+  ) +
+  scale_y_continuous(
+    labels = scales::percent_format()
+  ) +
+  labs(
+    x = "Year",
+    y = "Share of personnel"
+  )
 
 # 3.6.6. hardship allowance and percentage of staff receiving it
 # n/a: no data on hardship available
+
+

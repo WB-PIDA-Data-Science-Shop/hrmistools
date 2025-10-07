@@ -1,32 +1,31 @@
 ## code to prepare `economy_wide` variables for wage diagnostics
 
-idvar_list <- list("gdp_lcu" = "WB_WDI_NY_GDP_MKTP_CN",
-                   "pexpenditure_lcu" = "WB_WDI_GC_XPN_TOTL_CN",
-                   "prevenue_lcu" = "WB_WDI_GC_REV_XGRT_CN",
-                   "taxrevenue_lcu" = "WB_WDI_GC_TAX_TOTL_CN",
-                   "emp_pop_rate" = "WB_WDI_SL_EMP_TOTL_SP_NE_ZS",
-                   "tot_pop" = "WB_WDI_SP_POP_TOTL",
-                   "salaried_rate" = "WB_WDI_SL_EMP_WORK_ZS",
-                   "cpi" = "WB_WDI_FP_CPI_TOTL",
-                   "ppp" = "WB_WDI_PA_NUS_PRVT_PP")
+idvar_list <- list(
+  "gdp_lcu" = "WB_WDI_NY_GDP_MKTP_CN",
+  "pexpenditure_lcu" = "WB_WDI_GC_XPN_TOTL_CN",
+  "prevenue_lcu" = "WB_WDI_GC_REV_XGRT_CN",
+  "taxrevenue_lcu" = "WB_WDI_GC_TAX_TOTL_CN",
+  "emp_pop_rate" = "WB_WDI_SL_EMP_TOTL_SP_NE_ZS",
+  "tot_pop" = "WB_WDI_SP_POP_TOTL",
+  "salaried_rate" = "WB_WDI_SL_EMP_WORK_ZS",
+  "cpi" = "WB_WDI_FP_CPI_TOTL",
+  "ppp" = "WB_WDI_PA_NUS_PRVT_PP"
+)
 
-
-
-df <- lapply(X = idvar_list,
+macro_indicators <- lapply(X = idvar_list,
              FUN = get_data360_api,
              dataset_id = "WB_WDI") |>
-      Reduce(f = "merge_wrapper") |>
-      as_tibble() |>
-      setNames(c("country_code", "year", names(idvar_list)))
+  Reduce(f = "merge_wrapper") |>
+  as_tibble() |>
+  setNames(c("country_code", "year", names(idvar_list)))
 
-macro_indicators <- df
-
-rm(df)
+fiscal_balance <- get_data360_api(
+  dataset_id = "WB_MPO",
+  indicator_id = "WB_MPO_GGBALOVRLCD_"
+)
 
 macro_indicators <-
   macro_indicators |>
   mutate(across(names(idvar_list), as.numeric))
 
 usethis::use_data(macro_indicators, overwrite = TRUE)
-
-
