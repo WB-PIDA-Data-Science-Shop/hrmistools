@@ -42,7 +42,7 @@ compute_grouped_summary <- function(data, group_vars = NULL, cols) {
           median = purrr::partial(stats::median, na.rm = TRUE),
           sd = purrr::partial(stats::sd, na.rm = TRUE)
         ),
-        .names = "{.fn}_{.col}"
+        .names = "{.col}_{.fn}"
       ),
       .groups = "drop"
     )
