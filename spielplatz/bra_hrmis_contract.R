@@ -151,19 +151,24 @@ contract_alagoas_tbl <-
         worker_id = CPF,
         org_id = paste(ORGAO, COD_ORGAO, ANO_PAGAMENTO, sep = "-"),
         org_date = as.Date(paste(ANO_PAGAMENTO, MES_REFERENCIA, "01", sep = "-")),
-        year = ANO_PAGAMENTO,
+        year = as.numeric(ANO_PAGAMENTO),
         base_salary_lcu = SALARIO_BASE,
+        allowance_lcu = ABONO_PERMANENCIA,
         gross_salary_lcu = SALARIO_BRUTO,
         net_salary_lcu = SALARIO_LIQUIDO,
-        allowance_lcu = ABONO_PERMANENCIA,
-        spdef = NA,
         whours = as.numeric(JORNADA),
         country_code = "BRA",
         country_name = "Brazil",
         adm1_name = "Alagoas",
         adm1_code = "AL",
         start_date = as.Date(as.integer(DATA_ADMISSAO), origin = "1899-12-30"),
-        end_date = NA
+        end_date = NA,
+        paygrade = CLASSE,
+        seniority = NIVEL,
+        occupation_native = occupation_native,
+        occupation_english = occupation_english,
+        occupation_iscocode = occupation_iscocode,
+        occupation_isconame = occupation_isconame
       ),
     inactive_alagoas_tbl |>
       transmute(
@@ -171,19 +176,24 @@ contract_alagoas_tbl <-
         worker_id = CPF,
         org_id = paste(ORGAO, "000000", sep = "-"),
         org_date = as.Date(paste(ANO_PAGAMENTO, MES_REFERENCIA, "01", sep = "-")),
-        year = ANO_PAGAMENTO,
+        year = as.numeric(ANO_PAGAMENTO),
         base_salary_lcu = NA,
+        allowance_lcu = NA,
         gross_salary_lcu = VALOR_BRUTO,
         net_salary_lcu = VALOR_LIQUIDO,
-        allowance_lcu = NA,
-        spdef = NA,
         whours = 0,
         country_code = "BRA",
         country_name = "Brazil",
         adm1_name = "Alagoas",
         adm1_code = "AL",
         start_date = as.Date(as.integer(DATA_ADMISSAO), origin = "1899-12-30"),
-        end_date = as.Date(as.integer(DATA_APOSENTADORIA), origin = "1899-12-30")
+        end_date = as.Date(as.integer(DATA_APOSENTADORIA), origin = "1899-12-30"),
+        paygrade = CLASSE,
+        seniority = NIVEL,
+        occupation_native = occupation_native,
+        occupation_english = occupation_english,
+        occupation_iscocode = occupation_iscocode,
+        occupation_isconame = occupation_isconame
       )
   )
 

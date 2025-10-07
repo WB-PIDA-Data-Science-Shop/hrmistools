@@ -6,6 +6,7 @@ library(here)
 library(dplyr)
 library(readr)
 library(ggplot2)
+library(purrr)
 library(ggthemes)
 
 theme_set(
@@ -27,7 +28,13 @@ contract <- read_rds(
 contract_ppp <- contract |>
   convert_constant_ppp(
     ends_with("lcu"),
-    macro_indicators
+    macro_indicators |> mutate(year = as.numeric(year))
+  )
+
+contract_summary_ppp <- contract_ppp |>
+  compute_grouped_summary(
+    group_vars = c(year, paygrade),
+    cols = c(base_salary_ppp, allowance_ppp)
   )
 
 # analysis ----------------------------------------------------------------
