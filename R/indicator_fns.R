@@ -129,6 +129,89 @@ compute_wagebill_byoccup <- function(contract_df,
 
 }
 
+#' Compute Summary Statistics and Custom Metrics by Group
+#'
+#' Computes selected summary statistics (sum, mean, median, coefficient of variation, etc.)
+#' for one or more numeric variables, grouped by one or more categorical variables
+#' and optionally by a time variable. Users can also pass in **custom summary functions**.
+#'
+#' @param contract_df A data frame containing the data to summarize.
+#' @param wage_vars Character vector of column names in `contract_df` to summarize.
+#' @param group_vars Character vector of column names to group by (e.g., "paygrade").
+#' @param time_var Character string specifying an optional time variable. Defaults to `"year"`.
+#'                 If `NULL`, no time grouping is applied.
+#' @param choice_fns Character vector of names of default summary functions to compute.
+#'                   Options include `"sum"`, `"mean"`, `"median"`, `"cv"`. Defaults to all four.
+#' @param user_fns Named list of **user-defined functions** or formulas to compute additional statistics.
+#'                 Example: `list(cp_ratio = ~cp_ratio(.x))`.
+#'
+#' @details
+#' The function computes the selected summary statistics for each combination of `group_vars`
+#' and `time_var` (if provided). The results are returned in **long format** with columns:
+#' \code{indicator} (variable and statistic) and \code{value} (computed result).
+#'
+#' **Default functions included:**
+#' - `sum` : total sum of values
+#' - `mean` : arithmetic mean
+#' - `median` : median value
+#' - `cv` : coefficient of variation (sd/mean)
+#'
+#' Users can define their own functions (e.g., compression ratios) and pass them via `user_fns`.
+#'
+#' @return A tibble in long format with columns:
+#' \describe{
+#'   \item{group_vars}{Grouping variables used.}
+#'   \item{time_var}{Time variable if provided.}
+#'   \item{indicator}{The variable and statistic, e.g., `base_salary_lcu_mean`.}
+#'   \item{value}{The computed value.}
+#' }
+#'
+#'
+#' @export
+
+
+compute_wagebill_bygroup <- function(contract_df,
+                                     wage_vars,
+                                     group_vars,
+                                     time_var = "year",
+                                     choice_fns = c("sum", "mean", "median", "cv"),
+                                     user_fns = NULL) {
+
+  # Default summary functions
+  default_fns <- list(
+    sum    = ~sum(.x, na.rm = TRUE),
+    mean   = ~mean(.x, na.rm = TRUE),
+    median = ~median(.x, na.rm = TRUE),
+    cv     = ~cv(.x)
+  )
+
+  # Select only requested ones
+  selected_fns <- default_fns[intersect(choice_fns, names(default_fns))]
+
+  # Merge user functions if any
+  if (!is.null(user_fns)) {
+    selected_fns <- c(selected_fns, user_fns)
+  }
+
+  # Compute
+  stats_df <-
+    contract_df |>
+    group_by(across(all_of(c(group_vars, time_var)))) |>
+    summarise(
+      across(all_of(wage_vars),
+             selected_fns,
+             .names = "{.col}_{.fn}"),
+      .groups = "drop"
+    ) |>
+    pivot_longer(
+      cols = matches(paste(wage_vars, collapse = "|")),
+      names_to = "indicator",
+      values_to = "value"
+    )
+
+  return(stats_df)
+}
+
 #' Compute Public Employment Shares
 #'
 #' Calculates the ratio of public sector employment counts to selected macroeconomic aggregates.
