@@ -27,6 +27,7 @@
 #'
 #' @import dplyr
 #' @import purrr
+#' @importFrom stats median sd
 #' @export
 compute_grouped_summary <- function(data, group_vars = NULL, cols) {
   data %>%
@@ -38,8 +39,8 @@ compute_grouped_summary <- function(data, group_vars = NULL, cols) {
         {{ cols }},
         list(
           mean = purrr::partial(mean, na.rm = TRUE),
-          median = purrr::partial(median, na.rm = TRUE),
-          sd = purrr::partial(sd, na.rm = TRUE)
+          median = purrr::partial(stats::median, na.rm = TRUE),
+          sd = purrr::partial(stats::sd, na.rm = TRUE)
         ),
         .names = "{.fn}_{.col}"
       ),
