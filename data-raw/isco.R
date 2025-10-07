@@ -1,10 +1,8 @@
 ## code to prepare `isco` dataset goes here
 # accessed 8/22/2025
-# library(janitor)
-# library(readxl)
+library(janitor)
 library(dplyr)
 library(readr)
-library(janitor)
 
 # isco_url <- "https://www.ilo.org/ilostat-files/ISCO/newdocs-08-2021/ISCO-08/ISCO-08%20EN%20Structure%20and%20definitions.xlsx"
 # isco_path <- file.path(tempdir(), "isco.xlsx")

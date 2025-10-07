@@ -16,32 +16,21 @@ set.seed(1789)
 file_path <- "//egvpi/egvpi/data/harmonization/HRM/BRA/data-raw/6. Wage Bill AL/3. Microdados"
 
 active_alagoastbl_list <-
-  list.files(
-    path = file_path,
-    pattern = "^Ativos_[0-9]{4}\\.xlsx$",
-    full.names = T
-  ) |>
-  future_map(
-    \(file) read_xlsx(
-      file, na = c("", "-"), col_types = "text"
-    )
-  )
+  list.files(path = file_path,
+             pattern = "^Ativos_[0-9]{4}\\.xlsx$",
+             full.names = T) |>
+  future_map(\(file) read_xlsx(file, na = c("", "-"), col_types = "text"))
 
 inactive_alagoastbl_list <-
-  list.files(
-    path = file_path,
-    pattern = "^Inativos_[0-9]{4}\\.xlsx$",
-    full.names = T
-  ) |>
-  future_map(
-    \(file) read_xlsx(
-      file, na = c("", "-"), col_types = "text"
-    )
-  )
+  list.files(path = file_path,
+             pattern = "^Inativos_[0-9]{4}\\.xlsx$",
+             full.names = T) |>
+  future_map(\(file) read_xlsx(file, na = c("", "-"), col_types = "text"))
 
 ### lets quickly label the raw data
 act_list <-
-  c(ANO_PAGAMENTO = "Year of payment (e.g., 2022)",
+  c(
+    ANO_PAGAMENTO = "Year of payment (e.g., 2022)",
     MES_REFERENCIA = "Reference month (e.g., 1–12)",
     MATRICULA = "Employee registration number",
     CPF = "CPF (taxpayer ID)",
@@ -69,7 +58,8 @@ act_list <-
     DEMAIS_GRATIFICACOES_TRANSITORIAS = "Other temporary bonuses / gratifications",
     DEMAIS_GRATIFICACOES_CARREIRA = "Other career-related bonuses / gratifications",
     SALARIO_BRUTO = "Gross salary (before deductions)",
-    SALARIO_LIQUIDO = "Net salary (after deductions)")
+    SALARIO_LIQUIDO = "Net salary (after deductions)"
+  )
 
 inact_list <- c(
   ANO_PAGAMENTO = "Year of payment (e.g., 2022)",
@@ -108,18 +98,20 @@ active_alagoas_tbl <-
 
 ##### a few diagnostics
 check_dt <-
-active_alagoas_tbl |>
+  active_alagoas_tbl |>
   dplyr::select(ANO_PAGAMENTO, ORGAO, COD_ORGAO) |>
   unique()
 
 check_list <-
-active_alagoas_tbl |>
+  active_alagoas_tbl |>
   group_by(ANO_PAGAMENTO) |>
   group_split() |>
-  map(~ .x |>
-        group_by(ORGAO, COD_ORGAO) |>
-        summarize(n = n(), .groups = "drop") |>
-        pivot_wider(names_from = COD_ORGAO, values_from = n))
+  map(
+    ~ .x |>
+      group_by(ORGAO, COD_ORGAO) |>
+      summarize(n = n(), .groups = "drop") |>
+      pivot_wider(names_from = COD_ORGAO, values_from = n)
+  )
 
 names(check_list) <- unique(active_alagoas_tbl$ANO_PAGAMENTO)
 
@@ -128,74 +120,61 @@ names(check_list) <- unique(active_alagoas_tbl$ANO_PAGAMENTO)
 
 alagoas_org_tbl <-
   active_alagoas_tbl |>
-  transmute(org_id = paste(ORGAO, COD_ORGAO, ANO_PAGAMENTO, sep = "-"),
-            org_name_native = ORGAO,
-            country_code = "BRA",
-            country_name = "Brazil",
-            adm1_name = "Alagoas",
-            adm1_code = "AL",
-            org_parent = NA,
-            org_child = NA) |>
+  transmute(
+    org_id = paste(ORGAO, COD_ORGAO, ANO_PAGAMENTO, sep = "-"),
+    org_name_native = ORGAO,
+    country_code = "BRA",
+    country_name = "Brazil",
+    adm1_name = "Alagoas",
+    adm1_code = "AL",
+    org_parent = NA,
+    org_child = NA
+  ) |>
   unique()
 
 
 #### include translation for organization name
 alagoas_org_tbl <-
   alagoas_org_tbl |>
-    merge(tibble(org_name_native = unique(alagoas_org_tbl$org_name_native),
-                 org_name_en = vectorize_gt(vector = unique(alagoas_org_tbl$org_name_native),
-                                            source_language = "pt")),
-          by = "org_name_native",
-          all.x = TRUE) |>
-    as_tibble() |>
-    mutate(org_name_en = tolower(org_name_en))
+  merge(
+    tibble(
+      org_name_native = unique(alagoas_org_tbl$org_name_native),
+      org_name_en = vectorize_gt(
+        vector = unique(alagoas_org_tbl$org_name_native),
+        source_language = "pt"
+      )
+    ),
+    by = "org_name_native",
+    all.x = TRUE
+  ) |>
+  as_tibble() |>
+  mutate(org_name_en = tolower(org_name_en))
 
 
 #### include same data for the inactive works
 alagoas_org_tbl <-
-  bind_rows(alagoas_org_tbl,
-            inactive_alagoas_tbl |>
-              transmute(org_id = paste(ORGAO, "000000", sep = "-"),
-                        org_name_native = ORGAO,
-                        country_code = "BRA",
-                        country_name = "Brazil",
-                        adm1_name = "Alagoas",
-                        adm1_code = "AL",
-                        org_parent = NA,
-                        org_child = NA) |>
-              unique() |>
-              mutate(org_name_en = "Alagoas Retirees"))
+  bind_rows(
+    alagoas_org_tbl,
+    inactive_alagoas_tbl |>
+      transmute(
+        org_id = paste(ORGAO, "000000", sep = "-"),
+        org_name_native = ORGAO,
+        country_code = "BRA",
+        country_name = "Brazil",
+        adm1_name = "Alagoas",
+        adm1_code = "AL",
+        org_parent = NA,
+        org_child = NA
+      ) |>
+      unique() |>
+      mutate(org_name_en = "Alagoas Retirees")
+  )
 
 #### write results
-saveRDS(alagoas_org_tbl, "spielplatz/bra_hrmis_organization.rds")
+alagoas_org_tbl |>
+  write_rds(
+    here("data", "bra", "bra_hrmis_organization.rds"),
+    compress = "gz"
+  )
 
 write_xlsx(check_list, "spielplatz/orgao_check.xlsx")
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

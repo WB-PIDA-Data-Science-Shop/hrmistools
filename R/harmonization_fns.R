@@ -76,6 +76,7 @@ vectorize_gt <- function(vector,
 #'
 #' @import polyglotr
 #' @importFrom future.apply future_lapply
+#' @importFrom future plan multisession
 #' @export
 
 
@@ -84,7 +85,7 @@ vectorize_gt_parallel <- function(vector,
                                   source_language,
                                   workers = 4,
                                   chunk_size = 50) {
-  plan(multisession, workers = workers)
+  future::plan(future::multisession, workers = workers)
 
   chunks <- split(vector, ceiling(seq_along(vector) / chunk_size))
 
@@ -99,11 +100,6 @@ vectorize_gt_parallel <- function(vector,
   unlist(res, use.names = FALSE)
 
 }
-
-
-
-
-
 
 #' A function to identify inconsistent column names across data frames
 #'
@@ -241,7 +237,7 @@ find_duplicate_ids <- function(data, identifier) {
 #' This function takes a factor vector of education levels and returns
 #' the lowest (minimum) level present. If all values are `NA` or empty,
 #' it returns `NA`. It is useful for collapsing multiple education
-#' responses for an individual into a single representative value.
+#' responses for an individual into a single value.
 #'
 #' @param educat A factor vector representing education levels.
 #'   Factor levels should be ordered from lowest to highest.
@@ -463,20 +459,27 @@ complete_columns <- function(data, cols) {
 #'
 #' @param data Data frame with columns (country_code, year, wage).
 #' @param cols Column name to convert to constant PPP in international 2021 dollars.
+#' @param macro_indicators Macroeconomic indicators, can be lazy loaded.
 #' @return `data_out` augmented with columns converted to international 2021 dollars.
 #' @examples
 #' library(tibble)
-#' hh <- tibble(country_code = c("A","A"), year = c(2010, 2021),
-#'                      wage = c(20000, 25000))
-#' cpi <- tibble(country_code = "A", year = c(2010,2021), cpi = c(85,100))
-#' ppp <- tibble(country_code = "A", year = 2021, ppp = 3.5)
+#' hh <- tibble(
+#'   country_code = c("A","A"),
+#'   year = c("2010", "2021"),
+#'   wage = c(20000, 25000)
+#' )
 #'
-#' convert_constant_ppp(hh, wage)
+#' macro_indicators <- tibble(
+#'   country_code = "A", year = "2010", "2021",
+#'   cpi = c(85, 100), ppp = c(1.5, 3.5)
+#' )
+#'
+#' convert_constant_ppp(hh, wage, macro_indicators)
 #'
 #' @importFrom dplyr filter select rename left_join mutate
 #' @import glue
 #' @export
-convert_constant_ppp <- function(data, cols) {
+convert_constant_ppp <- function(data, cols, macro_indicators) {
 
   ## Basic input checks
   required_df  <- c("country_code", "year")
@@ -486,19 +489,19 @@ convert_constant_ppp <- function(data, cols) {
   }
 
   # extract CPI in base year (2021) by country
-  base_cpi <- cpi |>
+  base_cpi <- macro_indicators |>
     filter(year == 2021) |>
     select(country_code, cpi) |>
     rename(base_cpi = cpi)
 
   # join and compute using the exact formula
   data_out <- data |>
-    left_join(cpi, by = c("country_code", "year")) |>
+    left_join(macro_indicators, by = c("country_code", "year")) |>
     left_join(base_cpi, by = "country_code") |>
     left_join(
-      ppp |>
+      macro_indicators |>
         filter(year == 2021) |>
-        select(-year) |>
+        select(country_code, ppp) |>
         rename(ppp_2021 = ppp),
       by = "country_code"
     ) |>
@@ -506,7 +509,7 @@ convert_constant_ppp <- function(data, cols) {
       across(
         {{cols}},
         ~ (cpi / base_cpi) * (.x / ppp_2021),
-        .names = "{.col}_ppp"
+        .names = "{sub('_lcu$', '_ppp', .col)}"
       )
     ) |>
     select(-c(ppp_2021, base_cpi))

@@ -171,14 +171,19 @@ worker_id <- worker_active |>
     worker_id
   )
 
-worker_id_duplicate <- worker_id |>
+worker_id_multiple_contracts <- worker_id |>
   group_by(worker_id) |>
   summarise(
-    n = n_distinct(contract_id),
+    n_contract = n_distinct(contract_id),
     .groups = "drop"
   ) |>
-  filter(n > 1)
+  filter(n_contract > 1)
 
+# there are 9.4 thousand workers with multiple contracts
+worker_id_multiple_contracts |>
+  count(n_contract)
+
+# verify worker ids
 worker_active |>
   inner_join(
     worker_id_duplicate,
@@ -221,7 +226,7 @@ worker_active <- worker_active |>
     -correct_worker_id
   )
 
-# extract worker module
+# extract worker module ---------------------------------------------------
 # Worker
 #   - Reference date (ref_date)
 #   - Worker ID (contract_id)
@@ -234,18 +239,20 @@ worker_active <- worker_active |>
 worker_module <- worker_active |>
   group_by(worker_id, ref_date) |>
   summarise(
-    birth_date = case_when(
-      birth_date <= as_date("2010-01-01") ~ min(birth_date),
-      TRUE ~ NA_Date_
-    ),
+    # birth_date = case_when(
+    #   birth_date <= as_date("2010-01-01") ~ min(birth_date),
+    #   TRUE ~ NA_Date_
+    # ),
     educat7 = dedup_education(educat7),
     .groups = "drop"
   )
 
+# deduplicate gender
 worker_module_gender <- worker_active |>
   dedup_value_panel(
     gender,
-    worker_id, ref_date
+    worker_id,
+    ref_date
   )
 
 # if the number of rows for both match, left join
@@ -271,5 +278,6 @@ worker_module_clean <- worker_module |>
 
 worker_module_clean |>
   write_rds(
-    here("spielplatz/bra_hrmis_worker.rds")
+    here("inst", "extdata", "bra_hrmis_worker.rds"),
+    compress = "gz"
   )

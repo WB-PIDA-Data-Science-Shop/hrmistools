@@ -18,7 +18,7 @@ A character string corresponding to the lowest education
 This function takes a factor vector of education levels and returns
 the lowest (minimum) level present. If all values are `NA` or empty,
 it returns `NA`. It is useful for collapsing multiple education
-responses for an individual into a single representative value.
+responses for an individual into a single value.
 }
 \examples{
 edu_levels <- factor(
