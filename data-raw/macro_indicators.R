@@ -1,4 +1,5 @@
 ## code to prepare `economy_wide` variables for wage diagnostics
+library(purrr)
 
 idvar_list <- list(
   "gdp_lcu" = "WB_WDI_NY_GDP_MKTP_CN",
@@ -12,22 +13,36 @@ idvar_list <- list(
   "ppp" = "WB_WDI_PA_NUS_PRVT_PP"
 )
 
-
-
-df <- lapply(X = idvar_list,
+macro_indicators <- lapply(X = idvar_list,
              FUN = get_data360_api,
              dataset_id = "WB_WDI") |>
+      lapply(pivot_data360) |>
       Reduce(f = "merge_wrapper") |>
       as_tibble() |>
       setNames(c("country_code", "year", names(idvar_list)))
 
-macro_indicators <- df
-
-rm(df)
+fiscal_balance <- get_data360_api(
+  dataset_id = "WB_MPO",
+  indicator_id = "WB_MPO_GGBALOVRLCD_"
+) |>
+  # extract latest vintage
+  filter(
+    COMP_BREAKDOWN_1 == "WB_MPO_VINTAGE_SM_2025"
+  ) |>
+  pivot_data360() |>
+  rename(
+    fiscal_balance = wb_mpo_ggbalovrlcd
+  )
 
 macro_indicators <-
   macro_indicators |>
-  mutate(across(names(idvar_list), as.numeric))
+  left_join(
+    fiscal_balance,
+    by = c("country_code", "year")
+  ) |>
+  mutate(
+    across(-c(country_code), as.numeric)
+  )
 
 macro_indicators <-
   macro_indicators |>
@@ -36,6 +51,5 @@ macro_indicators <-
 macro_indicators <-
   macro_indicators |>
   mutate(salaried_pop = salaried_rate * emp_pop)
-
 
 usethis::use_data(macro_indicators, overwrite = TRUE)

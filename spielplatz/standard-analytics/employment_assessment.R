@@ -160,7 +160,7 @@ contract |>
 # 3.6.4. performance bonus as a percentage of basic pay
 contract_summary_ppp |>
   mutate(
-    share_allowance = mean_allowance_ppp/mean_base_salary_ppp
+    share_allowance = allowance_ppp_mean/base_salary_ppp_mean
   ) |>
   filter(
     paygrade %in% seq(1, 4, 1)
@@ -187,4 +187,4 @@ contract_summary_ppp |>
 # 3.6.6. hardship allowance and percentage of staff receiving it
 # n/a: no data on hardship available
 
-
+# 4.1.1

@@ -2,7 +2,7 @@
 % Please edit documentation in R/data360api.R
 \name{get_data360_api}
 \alias{get_data360_api}
-\title{Fetch World Bank Data360 CPI}
+\title{This function retrieves data from the Data360 API.}
 \usage{
 get_data360_api(dataset_id, indicator_id)
 }
