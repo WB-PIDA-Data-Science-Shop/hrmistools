@@ -37,6 +37,40 @@ contract_summary_ppp <- contract_ppp |>
     cols = c(base_salary_ppp, allowance_ppp)
   )
 
+contract_annual_growth <- contract_ppp |>
+  group_by(country_code, year) |>
+  summarise(
+    median_wage_ppp = median(gross_salary_ppp, na.rm = TRUE),
+    total_headcount = n(),
+    .groups = "drop"
+  ) |>
+  mutate(
+    growth_median_wage_ppp = (median_wage_ppp - lag(median_wage_ppp))/lag(median_wage_ppp) * 100
+  ) |>
+  left_join(
+    macro_indicators,
+    by = c("country_code", "year")
+  )
+
+wage_bill_change <- contract_ppp |>
+  filter(
+    paygrade %in% seq(1, 4, 1)
+  ) |>
+  mutate(
+    year = as.integer(year)
+  ) |>
+  group_by(paygrade, year) |>
+  summarise(
+    median_base_salary_ppp = median(base_salary_ppp, na.rm = TRUE),
+    .groups = "drop"
+  ) |>
+  arrange(paygrade, year) |>
+  group_by(paygrade) |>
+  mutate(
+    pct_change = 100 * (median_base_salary_ppp - lag(median_base_salary_ppp))/ lag(median_base_salary_ppp),
+    .groups = "drop"
+  )
+
 # analysis ----------------------------------------------------------------
 # 3.6.1. percentage of staff receiving highest performance ratings
 # N/A
@@ -75,23 +109,7 @@ contract_ppp |>
   )
 
 # as growth rates
-contract_ppp |>
-  filter(
-    paygrade %in% seq(1, 4, 1)
-  ) |>
-  mutate(
-    year = as.integer(year)
-  ) |>
-  group_by(paygrade, year) |>
-  summarise(
-    median_base_salary_ppp = median(base_salary_ppp, na.rm = TRUE),
-    .groups = "drop"
-  ) |>
-  arrange(paygrade, year) |>
-  group_by(paygrade) |>
-  mutate(
-    pct_change = 100 * (median_base_salary_ppp - lag(median_base_salary_ppp))/ lag(median_base_salary_ppp)
-  ) |>
+wage_bill_change |>
   ggplot_point_line(
     year,
     pct_change,
@@ -187,4 +205,26 @@ contract_summary_ppp |>
 # 3.6.6. hardship allowance and percentage of staff receiving it
 # n/a: no data on hardship available
 
-# 4.1.1
+# 4.1.1. correlation between wage bill growth and fiscal balances
+contract_annual_growth |>
+  ggplot() +
+  geom_point(
+    aes(growth_median_wage_ppp, fiscal_balance)
+  )
+
+# 4.1.3. Decomposition of wage growth: employment and wages
+contract_annual_growth |>
+  transmute(
+    year,
+    median_wage_ppp = median_wage_ppp/median_wage_ppp[year == min(year)],
+    total_headcount = total_headcount/total_headcount[year == min(year)]
+  ) |>
+  pivot_longer(
+    -c(year)
+  ) |>
+  ggplot(
+    aes(year, value, color = name)
+  ) +
+  geom_point(
+
+  )
