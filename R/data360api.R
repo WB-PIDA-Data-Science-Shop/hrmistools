@@ -10,6 +10,7 @@
 #'
 #' @param dataset_id Unique identifier for the database.
 #' @param indicator_id Indicator ID.
+#' @param pivot Whether or not to pivot the extracted data. Default is true.
 #'
 #' @import httr
 #' @import dplyr
@@ -17,7 +18,7 @@
 #' @importFrom jsonlite fromJSON
 #' @importFrom tibble as_tibble
 #' @export
-get_data360_api <- function(dataset_id, indicator_id) {
+get_data360_api <- function(dataset_id, indicator_id, pivot = TRUE) {
   base_url <- "https://data360api.worldbank.org/data360/data"
 
   modified_url <- httr::modify_url(
@@ -59,6 +60,11 @@ get_data360_api <- function(dataset_id, indicator_id) {
 
     nrow_data_360 <- nrow(data_360)
     skip_row <- skip_row + 1000
+  }
+
+  if(pivot){
+    data_360 <- data_360 |>
+      pivot_data360()
   }
 
   return(data_360)
@@ -145,11 +151,27 @@ pivot_data360 <- function(data){
 #' @importFrom jsonlite fromJSON
 #' @export
 get_metadata360 <- function(dataset_id) {
-  base_url <- "https://data360api.worldbank.org/data360/metadata"
-  md_url <- httr::modify_url(base_url,
-                             query = list(DATABASE_ID = dataset_id))
-  res <- httr::GET(md_url)
+  url <- "https://data360api.worldbank.org/data360/metadata"
+
+  # Define the JSON body as a list
+  body <- list(
+    query = dataset_id
+  )
+
+  # Send the POST request
+  res <- POST(
+    url = url,
+    add_headers(
+      "accept" = "*/*",
+      "Content-Type" = "application/json"
+    ),
+    body = body,
+    encode = "json"
+  )
+
   httr::stop_for_status(res)
+
   js <- httr::content(res, as = "text", encoding = "UTF-8")
+
   jsonlite::fromJSON(js)
 }

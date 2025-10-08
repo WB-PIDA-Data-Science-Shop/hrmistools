@@ -16,14 +16,14 @@ idvar_list <- list(
 macro_indicators <- lapply(X = idvar_list,
              FUN = get_data360_api,
              dataset_id = "WB_WDI") |>
-      lapply(pivot_data360) |>
       Reduce(f = "merge_wrapper") |>
       as_tibble() |>
       setNames(c("country_code", "year", names(idvar_list)))
 
 fiscal_balance <- get_data360_api(
   dataset_id = "WB_MPO",
-  indicator_id = "WB_MPO_GGBALOVRLCD_"
+  indicator_id = "WB_MPO_GGBALOVRLCD_",
+  pivot = FALSE
 ) |>
   # extract latest vintage
   filter(
