@@ -23,7 +23,7 @@
 #' been renamed for convenience, but the original WDI variable codes are provided
 #' for reference.
 #'
-#' @format A tibble with 17,195 rows and 11 columns:
+#' @format A tibble with 11652 rows and 14 variables:
 #' \describe{
 #'   \item{country_code}{ISO3 country code (originally from Data360 API).}
 #'   \item{year}{Year of observation (character, originally from Data360 API).}
@@ -36,8 +36,9 @@
 #'   \item{salaried_rate}{Share of employed people who are salaried (in percent). Original WDI code: WB_WDI_SL_EMP_WORK_ZS.}
 #'   \item{cpi}{Consumer Price Index, total. Original WDI code: WB_WDI_FP_CPI_TOTL.}
 #'   \item{ppp}{Purchasing Power Parity (local currency units per international USD). Original WDI code: WB_WDI_PA_NUS_PRVT_PP.}
-#'   \item{emp_pop}{The population of employed i.e. `emp_pop_rate` * `tot_pop`}
-#'   \item{salaried_pop}{The population of salaried workers i.e. `salaried_rate` * `emp_pop`}
+#'   \item{fiscal_balance}{Overall Fiscal Balance, USD, percentage of GDP.}
+#'   \item{emp_pop}{The population of employed i.e. `emp_pop_rate` * `tot_pop`.}
+#'   \item{salaried_pop}{The population of salaried workers i.e. `salaried_rate` * `emp_pop`.}
 #' }
 #'
 #' @details
