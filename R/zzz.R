@@ -8,5 +8,6 @@ utils::globalVariables(c(
   "occupation_native", "occupation_english", "country_name",
   "govcount", "indicator", "isco", "isco_share", "macro_indicators",
   "macro_value", "macro_var", "num_teachers", "total", "totals",
-  "ts_ratio", "value", "wage_value", "wage_var", "."
+  "ts_ratio", "value", "wage_value", "wage_var", ".", "sd",
+  "summary_value", "summary_var"
 ))

@@ -26,7 +26,6 @@ Imports:
     jsonlite,
     future.apply,
     lubridate,
-    data.table,
     future,
     ggplot2
 RoxygenNote: 7.3.2
