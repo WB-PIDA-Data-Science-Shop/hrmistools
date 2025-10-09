@@ -25,18 +25,16 @@
 #'
 #' @import ggplot2
 #' @importFrom ggrepel geom_text_repel
+#' @importFrom ggthemes scale_color_solarized
 #'
 #' @export
-ggplot_point_line <- function(data, x, y, group = NULL, label = NULL, ...) {
-  plot <- ggplot(
-    data,
-    aes(
-      x = {{ x }},
-      y = {{ y }},
-      color = {{ group }},
-      ...
-    )
-  ) +
+ggplot_point_line <- function(data,
+                              x,
+                              y,
+                              group = NULL,
+                              label = NULL,
+                              ...) {
+  plot <- ggplot(data, aes(x = {{ x }}, y = {{ y }}, color = {{ group }}, ...)) +
     geom_line(linewidth = 1.2) +
     geom_point(size = 4)
 
@@ -53,6 +51,11 @@ ggplot_point_line <- function(data, x, y, group = NULL, label = NULL, ...) {
         max.overlaps = Inf,
         color = "grey40"
       )
+  }
+
+  if (!rlang::quo_is_null(rlang::enquo(group))) {
+    plot <- plot +
+      ggthemes::scale_colour_solarized()
   }
 
   plot <- plot +

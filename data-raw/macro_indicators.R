@@ -9,6 +9,7 @@ idvar_list <- list(
   "emp_pop_rate" = "WB_WDI_SL_EMP_TOTL_SP_NE_ZS",
   "tot_pop" = "WB_WDI_SP_POP_TOTL",
   "salaried_rate" = "WB_WDI_SL_EMP_WORK_ZS",
+  "government_expenditure_gdp" = "WB_WDI_NE_CON_GOVT_ZS",
   "cpi" = "WB_WDI_FP_CPI_TOTL",
   "ppp" = "WB_WDI_PA_NUS_PRVT_PP"
 )

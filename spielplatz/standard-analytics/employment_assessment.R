@@ -9,8 +9,9 @@ library(ggplot2)
 library(purrr)
 library(ggthemes)
 
+# set default color palette with scale_color_brewer
 theme_set(
-  theme_clean()
+  theme_few()
 )
 
 devtools::load_all()
@@ -72,6 +73,7 @@ wage_bill_change <- contract_ppp |>
   )
 
 # analysis ----------------------------------------------------------------
+# 3.6. wage incentives ----------------------------------------------------
 # 3.6.1. percentage of staff receiving highest performance ratings
 # N/A
 
@@ -205,6 +207,7 @@ contract_summary_ppp |>
 # 3.6.6. hardship allowance and percentage of staff receiving it
 # n/a: no data on hardship available
 
+# fiscal sustainability ---------------------------------------------------
 # 4.1.1. correlation between wage bill growth and fiscal balances
 contract_annual_growth |>
   ggplot() +
@@ -212,19 +215,37 @@ contract_annual_growth |>
     aes(growth_median_wage_ppp, fiscal_balance)
   )
 
+# 4.1.2.Correlation between wage bill growth and changes in capital and non-wage recurrent expenditures
+contract_annual_growth |>
+  ggplot(
+    aes(
+      government_expenditure_gdp,
+      growth_median_wage_ppp
+    )
+  ) +
+  geom_point() +
+  labs(
+    x = "Government Expenditre (Share of GDP)",
+    y = "Wage growth"
+  )
+
 # 4.1.3. Decomposition of wage growth: employment and wages
 contract_annual_growth |>
+  filter(year <= 2017) |>
   transmute(
     year,
-    median_wage_ppp = median_wage_ppp/median_wage_ppp[year == min(year)],
-    total_headcount = total_headcount/total_headcount[year == min(year)]
+    `Median Wage (PPP)` = median_wage_ppp/median_wage_ppp[year == min(year)] * 100,
+    `Total Headcount` = total_headcount/total_headcount[year == min(year)] * 100
   ) |>
   pivot_longer(
-    -c(year)
+    -c(year),
+    names_to = "Indicator"
   ) |>
-  ggplot(
-    aes(year, value, color = name)
-  ) +
-  geom_point(
-
+  ggplot_point_line(
+    year,
+    value,
+    group = Indicator
   )
+
+# 4.2. public sector productivity -----------------------------------------
+# 4.2.

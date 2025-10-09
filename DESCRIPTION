@@ -29,7 +29,8 @@ Imports:
     data.table,
     future,
     ggplot2,
-    ggrepel
+    ggrepel,
+    ggthemes
 RoxygenNote: 7.3.2
 Suggests: 
     testthat (>= 3.0.0)
