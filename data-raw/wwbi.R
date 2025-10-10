@@ -65,7 +65,7 @@ wwbi <- wwbi_educational_attainment |>
   ) |>
   mutate(
     across(
-      -c(country_code, year),
+      -c(country_code),
       as.numeric
     )
   )

@@ -260,5 +260,75 @@ contract_annual_growth |>
   )
 
 # 4.3. labor allocation between public and private sectors ----------------
+# 4.3.1. public sector wage premium
+wwbi |>
+  filter(country_code == "BRA") |>
+  ggplot_point_line(
+    year,
+    ps_wage_premium_pooled
+  ) +
+  labs(
+    x = "Year",
+    y = "Public Sector Wage Premium"
+  )
 
+wwbi |>
+  filter(country_code == "BRA") |>
+  select(country_code, year, starts_with("ps_wage")) |>
+  pivot_longer(
+    cols = c(starts_with("ps_wage_")),
+    names_prefix = "ps_wage_premium_"
+  ) |>
+  mutate(
+    name = case_when(
+      name == "edu_sector" ~ "Education",
+      name == "hea_sector" ~ "Health",
+      name == "female" ~ "Female worker",
+      name == "male" ~ "Male worker",
+      name == "pooled" ~  "Overall"
+    )
+  ) |>
+  filter(
+    between(year, 2002, 2015)
+  ) |>
+  ggplot_point_line(
+    year,
+    value,
+    group = name
+  )
 
+# 4.3.2. Number of applications per position
+# N/A
+
+# 4.3.3. Correlation between public sector employment growth or recruitment patterns and
+# private-sector employment growth or recruitment patterns (by skill, demographic, occupation,
+# and geographical groups)
+contract_annual_growth |>
+  transmute(
+    year,
+    `Total Headcount` = total_headcount/total_headcount[year == 2007] * 100,
+    `Total labor force` = labor_force_total/labor_force_total[year == 2007] * 100
+  ) |>
+  pivot_longer(
+    -c(year),
+    names_to = "Indicator"
+  ) |>
+  ggplot_point_line(
+    year,
+    value,
+    group = Indicator
+  ) +
+  labs(
+    x = "Year",
+    y = "Index (2007 = 100)"
+  )
+
+# 4.3.4. Trends in educational profiles of public-sector workers relative to private-sector workers (by demographic, occupation, and geographical groups)
+worker |>
+  mutate(
+    year = year(ref_date)
+  ) |>
+  group_by(year) |>
+  summarise(
+    ps_share_tertiary = mean(educat7 == "")
+  )

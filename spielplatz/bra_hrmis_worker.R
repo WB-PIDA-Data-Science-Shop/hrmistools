@@ -183,21 +183,6 @@ worker_id_multiple_contracts <- worker_id |>
 worker_id_multiple_contracts |>
   count(n_contract)
 
-# verify worker ids
-worker_active |>
-  inner_join(
-    worker_id_duplicate,
-    by = c("worker_id")
-  ) |>
-  arrange(worker_id) |>
-  select(
-    worker_id,
-    contract_id,
-    year,
-    birth_date,
-    gender
-  )
-
 contract_id_duplicate_national <- worker_id |>
   group_by(contract_id) |>
   summarise(

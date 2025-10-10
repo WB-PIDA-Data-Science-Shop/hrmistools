@@ -7,6 +7,8 @@ idvar_list <- list(
   "prevenue_lcu" = "WB_WDI_GC_REV_XGRT_CN",
   "taxrevenue_lcu" = "WB_WDI_GC_TAX_TOTL_CN",
   "emp_pop_rate" = "WB_WDI_SL_EMP_TOTL_SP_NE_ZS",
+  "labor_force_total" = "WB_WDI_SL_TLF_TOTL_IN",
+  "labor_force_advanced_edu" = "WB_WDI_SL_TLF_ADVN_ZS",
   "tot_pop" = "WB_WDI_SP_POP_TOTL",
   "salaried_rate" = "WB_WDI_SL_EMP_WORK_ZS",
   "government_expenditure_gdp" = "WB_WDI_NE_CON_GOVT_ZS",

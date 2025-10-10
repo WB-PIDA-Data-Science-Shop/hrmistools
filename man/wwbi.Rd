@@ -8,7 +8,7 @@
 A data frame with 993 rows and 11 variables:
 \describe{
   \item{\code{country_code}}{character World Bank country code.}
-  \item{\code{year}}{character Year.}
+  \item{\code{year}}{double Year.}
   \item{\code{share_no_edu}}{double Share of public sector workers with no education.}
   \item{\code{share_primary_edu}}{double Share of public sector workers with primary education completed.}
   \item{\code{share_secondary_edu}}{double Share of public sector workers with secondary education completed.}
