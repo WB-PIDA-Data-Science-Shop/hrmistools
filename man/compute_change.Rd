@@ -39,7 +39,7 @@ library(dplyr)
 library(tidyr)
 
 df <- tibble(
-  year = c(2020, 2023),
+  year = c(2020, 2021, 2023),
   gdp = c(100, 110, 130)
 )
 

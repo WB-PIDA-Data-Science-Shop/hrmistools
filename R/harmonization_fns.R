@@ -232,34 +232,6 @@ find_duplicate_ids <- function(data, identifier) {
     filter(n > 1)
 }
 
-#' Deduplicate a factor by keeping only its minimum level
-#'
-#' This function filters a factor vector to keep only the elements
-#' that correspond to its minimum level.
-#'
-#' @param col A vector. Must be a factor
-#' @param by_levels Logical. If TRUE (default), uses the factor's level order
-#'   to determine the minimum level. If FALSE, uses lexicographic order.
-#'
-#' @return A factor vector containing only the observations that match
-#'   the minimum level.
-#'
-#' @examples
-#' f <- factor(c("B", "A", "C", "B", "A"))
-#' dedup_min_level(f)
-#'
-#' f2 <- factor(c("z", "x", "y", "z"))
-#' dedup_min_level(f2, by_levels = FALSE)
-#'
-#' @export
-dedup_factor <- function(col, by_levels = TRUE) {
-  stopifnot(is.factor(col))
-
-  if (all(is.na(col))) return(NA_character_)
-
-  levels(col)[min(as.integer(col), na.rm = TRUE)]
-}
-
 #' Deduplicate and disambiguate an attribute using both lag and lead values
 #'
 #' Handles missing values and cases where the same date has conflicting
@@ -538,7 +510,7 @@ merge_wrapper <- function(...){
 #' library(tidyr)
 #'
 #' df <- tibble(
-#'   year = c(2020, 2023),
+#'   year = c(2020, 2021, 2023),
 #'   gdp = c(100, 110, 130)
 #' )
 #'
