@@ -90,3 +90,21 @@ cp_ratio <- function(x, upper = 0.9, lower = 0.1, na.rm = TRUE){
   return(ratio)
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

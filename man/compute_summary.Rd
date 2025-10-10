@@ -6,7 +6,7 @@
 \usage{
 compute_summary(
   data,
-  cols = list(vars = NULL, groups = "year"),
+  cols = list(vars = NULL, groups = c("year", "country_code")),
   fns = list(default = c("sum", "mean", "median", "cv"), user = NULL),
   output = c("long", "wide")
 )
@@ -18,7 +18,8 @@ compute_summary(
 Must include:
 \itemize{
   \item \code{vars} — Character vector of variable names to summarize.
-  \item \code{groups} — Character vector of grouping variables (defaults to \code{"year"}).
+  \item \code{groups} — Character vector of grouping variables (defaults to \code{c("year",
+  "country_code")} if performed with harmonized contract level hrmis `data.frame`).
 }}
 
 \item{fns}{A list specifying which summary functions to apply.

@@ -7,7 +7,7 @@
 compute_share(
   data,
   macro_data = macro_indicators,
-  cols = list(vars = NULL, groups = "year"),
+  cols = list(vars = NULL, groups = c("country_code", "year")),
   macro_cols,
   fns = list(default = c("sum"), user = NULL),
   output = c("long", "wide")
@@ -18,7 +18,8 @@ compute_share(
 
 \item{macro_data}{A data frame containing macro-level indicators.}
 
-\item{cols}{A list defining variables and groups for `compute_summary()` (see `?compute_summary`).}
+\item{cols}{A list of 2 elements defining variables (`vars`) and groups (`groups`)
+for `compute_summary()` (see `?compute_summary`).}
 
 \item{macro_cols}{Character vector of macro indicator columns to use.}
 
@@ -32,4 +33,12 @@ A tibble containing ratio indicators (shares) in long or wide format.
 \description{
 Computes ratios of summarized values from a dataset to corresponding macro-level indicators
 (e.g., wage bill as a share of GDP or population). Uses `compute_summary()` internally.
+}
+\details{
+Ensure the `groups` argument match with `colnames` within the
+`macro_data` for appropriate comparisons between results of summarizing
+`vars` (within cols argument) and `macro_data`. The current default is
+set for the HRM harmonization which assumes shares of `vars` in the
+`macro_data` which is merged by `country_code` and `year` for appropriate
+comparisons.
 }

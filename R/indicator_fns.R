@@ -6,12 +6,14 @@
 #' Supports both built-in summary statistics (sum, mean, median, cv) and user-defined
 #' functions, with flexible output in either long or wide format.
 #'
+#'
 #' @param data A data frame or tibble containing the variables to summarize.
 #' @param cols A list specifying which columns to summarize and which to group by.
 #'   Must include:
 #'   \itemize{
 #'     \item \code{vars} — Character vector of variable names to summarize.
-#'     \item \code{groups} — Character vector of grouping variables (defaults to \code{"year"}).
+#'     \item \code{groups} — Character vector of grouping variables (defaults to \code{c("year",
+#'     "country_code")} if performed with harmonized contract level hrmis `data.frame`).
 #'   }
 #' @param fns A list specifying which summary functions to apply.
 #'   Must include:
@@ -80,7 +82,8 @@
 
 
 compute_summary <- function(data,
-                            cols = list(vars = NULL, groups = "year"),
+                            cols = list(vars = NULL,
+                                        groups = c("year", "country_code")),
                             fns  = list(default = c("sum", "mean", "median", "cv"),
                                         user = NULL),
                             output = c("long", "wide")) {
@@ -139,17 +142,27 @@ compute_summary <- function(data,
 #'
 #' @param data A data frame containing the microdata.
 #' @param macro_data A data frame containing macro-level indicators.
-#' @param cols A list defining variables and groups for `compute_summary()` (see `?compute_summary`).
+#' @param cols A list of 2 elements defining variables (`vars`) and groups (`groups`)
+#' for `compute_summary()` (see `?compute_summary`).
 #' @param macro_cols Character vector of macro indicator columns to use.
 #' @param fns A list of summary functions (default and/or user-defined).
 #' @param output Either `"long"` or `"wide"` (default `"long"`).
+#'
+#'
+#' @details Ensure the `groups` argument match with `colnames` within the
+#' `macro_data` for appropriate comparisons between results of summarizing
+#' `vars` (within cols argument) and `macro_data`. The current default is
+#' set for the HRM harmonization which assumes shares of `vars` in the
+#' `macro_data` which is merged by `country_code` and `year` for appropriate
+#' comparisons.
+#'
 #'
 #' @return A tibble containing ratio indicators (shares) in long or wide format.
 #' @export
 #'
 compute_share <- function(data,
                           macro_data = macro_indicators,
-                          cols = list(vars = NULL, groups = "year"),
+                          cols = list(vars = NULL, groups = c("country_code", "year")),
                           macro_cols,
                           fns = list(default = c("sum"), user = NULL),
                           output = c("long", "wide")) {
