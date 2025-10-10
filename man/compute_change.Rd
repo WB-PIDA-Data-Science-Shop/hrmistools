@@ -39,7 +39,7 @@ library(dplyr)
 library(tidyr)
 
 df <- tibble(
-  year = as.Date(c("2020-01-01", "2021-01-01", "2023-01-01")),
+  year = c(2020, 2023),
   gdp = c(100, 110, 130)
 )
 

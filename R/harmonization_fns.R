@@ -255,7 +255,7 @@ find_duplicate_ids <- function(data, identifier) {
 dedup_factor <- function(col, by_levels = TRUE) {
   stopifnot(is.factor(col))
 
-  if (all(is.na(x))) return(NA_character_)
+  if (all(is.na(col))) return(NA_character_)
 
   levels(col)[min(as.integer(col), na.rm = TRUE)]
 }
@@ -538,7 +538,7 @@ merge_wrapper <- function(...){
 #' library(tidyr)
 #'
 #' df <- tibble(
-#'   year = as.Date(c("2020-01-01", "2021-01-01", "2023-01-01")),
+#'   year = c(2020, 2023),
 #'   gdp = c(100, 110, 130)
 #' )
 #'
