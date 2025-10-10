@@ -328,7 +328,46 @@ worker |>
   mutate(
     year = year(ref_date)
   ) |>
-  group_by(year) |>
+  group_by(country_code, year) |>
   summarise(
-    ps_share_tertiary = mean(educat7 == "")
+    ps_share_tertiary = mean(educat7 %in% c("Higher than secondary but not university", "University incomplete or complete"), na.rm = TRUE) * 100,
+    .groups = "drop"
+  ) |>
+  left_join(
+    macro_indicators,
+    by = c("country_code", "year")
+  ) |>
+  pivot_longer(
+    cols = c(ps_share_tertiary, labor_force_advanced_edu)
+  ) |>
+  ggplot_point_line(
+    year,
+    value,
+    group = name
   )
+
+# 4.3.5. Correlation between public-sector wage premium and relative employment
+# growth in the public sector (by skill, demographic, occupation, and geographical groups)
+contract_annual_growth |>
+  group_by(country_code) |>
+  compute_change(
+    col = total_headcount,
+    year
+  ) |>
+  ungroup() |>
+  left_join(
+    wwbi,
+    by = c("country_code", "year")
+  ) |>
+  ggplot(
+    aes(ps_wage_premium_pooled, total_headcount_growth)
+  ) +
+  geom_point() +
+  labs(
+    x = "Public Sector Wage Premium",
+    y = "Growth in headcount"
+  )
+
+# 4.3.6. Skills shortages in the private sector (from firm surveys)
+enterprise_surveys |>
+  filter(country_code == "BRA")
