@@ -542,7 +542,7 @@ merge_wrapper <- function(...){
 #'   gdp = c(100, 110, 130)
 #' )
 #'
-#' calculate_growth_rate(df, gdp, year)
+#' compute_change(df, gdp, year)
 #'
 #' @export
 compute_change <- function(data, col, date_col){
