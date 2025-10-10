@@ -17,6 +17,10 @@ social_sustainability <- social_sustainability_raw |>
   pivot_data360() |>
   rename(
     confidence_in_gov = wb_ssgd_pct_pop_conf_gov
+  ) |>
+  mutate(
+    year = as.numeric(year),
+    confidence_in_gov = as.numeric(confidence_in_gov)
   )
 
 usethis::use_data(social_sustainability, overwrite = TRUE)

@@ -248,4 +248,17 @@ contract_annual_growth |>
   )
 
 # 4.2. public sector productivity -----------------------------------------
-# 4.2.
+# 4.2.1. Correlation between wage bill growth and public-sector outputs and outcomes.
+# confidence in government
+# challenge: confidence in government is measured at the national level and
+# generally for only a few years
+# not representative at the institutional level
+contract_annual_growth |>
+  inner_join(
+    social_sustainability,
+    by = c("country_code", "year")
+  )
+
+# 4.3. labor allocation between public and private sectors ----------------
+
+
