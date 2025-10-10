@@ -9,7 +9,7 @@
 #' }
 #'
 #' @param dataset_id Unique identifier for the database.
-#' @param indicator_id Indicator ID.
+#' @param indicator_id Indicator ID. If a vector of indicators is provided, the query retrieves all indicators.
 #' @param pivot Whether or not to pivot the extracted data. Default is true.
 #'
 #' @import httr
@@ -20,6 +20,11 @@
 #' @export
 get_data360_api <- function(dataset_id, indicator_id, pivot = TRUE) {
   base_url <- "https://data360api.worldbank.org/data360/data"
+
+  indicator_id <- paste0(
+    indicator_id,
+    collapse = ","
+  )
 
   modified_url <- httr::modify_url(
     base_url,

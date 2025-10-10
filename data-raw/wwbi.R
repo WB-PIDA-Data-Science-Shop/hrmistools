@@ -18,47 +18,56 @@ wwbi_raw <- get_data360_api(
   pivot = FALSE
 )
 
-wwbi <- wwbi_raw |>
+wwbi_educational_attainment <- wwbi_raw |>
   filter(
-    COMP_BREAKDOWN_1 == "_Z"
-  )
-
-wwbi_occupation_input <- read_xlsx(
-  here("data-raw", "input", "wwbi", "wwbi_occupation.xlsx")
-)
-
-wwbi <- wwbi_input |>
-  select(
-    country_code = COUNTRY_CODE,
-    indicator_id = INDICATOR_ID,
-    year = CAL_YEAR,
-    value = IND_VALUE
-  ) |>
-  filter(
-    country_code != "AGGREGATE"
+    INDICATOR == "WB_WWBI_BI_PWK_PUBS_ED" &
+      str_detect(COMP_BREAKDOWN_1, "^ISCED")
   ) |>
   pivot_wider(
-    names_from = indicator_id,
-    values_from = value
+    id_cols = c(REF_AREA, TIME_PERIOD),
+    values_from = OBS_VALUE,
+    names_from = c(INDICATOR, COMP_BREAKDOWN_1),
+    names_sep = "_"
   ) |>
   rename(
-    share_public_sector = `WB.WWBI.BI.EMP.TOTL.PB.ZS`
+    country_code = REF_AREA,
+    year = TIME_PERIOD,
+    share_no_edu = WB_WWBI_BI_PWK_PUBS_ED_ISCED11_N,
+    share_primary_edu = WB_WWBI_BI_PWK_PUBS_ED_ISCED11_1,
+    share_secondary_edu = WB_WWBI_BI_PWK_PUBS_ED_ISCED11_2_3,
+    share_tertiary_edu = WB_WWBI_BI_PWK_PUBS_ED_ISCED11_5T8
+  )
+
+wwbi_wage_premium <- wwbi_raw |>
+  filter(
+    INDICATOR == "WB_WWBI_BI_WAG_PREM_PE"
+  ) |>
+  pivot_wider(
+    id_cols = c(REF_AREA, TIME_PERIOD),
+    values_from = OBS_VALUE,
+    names_from = c(INDICATOR, COMP_BREAKDOWN_1, SEX),
+    names_sep = "_"
+  ) |>
+  rename(
+    country_code = REF_AREA,
+    year = TIME_PERIOD,
+    ps_wage_premium_pooled = WB_WWBI_BI_WAG_PREM_PE__Z__T,
+    ps_wage_premium_female = WB_WWBI_BI_WAG_PREM_PE__Z_F,
+    ps_wage_premium_male = WB_WWBI_BI_WAG_PREM_PE__Z_M,
+    ps_wage_premium_edu_sector = WB_WWBI_BI_WAG_PREM_PE_WB_WWBI_INED__T,
+    ps_wage_premium_hea_sector = WB_WWBI_BI_WAG_PREM_PE_WB_WWBI_INHE__T
+  )
+
+wwbi <- wwbi_educational_attainment |>
+  full_join(
+    wwbi_wage_premium,
+    by = c("country_code", "year")
   ) |>
   mutate(
-    year = as.numeric(
-      str_sub(year, -4, -1)
+    across(
+      -c(country_code, year),
+      as.numeric
     )
   )
 
-wwbi_occupation <- wwbi_occupation_input |>
-  select(
-    country_code = ccode,
-    everything()
-  ) |>
-  clean_names()
-
-wwbi <- wwbi |>
-  classify_income_group()
-
 usethis::use_data(wwbi, overwrite = TRUE)
-usethis::use_data(wwbi_occupation, overwrite = TRUE)

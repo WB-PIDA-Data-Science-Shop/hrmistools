@@ -109,3 +109,23 @@
 #' @source World Bank
 #' \url{https://datacatalog.worldbank.org/int/search/dataset/0061880/Social-Sustainability-Global-Database-}
 "social_sustainability"
+
+#' @title Worldwide Bureaucracy Indicators
+#' @description The Worldwide Bureaucracy Indicators (WWBI) database is a unique cross-national dataset on public sector employment and wages that aims to fill an information gap, thereby helping researchers, development practitioners, and policymakers gain a better understanding of the personnel dimensions of state capability, the footprint of the public sector within the overall labor market, and the fiscal implications of the public sector wage bill. The dataset is derived from administrative data and household surveys, thereby complementing existing, expert perception-based approaches.
+#' @format A data frame with 993 rows and 11 variables:
+#' \describe{
+#'   \item{\code{country_code}}{character World Bank country code.}
+#'   \item{\code{year}}{character Year.}
+#'   \item{\code{share_no_edu}}{double Share of public sector workers with no education.}
+#'   \item{\code{share_primary_edu}}{double Share of public sector workers with primary education completed.}
+#'   \item{\code{share_secondary_edu}}{double Share of public sector workers with secondary education completed.}
+#'   \item{\code{share_tertiary_edu}}{double Share of public sector workers with tertiary education completed.}
+#'   \item{\code{ps_wage_premium_edu_sector}}{double Public sector wage premium in the education sector, compared to formal sector workers in the private sector.}
+#'   \item{\code{ps_wage_premium_hea_sector}}{double Public sector wage premium in the health sector, compared to formal sector workers in the private sector.}
+#'   \item{\code{ps_wage_premium_female}}{double Public sector wage premium for female workers, compared to formal sector workers in the private sector.}
+#'   \item{\code{ps_wage_premium_male}}{double Public sector wage premium for male workers, compared to formal sector workers in the private sector.}
+#'   \item{\code{ps_wage_premium_pooled}}{double Public sector wage premium for all public sector workers, compared to formal sector workers in the private sector.}
+#'}
+#' @source World Bank
+#' \url{https://data360.worldbank.org/en/int/dataset/WB_WWBI}
+"wwbi"
