@@ -2,14 +2,16 @@
 % Please edit documentation in R/data360api.R
 \name{get_data360_api}
 \alias{get_data360_api}
-\title{Fetch World Bank Data360 CPI}
+\title{This function retrieves data from the Data360 API.}
 \usage{
-get_data360_api(dataset_id, indicator_id)
+get_data360_api(dataset_id, indicator_id, pivot = TRUE)
 }
 \arguments{
 \item{dataset_id}{Unique identifier for the database.}
 
-\item{indicator_id}{Indicator ID.}
+\item{indicator_id}{Indicator ID. If a vector of indicators is provided, the query retrieves all indicators.}
+
+\item{pivot}{Whether or not to pivot the extracted data. Default is true.}
 }
 \value{
 A tibble containing data, including country codes, country names,

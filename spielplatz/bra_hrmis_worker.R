@@ -115,7 +115,7 @@ worker_active <- worker_active |>
         "ESPECIALIZAÇÃO INCOMPLETO",
         "ESPECIALIZA«√O COMPLETO",
         "ESPECIALIZA«√O INCOMPLETO"
-      ) ~ "Higher than secondary, not university",
+      ) ~ "Higher than secondary but not university",
       education %in% c(
         "CURSO SUPERIOR COMPLETO",
         "CURSO SUPERIOR INCOMPLETO",
@@ -131,7 +131,8 @@ worker_active <- worker_active |>
         "Secondary incomplete", "Secondary complete",
         "Higher than secondary but not university",
         "University incomplete or complete"
-      )
+      ),
+      ordered = TRUE
     )
   )
 
@@ -183,21 +184,6 @@ worker_id_multiple_contracts <- worker_id |>
 worker_id_multiple_contracts |>
   count(n_contract)
 
-# verify worker ids
-worker_active |>
-  inner_join(
-    worker_id_duplicate,
-    by = c("worker_id")
-  ) |>
-  arrange(worker_id) |>
-  select(
-    worker_id,
-    contract_id,
-    year,
-    birth_date,
-    gender
-  )
-
 contract_id_duplicate_national <- worker_id |>
   group_by(contract_id) |>
   summarise(
@@ -236,17 +222,6 @@ worker_active <- worker_active |>
 #   - Tribe (tribe)
 #   - Race (race)
 #   - Status (active/retired)
-worker_module <- worker_active |>
-  group_by(worker_id, ref_date) |>
-  summarise(
-    # birth_date = case_when(
-    #   birth_date <= as_date("2010-01-01") ~ min(birth_date),
-    #   TRUE ~ NA_Date_
-    # ),
-    educat7 = dedup_education(educat7),
-    .groups = "drop"
-  )
-
 # deduplicate gender
 worker_module_gender <- worker_active |>
   dedup_value_panel(
@@ -256,7 +231,7 @@ worker_module_gender <- worker_active |>
   )
 
 # if the number of rows for both match, left join
-worker_module <- worker_module |>
+worker_module <- worker_active |>
   left_join(
     worker_module_gender,
     by = c("worker_id", "ref_date")
@@ -274,6 +249,9 @@ dictionary_worker_cols <- c(
 worker_module_clean <- worker_module |>
   complete_columns(
     dictionary_worker_cols
+  ) |>
+  mutate(
+    country_code = "BRA"
   )
 
 worker_module_clean |>

@@ -23,7 +23,7 @@
 #' been renamed for convenience, but the original WDI variable codes are provided
 #' for reference.
 #'
-#' @format A tibble with 17,195 rows and 11 columns:
+#' @format A tibble with 11652 rows and 14 variables:
 #' \describe{
 #'   \item{country_code}{ISO3 country code (originally from Data360 API).}
 #'   \item{year}{Year of observation (character, originally from Data360 API).}
@@ -32,12 +32,16 @@
 #'   \item{prevenue_lcu}{Total government revenue (local currency units). Original WDI code: WB_WDI_GC_REV_XGRT_CN.}
 #'   \item{taxrevenue_lcu}{Total government tax revenue (local currency units). Original WDI code: WB_WDI_GC_TAX_TOTL_CN.}
 #'   \item{emp_pop_rate}{Employment-to-population ratio (in percent). Original WDI code: WB_WDI_SL_EMP_TOTL_SP_NE_ZS.}
+#'   \item{labor_force_total}{Labor force, total. Original WDI code: WB_WDI_SL_TLF_TOTL_IN.}
+#'   \item{labor_force_advanced_edu}{Labor force with advanced education (percentage of total working-age population with advanced education). Original WDI code: WB_WDI_SL_TLF_ADVN_ZS.}
 #'   \item{tot_pop}{Total population. Original WDI code: WB_WDI_SP_POP_TOTL.}
+#'   \item{government_expenditure_gdp}{General government final consumption expenditure (percentage of GDP). Original WDI code: WB_WDI_NE_CON_GOVT_ZS.}
 #'   \item{salaried_rate}{Share of employed people who are salaried (in percent). Original WDI code: WB_WDI_SL_EMP_WORK_ZS.}
 #'   \item{cpi}{Consumer Price Index, total. Original WDI code: WB_WDI_FP_CPI_TOTL.}
 #'   \item{ppp}{Purchasing Power Parity (local currency units per international USD). Original WDI code: WB_WDI_PA_NUS_PRVT_PP.}
-#'   \item{emp_pop}{The population of employed i.e. `emp_pop_rate` * `tot_pop`}
-#'   \item{salaried_pop}{The population of salaried workers i.e. `salaried_rate` * `emp_pop`}
+#'   \item{fiscal_balance}{Overall Fiscal Balance, USD, percentage of GDP.}
+#'   \item{emp_pop}{The population of employed i.e. `emp_pop_rate` * `tot_pop`.}
+#'   \item{salaried_pop}{The population of salaried workers i.e. `salaried_rate` * `emp_pop`.}
 #' }
 #'
 #' @details
@@ -95,3 +99,48 @@
 #' data(isco)
 #' head(isco)
 "isco"
+
+#' @title Social Sustainability Global Database
+#' @description The Social Sustainability global database and its visualization dashboard <https://public.tableau.com/app/profile/social.sustainability.and.inclusion.world.bank/viz/SocialSustainabilityGlobalDashboard2_0/Historia1?publish=yes/> are global public goods produced by the Social Development Global Practice of The World Bank Group. They feature leading indicators of inclusion, resilience, social cohesion, and process legitimacy, for 222 countries, disaggregated by population group and analyzed spatially and over time. In addition, the dashboard allows the user to overlay the indicators in the geospatial platform of the World Bank Group.
+#' @format A data frame with 195 rows and 3 variables:
+#' \describe{
+#'   \item{\code{country_code}}{character World Bank country code.}
+#'   \item{\code{year}}{numeric Year.}
+#'   \item{\code{confidence_in_gov}}{numeric Percentage of population with confidence in government.}
+#'}
+#' @source World Bank
+#' \url{https://datacatalog.worldbank.org/int/search/dataset/0061880/Social-Sustainability-Global-Database-}
+"social_sustainability"
+
+#' @title Worldwide Bureaucracy Indicators
+#' @description The Worldwide Bureaucracy Indicators (WWBI) database is a unique cross-national dataset on public sector employment and wages that aims to fill an information gap, thereby helping researchers, development practitioners, and policymakers gain a better understanding of the personnel dimensions of state capability, the footprint of the public sector within the overall labor market, and the fiscal implications of the public sector wage bill. The dataset is derived from administrative data and household surveys, thereby complementing existing, expert perception-based approaches.
+#' @format A data frame with 993 rows and 11 variables:
+#' \describe{
+#'   \item{\code{country_code}}{character World Bank country code.}
+#'   \item{\code{year}}{double Year.}
+#'   \item{\code{share_no_edu}}{double Share of public sector workers with no education.}
+#'   \item{\code{share_primary_edu}}{double Share of public sector workers with primary education completed.}
+#'   \item{\code{share_secondary_edu}}{double Share of public sector workers with secondary education completed.}
+#'   \item{\code{share_tertiary_edu}}{double Share of public sector workers with tertiary education completed.}
+#'   \item{\code{ps_wage_premium_edu_sector}}{double Public sector wage premium in the education sector, compared to formal sector workers in the private sector.}
+#'   \item{\code{ps_wage_premium_hea_sector}}{double Public sector wage premium in the health sector, compared to formal sector workers in the private sector.}
+#'   \item{\code{ps_wage_premium_female}}{double Public sector wage premium for female workers, compared to formal sector workers in the private sector.}
+#'   \item{\code{ps_wage_premium_male}}{double Public sector wage premium for male workers, compared to formal sector workers in the private sector.}
+#'   \item{\code{ps_wage_premium_pooled}}{double Public sector wage premium for all public sector workers, compared to formal sector workers in the private sector.}
+#'}
+#' @source World Bank
+#' \url{https://data360.worldbank.org/en/int/dataset/WB_WWBI}
+"wwbi"
+
+#' @title World Bank Enterprise Surveys
+#' @description The Formal Sector World Bank Enterprise Surveys, generally known by the shortened term, World Bank Enterprise Surveys (WBES), are the main product of the Enterprise Surveys team. They are nationally representative firm-level surveys with top managers and owners of businesses in over 160 economies, reaching 180 in upcoming years, that provide insight into many business environment topics such as access to finance, corruption, infrastructure, and performance, among others. The comprehensive data and analytical reports enable easy comparisons across economies and time. The information collected through these surveys is publicly available at the economy and firm level. Explore the indicators by economy or topic, browse the surveys, or access the granular data on the WBES data portal.
+#' @format A data frame with 413 rows and 3 variables:
+#' \describe{
+#'   \item{\code{country_code}}{character World Bank country code.}
+#'   \item{\code{year}}{character Year.}
+#'   \item{\code{workforce_constraint}}{character Proportion of establishments identifying an inadequately educated workforce as a major or severe constraint to the current operations of the establishment.}
+#'}
+#'
+#' @source World Bank
+#' \url{https://data360.worldbank.org/en/int/indicator/WB_ES_T_WK10}
+"enterprise_surveys"

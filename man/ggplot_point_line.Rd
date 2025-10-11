@@ -2,9 +2,9 @@
 % Please edit documentation in R/plots.R
 \name{ggplot_point_line}
 \alias{ggplot_point_line}
-\title{Plot grouped line chart with points}
+\title{Plot grouped line chart with labeled points}
 \usage{
-ggplot_point_line(data, x, y, group = NULL, ...)
+ggplot_point_line(data, x, y, group = NULL, label = NULL, ...)
 }
 \arguments{
 \item{data}{A data frame or tibble containing the variables to plot.}
@@ -13,17 +13,18 @@ ggplot_point_line(data, x, y, group = NULL, ...)
 
 \item{y}{Column to be mapped to the y-axis.}
 
-\item{group}{Column specifying the grouping variable.
-This will be mapped to color.}
+\item{group}{Column specifying the grouping variable (mapped to color).}
 
-\item{...}{Any other arguments passed to aes().}
+\item{label}{Column specifying the labels for each point (optional).}
+
+\item{...}{Any other arguments passed to \code{aes()}.}
 }
 \value{
 A \code{ggplot} object representing the grouped line chart.
 }
 \description{
-This function creates a line plot with points, showing how a variable
-(y) evolves along another variable (x)
+This function creates a line plot with labeled points, showing how a variable
+(y) evolves along another variable (x).
 }
 \examples{
 \dontrun{
@@ -31,7 +32,8 @@ ggplot_point_line(
   data,
   x = year,
   y = median_base_salary_ppp,
-  group = paygrade
+  group = paygrade,
+  label = year
 )
 }
 

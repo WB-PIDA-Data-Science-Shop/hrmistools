@@ -232,53 +232,6 @@ find_duplicate_ids <- function(data, identifier) {
     filter(n > 1)
 }
 
-#' Deduplicate education level factor values by selecting the minimum
-#'
-#' This function takes a factor vector of education levels and returns
-#' the lowest (minimum) level present. If all values are `NA` or empty,
-#' it returns `NA`. It is useful for collapsing multiple education
-#' responses for an individual into a single value.
-#'
-#' @param educat A factor vector representing education levels.
-#'   Factor levels should be ordered from lowest to highest.
-#'
-#' @return A character string corresponding to the lowest education
-#'   level present in `educat`, or `NA` if no valid value exists.
-#'
-#' @examples
-#' edu_levels <- factor(
-#'   c("Primary", "Secondary", "Tertiary"),
-#'   levels = c("Primary", "Secondary", "Tertiary"),
-#'   ordered = TRUE
-#' )
-#' dedup_education(edu_levels)
-#'
-#' # When there are missing values
-#' dedup_education(factor(c(NA, "Secondary"),
-#'   levels = c("Primary", "Secondary", "Tertiary"), ordered = TRUE))
-#'
-#' # When all values are NA
-#' dedup_education(factor(c(NA, NA),
-#'   levels = c("Primary", "Secondary", "Tertiary"), ordered = TRUE))
-#'
-#' @export
-dedup_education <- function(educat) {
-  min_educat <- ifelse(
-    length(which.min(as.integer(educat))) != 0,
-    # all edu values are empty
-    which.min(as.integer(educat)),
-    NA
-  )
-
-  if (is.na(min_educat)) {
-    educat_dedup <- NA
-  } else {
-    educat_dedup <- levels(educat)[min_educat]
-  }
-
-  return(educat_dedup)
-}
-
 #' Deduplicate and disambiguate an attribute using both lag and lead values
 #'
 #' Handles missing values and cases where the same date has conflicting
@@ -523,4 +476,55 @@ merge_wrapper <- function(...){
 
   return(y)
 
+}
+
+
+#' Calculate annual growth rates for a numeric column
+#'
+#' @description
+#' Computes the year-over-year growth rate of a numeric column in a data frame.
+#' The function first completes the date sequence using `tidyr::complete()` to
+#' ensure all years between the minimum and maximum are represented, then
+#' calculates the growth rate using lagged values.
+#'
+#' @param data A data frame or tibble containing the data.
+#' @param col A numeric column (unquoted) for which the growth rate will be calculated.
+#' @param date_col A date column (unquoted) used to order the data and define the time sequence.
+#'
+#' @return A tibble with two columns:
+#' \itemize{
+#'   \item The `date_col` column (yearly sequence from min to max).
+#'   \item A new column named `"growth_<col>"` containing the calculated
+#'   year-over-year growth rates.
+#' }
+#'
+#' @details
+#' - The function uses `tidyr::complete()` to fill in missing years in the date sequence.
+#'   Missing values in `col` will result in `NA` for the corresponding growth rate.
+#' - The first observation (or any where the lag is missing) will have `NA`.
+#' - Grouping is by the date column to summarise across the entire dataset; if you
+#'   have multiple series (e.g., countries), consider grouping beforehand.
+#'
+#' @examples
+#' library(dplyr)
+#' library(tidyr)
+#'
+#' df <- tibble(
+#'   year = c(2020, 2021, 2023),
+#'   gdp = c(100, 110, 130)
+#' )
+#'
+#' compute_change(df, gdp, year)
+#'
+#' @export
+compute_change <- function(data, col, date_col){
+  data |>
+    complete(
+      {{date_col}} := min({{date_col}}):max({{date_col}})
+    ) |>
+    transmute(
+      {{date_col}},
+      "{{col}}_growth" := {{col}}/lag({{col}}) - 1,
+      .groups = "drop"
+    )
 }
