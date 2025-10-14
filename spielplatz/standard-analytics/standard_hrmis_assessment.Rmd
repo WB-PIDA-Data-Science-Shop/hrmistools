@@ -1,3 +1,9 @@
+---
+title: "standard_hrmis_assessment"
+output: html_document
+---
+
+```{r message=FALSE, warning=FALSE, echo=FALSE}
 # reference:
 # https://documents1.worldbank.org/curated/en/324801640074379484/pdf/Public-Sector-Employment-and-Compensation-An-Assessment-Framework.pdf
 
@@ -73,6 +79,10 @@ wage_bill_change <- contract_ppp |>
     .groups = "drop"
   )
 
+```
+
+
+```{r}
 # analysis ----------------------------------------------------------------
 # 3.6. wage incentives ----------------------------------------------------
 # 3.6.1. percentage of staff receiving highest performance ratings
@@ -372,3 +382,6 @@ contract_annual_growth |>
 # 4.3.6. Skills shortages in the private sector (from firm surveys)
 enterprise_surveys |>
   filter(country_code == "BRA")
+
+```
+
