@@ -1,6 +1,6 @@
 ---
 title: "standard_hrmis_assessment"
-output: html_document
+output: word_document
 ---
 
 ```{r message=FALSE, warning=FALSE, echo=FALSE}
@@ -79,6 +79,11 @@ wage_bill_change <- contract_ppp |>
     .groups = "drop"
   )
 
+knitr::opts_chunk$set(
+  echo = FALSE,
+  warning = FALSE,
+  dpi = 300
+)
 ```
 
 
