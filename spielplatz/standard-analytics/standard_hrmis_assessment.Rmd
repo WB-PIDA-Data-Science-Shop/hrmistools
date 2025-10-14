@@ -82,6 +82,7 @@ wage_bill_change <- contract_ppp |>
 knitr::opts_chunk$set(
   echo = FALSE,
   warning = FALSE,
+  message = FALSE,
   dpi = 300
 )
 ```
@@ -241,7 +242,7 @@ contract_annual_growth |>
   ) +
   geom_point() +
   labs(
-    x = "Government Expenditre (Share of GDP)",
+    x = "Government Expenditure (Share of GDP)",
     y = "Wage growth"
   )
 
@@ -387,6 +388,5 @@ contract_annual_growth |>
 # 4.3.6. Skills shortages in the private sector (from firm surveys)
 enterprise_surveys |>
   filter(country_code == "BRA")
-
 ```
 
