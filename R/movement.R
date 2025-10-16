@@ -65,3 +65,38 @@ detect_hire_events <- function(worker_df, contract_df) {
 
   return(event_hire_df)
 }
+
+library(dplyr)
+library(lubridate)
+
+#' Calculate time intervals between reference dates
+#'
+#' This function computes the time interval between consecutive values
+#' in a reference date column, optionally within groups.
+#'
+#' @param data A data frame or tibble.
+#' @param ref_date Name of the column containing reference dates.
+#' @param group_vars Optional grouping variables (e.g., `id`, `country`, or `c(id, country)`).
+#'
+#' @return The original data with an additional set of columns indicating the
+#;   difference between consecutive reference dates.
+#' @examples
+#' df <- tibble(id = c(1, 1, 1, 2, 2),
+#'              ref_date = as.Date(c("2020-01-01", "2021-01-01", "2023-01-01",
+#'                                   "2020-06-01", "2020-12-01")))
+#' calculate_date_intervals(df, ref_date, id)
+#'
+#' @import lubridate
+#' @import dplyr
+#' @export
+calculate_date_intervals <- function(data, ref_date, group_vars = NULL) {
+  data |>
+    dplyr::group_by(
+      dplyr::across({{ group_vars }})
+    ) |>
+    dplyr::mutate(
+      interval_days = time_length(interval(lag({{ ref_date }}), {{ ref_date }}), unit = "day")
+    ) |>
+    dplyr::ungroup()
+}
+

@@ -66,29 +66,34 @@ event_hire_test_df <- detect_hire_events(
   contract_df
 )
 
-worker_df |>
-  arrange(ref_date) %>%
-  group_by(worker_id) |>
-  summarise(median(diff(ref_date))) %>%
-  pull(1)
+worker_interval_df <- worker_df |>
+  head(1e5) |>
+  arrange(
+    worker_id, ref_date
+  ) |>
+  calculate_date_intervals(
+    ref_date,
+    group_vars = worker_id
+  )
 
 worker_df |>
   filter(status == "active") |>
   arrange(worker_id, ref_date) |>
   group_by(worker_id) |>
-  mutate(
-    ref_date_lag = lag(ref_date)
-  ) |>
-  summarise(
-    ref_date = first(ref_date),
-    .groups = "drop"
-  ) |>
-  filter(
-    ref_date > min(ref_date)
+  # this is creating issues
+  complete(
+    ref_date = seq(ymd("2007-09-01"), ymd("2018-01-01"), by = "year")
   ) |>
   mutate(
-    type_event = "hire"
-  )
+    status_lag = lag(status),
+    type_event = if_else(
+      status == "active" & is.na(status_lag),
+      "hire",
+      "no hire"
+    )
+  ) |>
+  ungroup()
+
 
 # 2. infer fire
 contract_fire_df <- contract |>
