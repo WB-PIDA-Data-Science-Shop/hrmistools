@@ -2,6 +2,8 @@
 library(readr)
 library(dplyr)
 library(lubridate)
+library(stringr)
+library(tidyr)
 library(here)
 
 # read-in data ------------------------------------------------------------
@@ -22,7 +24,7 @@ worker <- read_rds(
 # 1. infer hire
 # a hire is defined as a new contract when the worker
 # was not present in the dataset in the previous period
-contract_hire <- contract |>
+contract_hire_df <- contract |>
   # only retain contracts when worker was active
   # at any point in our sample
   inner_join(
@@ -46,7 +48,7 @@ contract_hire <- contract |>
   )
 
 # if the worker does not appear in the previous ref_date, this is a hire
-event_hire <- contract_hire |>
+event_hire_df <- contract_hire |>
   mutate(
     ref_date_lag = ref_date - years(1)
   ) |>
@@ -60,7 +62,7 @@ event_hire <- contract_hire |>
   select(-ref_date_lag)
 
 # 2. infer fire
-contract_fire <- contract |>
+contract_fire_df <- contract |>
   # only retain contracts when worker was active
   # at any point in our sample
   inner_join(
@@ -84,7 +86,7 @@ contract_fire <- contract |>
   )
 
 # if the worker does not appear in the next ref_date, this is a firing
-event_fire <- contract_fire |>
+event_fire_df <- contract_fire |>
   mutate(
     ref_date_lead = ref_date + years(1)
   ) |>
@@ -99,7 +101,7 @@ event_fire <- contract_fire |>
 
 # 3. infer retirement
 # if the worker appears as retired in the next ref_date, this is a retirement
-worker_retired <- worker |>
+worker_retired_df <- worker |>
   group_by(worker_id) |>
   mutate(
     lag_status = lag(status)
@@ -110,7 +112,7 @@ worker_retired <- worker |>
       lag_status == "active"
   )
 
-event_retire <- worker_retired |>
+event_retire_df <- worker_retired |>
   select(worker_id, ref_date) |>
   mutate(
     type_event = "retire"
@@ -118,13 +120,21 @@ event_retire <- worker_retired |>
 
 # 4. infer movement
 # rename orgao id
-contract_rename_org <- contract |>
-  mutate(
-    org_id = str_remove_all(org_id, "\\d+|-"),
+contract_rename_org_df <- contract |>
+  rename(
     ref_date = org_date
+  ) |>
+  inner_join(
+    worker |> filter(status == "active"),
+    by = c("worker_id", "ref_date"),
+    relationship = "many-to-many"
+  ) |>
+  mutate(
+    org_id = str_remove_all(org_id, "\\d+|-")
   )
 
-contract_reallocation <- contract_rename_org |>
+# option 1: contract level
+contract_reallocation_df <- contract_rename_org |>
   arrange(ref_date, contract_id) |>
   group_by(contract_id) |>
   mutate(
@@ -144,3 +154,38 @@ contract_reallocation <- contract_rename_org |>
   select(
     org_id, worker_id, contract_id, ref_date, type_event
   )
+
+# option 2: worker level
+worker_reallocation_df <- contract_rename_org |>
+  arrange(worker_id, ref_date, org_id) |>
+  select(worker_id, ref_date, org_id) |>
+  group_by(worker_id, ref_date) |>
+  nest(
+    .key = "org_id_nested"
+  ) |>
+  group_by(worker_id) |>
+  # if the set of organizations worked for in the previous reference data
+  # do not match identically, it is a reallocation
+  mutate(
+    type_event = map2_chr(
+      org_id_nested,
+      lag(org_id_nested),
+      ~ ifelse(
+        !identical(.x, .y),
+        "reallocation",
+        "no reallocation"
+      )
+    )
+  ) |>
+  ungroup() |>
+  # remove hires
+  anti_join(
+    event_hire |>
+      distinct(worker_id, ref_date),
+    by = c("worker_id", "ref_date")
+  ) |>
+  # remove earliest ref_date in sample
+  filter(
+    ref_date > min(ref_date)
+  )
+
