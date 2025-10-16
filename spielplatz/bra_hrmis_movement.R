@@ -7,11 +7,11 @@ library(tidyr)
 library(here)
 
 # read-in data ------------------------------------------------------------
-contract <- read_rds(
+contract_df <- read_rds(
   here("spielplatz", "bra_hrmis_contract.rds")
 )
 
-worker <- read_rds(
+worker_df <- read_rds(
   here("inst/extdata/bra_hrmis_worker.rds")
 )
 
@@ -22,13 +22,13 @@ worker <- read_rds(
 # 3) event type: hire, dismissal, retirement, reallocation.
 
 # 1. infer hire
-# a hire is defined as a new contract when the worker
+# a hire is defined as a new contract when the worker_df
 # was not present in the dataset in the previous period
-contract_hire_df <- contract |>
-  # only retain contracts when worker was active
+contract_hire_df <- contract_df |>
+  # only retain contracts when worker_df was active
   # at any point in our sample
   inner_join(
-    worker |>
+    worker_df |>
       group_by(worker_id) |>
       filter(any(status == "active")) |>
       ungroup() |>
@@ -47,13 +47,13 @@ contract_hire_df <- contract |>
     .groups = "drop"
   )
 
-# if the worker does not appear in the previous ref_date, this is a hire
+# if the worker_df does not appear in the previous ref_date, this is a hire
 event_hire_df <- contract_hire |>
   mutate(
     ref_date_lag = ref_date - years(1)
   ) |>
   anti_join(
-    worker |> select(worker_id, ref_date),
+    worker_df |> select(worker_id, ref_date),
     by = c("worker_id", "ref_date_lag" = "ref_date")
   ) |>
   mutate(
@@ -61,12 +61,41 @@ event_hire_df <- contract_hire |>
   ) |>
   select(-ref_date_lag)
 
+event_hire_test_df <- detect_hire_events(
+  worker_df,
+  contract_df
+)
+
+worker_df |>
+  arrange(ref_date) %>%
+  group_by(worker_id) |>
+  summarise(median(diff(ref_date))) %>%
+  pull(1)
+
+worker_df |>
+  filter(status == "active") |>
+  arrange(worker_id, ref_date) |>
+  group_by(worker_id) |>
+  mutate(
+    ref_date_lag = lag(ref_date)
+  ) |>
+  summarise(
+    ref_date = first(ref_date),
+    .groups = "drop"
+  ) |>
+  filter(
+    ref_date > min(ref_date)
+  ) |>
+  mutate(
+    type_event = "hire"
+  )
+
 # 2. infer fire
 contract_fire_df <- contract |>
-  # only retain contracts when worker was active
+  # only retain contracts when worker_df was active
   # at any point in our sample
   inner_join(
-    worker |>
+    worker_df |>
       group_by(worker_id) |>
       filter(any(status == "active")) |>
       ungroup() |>
@@ -85,13 +114,13 @@ contract_fire_df <- contract |>
     .groups = "drop"
   )
 
-# if the worker does not appear in the next ref_date, this is a firing
+# if the worker_df does not appear in the next ref_date, this is a firing
 event_fire_df <- contract_fire |>
   mutate(
     ref_date_lead = ref_date + years(1)
   ) |>
   anti_join(
-    worker |> select(worker_id, ref_date),
+    worker_df |> select(worker_id, ref_date),
     by = c("worker_id", "ref_date_lead" = "ref_date")
   ) |>
   mutate(
@@ -100,8 +129,8 @@ event_fire_df <- contract_fire |>
   select(-ref_date_lead)
 
 # 3. infer retirement
-# if the worker appears as retired in the next ref_date, this is a retirement
-worker_retired_df <- worker |>
+# if the worker_df appears as retired in the next ref_date, this is a retirement
+worker_retired_df <- worker_df |>
   group_by(worker_id) |>
   mutate(
     lag_status = lag(status)
@@ -125,7 +154,7 @@ contract_rename_org_df <- contract |>
     ref_date = org_date
   ) |>
   inner_join(
-    worker |> filter(status == "active"),
+    worker_df |> filter(status == "active"),
     by = c("worker_id", "ref_date"),
     relationship = "many-to-many"
   ) |>
@@ -155,7 +184,7 @@ contract_reallocation_df <- contract_rename_org |>
     org_id, worker_id, contract_id, ref_date, type_event
   )
 
-# option 2: worker level
+# option 2: worker_df level
 worker_reallocation_df <- contract_rename_org |>
   arrange(worker_id, ref_date, org_id) |>
   select(worker_id, ref_date, org_id) |>
