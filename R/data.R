@@ -144,3 +144,69 @@
 #' @source World Bank
 #' \url{https://data360.worldbank.org/en/int/indicator/WB_ES_T_WK10}
 "enterprise_surveys"
+
+
+#' Harmonized Public Sector Employment Contracts (Sample)
+#'
+#' @description
+#' A harmonized dataset of 10,000 anonymized public sector employment contracts
+#' for Brazil. The data illustrate how administrative human resource (HR)
+#' information can be structured for analysis within the
+#' **Public Institutions Data and Analytics** framework. Variables include
+#' identifiers for contracts, workers, and organizations; employment dates;
+#' compensation measures; and occupational classifications.
+#'
+#' @format A tibble with 10,000 rows and 21 variables:
+#' \describe{
+#'   \item{contract_id}{Numeric. Unique identifier for the employment contract.}
+#'   \item{worker_id}{Numeric. Unique identifier for the worker (anonymized).}
+#'   \item{org_id}{Character. Name and code of the employing organization.}
+#'   \item{org_date}{Date. Date when the employing organization was established or recorded.}
+#'   \item{year}{Numeric. Reference year of the contract record.}
+#'   \item{base_salary_lcu}{Numeric. Base salary expressed in local currency units (LCU).}
+#'   \item{gross_salary_lcu}{Numeric. Gross salary including allowances and bonuses (LCU).}
+#'   \item{net_salary_lcu}{Numeric. Net salary after deductions (LCU).}
+#'   \item{whours}{Numeric. Weekly contracted working hours.}
+#'   \item{country_code}{Character. ISO3 country code (here, `"BRA"` for Brazil).}
+#'   \item{country_name}{Character. Country name.}
+#'   \item{adm1_name}{Character. Name of the first administrative division (e.g., state).}
+#'   \item{adm1_code}{Character. Administrative division code (e.g., `"AL"` for Alagoas).}
+#'   \item{start_date}{Date. Contract start date.}
+#'   \item{end_date}{Numeric. Contract end date (may be `NA` for ongoing contracts).}
+#'   \item{paygrade}{Character. Pay grade or salary level associated with the contract.}
+#'   \item{seniority}{Character. Seniority or position classification code.}
+#'   \item{occupation_native}{Character. Original occupation title in the source language (Portuguese).}
+#'   \item{occupation_english}{Character. English translation of the occupation title.}
+#'   \item{occupation_iscocode}{Numeric. ISCO-08 occupation code, where available.}
+#'   \item{occupation_isconame}{Character. ISCO-08 occupation group name.}
+#' }
+#'
+#' @details
+#' This dataset provides a harmonized structure for analyzing public employment
+#' and compensation across government entities. It is intended as a demonstration
+#' dataset for testing data pipelines, HR analytics tools, and summary functions
+#' such as [compute_summary()].
+#'
+#' The variables follow a consistent schema used for HRMIS-type administrative
+#' data within the World Bank’s Governance GP. Salary variables are expressed
+#' in **local currency units (LCU)** and are not adjusted for inflation.
+#'
+#' @examples
+#' data(contract_harmonized)
+#'
+#' dplyr::glimpse(contract_harmonized)
+#'
+#' # Example: Compute mean salary by occupation group
+#' compute_summary(contract_harmonized,
+#'                 cols = c("gross_salary_lcu"),
+#'                 groups = c("occupation_isconame"),
+#'                 fns = c("mean"))
+#'
+#' @source
+#' Synthetic dataset generated for illustrative purposes by ChatGPT (2025),
+#' based on typical administrative HR data structures used in public sector analytics.
+#'
+#' @keywords datasets
+"contract_harmonized"
+
+

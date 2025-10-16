@@ -8,15 +8,21 @@ wage_vars <- c("gross_salary_lcu",
                "base_salary_lcu")
 
 # wage bill by gdp, expenditures, revenues by year
-compute_share(data = contract_df,
-              cols = list(vars = c("gross_salary_lcu",
-                                   "net_salary_lcu",
-                                   "base_salary_lcu"),
-                          groups = c("country_code","year")),
-              macro_cols = c("gdp_lcu", "pexpenditure_lcu",
-                             "prevenue_lcu", "taxrevenue_lcu"),
-              fns = list(default = c("sum", "mean")),
-              output = "long")
+# compute_share(data = contract_df,
+#               cols = list(vars = c("gross_salary_lcu",
+#                                    "net_salary_lcu",
+#                                    "base_salary_lcu"),
+#                           groups = c("country_code","year")),
+#               macro_cols = c("gdp_lcu", "pexpenditure_lcu",
+#                              "prevenue_lcu", "taxrevenue_lcu"),
+#               fns = list(default = c("sum", "mean")),
+#               output = "long")
+
+compute_summary(data = contract_harmonized,
+                cols = wage_vars,
+                fns = c("sum", "mean"),
+                groups = c("occupation_isconame", "occupation_iscocode", "year"),
+                output = "long")
 
 # wage bill decomposed by administrative and industrial classification
 compute_summary(data = contract_df,
