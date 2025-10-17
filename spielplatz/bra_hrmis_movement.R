@@ -94,7 +94,6 @@ worker_df |>
   ) |>
   ungroup()
 
-
 # 2. infer fire
 contract_fire_df <- contract |>
   # only retain contracts when worker_df was active

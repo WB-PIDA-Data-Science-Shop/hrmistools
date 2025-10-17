@@ -36,7 +36,9 @@ detect_hire_events <- function(worker_df, contract_df) {
     inner_join(
       worker_df |>
         group_by(worker_id) |>
-        filter(any(status == "active")) |>
+        filter(
+          any(.data[["status"]] == "active")
+        ) |>
         ungroup() |>
         distinct(worker_id),
       by = "worker_id"
@@ -54,14 +56,16 @@ detect_hire_events <- function(worker_df, contract_df) {
     arrange(worker_id, ref_date) |>
     group_by(worker_id) |>
     mutate(
-      ref_date_lag = lag(ref_date)
+      ref_date_lag = lag(.data[["ref_date"]])
     ) |>
     anti_join(
       worker_df |> select(worker_id, ref_date),
       by = c("worker_id", "ref_date_lag" = "ref_date")
     ) |>
     mutate(type_event = "hire") |>
-    select(-ref_date_lag)
+    select(
+      -c(.data[["ref_date_lag"]])
+    )
 
   return(event_hire_df)
 }
@@ -81,6 +85,8 @@ library(lubridate)
 #' @return The original data with an additional set of columns indicating the
 #;   difference between consecutive reference dates.
 #' @examples
+#' library(tibble)
+#'
 #' df <- tibble(id = c(1, 1, 1, 2, 2),
 #'              ref_date = as.Date(c("2020-01-01", "2021-01-01", "2023-01-01",
 #'                                   "2020-06-01", "2020-12-01")))
@@ -99,4 +105,3 @@ calculate_date_intervals <- function(data, ref_date, group_vars = NULL) {
     ) |>
     dplyr::ungroup()
 }
-
