@@ -26,6 +26,6 @@ library(tibble)
 df <- tibble(id = c(1, 1, 1, 2, 2),
              ref_date = as.Date(c("2020-01-01", "2021-01-01", "2023-01-01",
                                   "2020-06-01", "2020-12-01")))
-calculate_date_intervals(df, ref_date, id)
+calculate_date_intervals(df, "ref_date", "id")
 
 }
