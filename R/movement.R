@@ -224,59 +224,6 @@ detect_reallocation <- function(data, worker_hire) {
   return(data_reallocation)
 }
 
-#' Detect Worker Reallocation Events (data.table version)
-#'
-#' Identifies reallocation events when a worker's set of organizations changes
-#' between consecutive reference dates. Removes hire events and keeps only
-#' reallocation events after the earliest reference date.
-#'
-#' @param data A data.frame or data.table containing at least the columns:
-#'   - `worker_id`: Unique worker identifier.
-#'   - `ref_date`: Reference date (Date or convertible to Date).
-#'   - `org_id`: Organization ID.
-#' @param worker_hire A data.frame or data.table containing hire events with columns
-#'   `worker_id` and `ref_date`.
-#'
-#' @return A data.table with columns:
-#'   - `worker_id`
-#'   - `ref_date`
-#'   - `org_id_nested`: List-column of organization IDs for that worker and date.
-#'   - `type_event`: `"reallocation"` or `"no reallocation"`.
-#'
-#' @examples
-#' \dontrun{
-#' worker_reallocation_dt <- detect_reallocation_dt(contract_rename_org_df, worker_hire_df)
-#' }
-detect_reallocation_dt <- function(data, worker_hire) {
-  # Ensure data.table
-  dt <- data.table::as.data.table(data)
-  hire_dt <- data.table::as.data.table(worker_hire)
-
-  # Sort by worker, date, org
-  data.table::setorderv(dt, c("worker_id", "ref_date", "org_id"))
-
-  # Nest org_id per worker_id and ref_date
-  nested_dt <- dt[, .(org_id_nested = list(unique(org_id))), by = .(worker_id, ref_date)]
-
-  # Detect reallocation by comparing to previous org_id_nested
-  nested_dt[, type_event := ifelse(
-    !mapply(identical, org_id_nested, data.table::shift(org_id_nested, type = "lag")),
-    "reallocation",
-    "no reallocation"
-  ), by = worker_id]
-
-  # Remove hire events (anti-join)
-  nested_dt <- nested_dt[!hire_dt, on = c("worker_id", "ref_date")]
-
-  # Remove earliest ref_date per worker and keep only reallocations
-  nested_dt[, min_ref := min(ref_date), by = worker_id]
-  nested_dt <- nested_dt[ref_date > min_ref & type_event == "reallocation"]
-  nested_dt[, min_ref := NULL]  # cleanup
-
-  return(nested_dt[])
-}
-
-
 #' Complete Panel Data by Identifier and Reference Dates
 #'
 #' Expands a dataset to include all combinations of identifiers and reference
