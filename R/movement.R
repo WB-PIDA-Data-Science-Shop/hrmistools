@@ -8,7 +8,7 @@
 #' @param group_vars Optional grouping variables (e.g., `id`, `country`, or `c(id, country)`).
 #'
 #' @return The original data with an additional set of columns indicating the
-#;   difference between consecutive reference dates.
+#'   difference between consecutive reference dates.
 #' @examples
 #' library(tibble)
 #'
@@ -28,7 +28,7 @@ calculate_date_intervals <- function(data, ref_date, group_vars = NULL) {
 
   # Calculate the interval using get() and shift()
   data[,
-       .(interval_days = as.numeric(ref_date) - as.numeric(data.table::shift(ref_date, type = "lag"))),
+       .(interval_days := as.numeric(ref_date) - as.numeric(data.table::shift(ref_date, type = "lag"))),
        by = group_vars
   ]
 
@@ -69,7 +69,7 @@ calculate_date_intervals <- function(data, ref_date, group_vars = NULL) {
 #' fires <- detect_worker_event(worker_df, id_col = "worker_id", start_date = "2007-09-01",
 #'                        end_date = "2018-01-01", event_type = "fire")
 #' }
-#'
+#' @export
 detect_worker_event <- function(data,
                                 id_col,
                                 event_type,
@@ -107,7 +107,7 @@ detect_worker_event <- function(data,
       status == "active" & is.na(data.table::shift(status, type = "lead")),
       "fire",
       "no fire"
-    )]
+    ), by = id_col]
   }
 
   expanded_active_workers_dt <- expanded_active_workers_dt[
@@ -135,7 +135,7 @@ detect_worker_event <- function(data,
 #' \dontrun{
 #' retire_events <- detect_retirement(worker_df)
 #' }
-#'
+#' @export
 detect_retirement <- function(data) {
   # Convert to data.table
   dt <- data.table::as.data.table(data)
@@ -185,6 +185,7 @@ detect_retirement <- function(data) {
 #' \dontrun{
 #' worker_reallocation_df <- detect_reallocation(contract_rename_org_df, worker_hire_df)
 #' }
+#' @export
 detect_reallocation <- function(data, worker_hire) {
   data_nested <- data %>%
     # Arrange by worker, date, and org
@@ -262,7 +263,7 @@ detect_reallocation <- function(data, worker_hire) {
 #'   freq = "year"
 #' )
 #' }
-#'
+#' @export
 complete_dates <- function(
     data,
     id_col,

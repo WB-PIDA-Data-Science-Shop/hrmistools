@@ -62,7 +62,7 @@ contract_rename_org_df <- contract_df |>
   )
 
 # option 1: contract level
-contract_reallocation_df <- contract_rename_org |>
+contract_reallocation_df <- contract_rename_org_df  |>
   arrange(ref_date, contract_id) |>
   group_by(contract_id) |>
   mutate(
