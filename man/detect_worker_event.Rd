@@ -48,5 +48,4 @@ hires <- detect_worker_event(worker_df, id_col = "worker_id", start_date = "2007
 fires <- detect_worker_event(worker_df, id_col = "worker_id", start_date = "2007-09-01",
                        end_date = "2018-01-01", event_type = "fire")
 }
-
 }

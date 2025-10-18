@@ -15,6 +15,7 @@ calculate_date_intervals(data, ref_date, group_vars = NULL)
 }
 \value{
 The original data with an additional set of columns indicating the
+  difference between consecutive reference dates.
 }
 \description{
 This function computes the time interval between consecutive values

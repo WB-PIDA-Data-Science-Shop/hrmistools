@@ -19,5 +19,4 @@ Identifies workers who retired, i.e., whose status changed from "active" to "ina
 \dontrun{
 retire_events <- detect_retirement(worker_df)
 }
-
 }

@@ -27,8 +27,8 @@ calculate_date_intervals <- function(data, ref_date, group_vars = NULL) {
   data.table::setorderv(data, c(group_vars, ref_date))
 
   # Calculate the interval using get() and shift()
-  data[,
-       .(interval_days := as.numeric(ref_date) - as.numeric(data.table::shift(ref_date, type = "lag"))),
+  data_out <- data[,
+       .(interval_days = as.numeric(ref_date) - as.numeric(data.table::shift(ref_date, type = "lag"))),
        by = group_vars
   ]
 

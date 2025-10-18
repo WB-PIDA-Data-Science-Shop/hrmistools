@@ -45,5 +45,4 @@ complete_dt <- complete_dates(
   freq = "year"
 )
 }
-
 }
