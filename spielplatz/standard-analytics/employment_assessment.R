@@ -7,6 +7,7 @@ library(dplyr)
 library(readr)
 library(ggplot2)
 library(purrr)
+library(lubridate)
 library(ggthemes)
 
 # set default color palette with scale_color_brewer

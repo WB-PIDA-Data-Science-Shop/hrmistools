@@ -81,11 +81,33 @@ worker_active <- worker_active_list |>
   ) |>
   bind_rows() |>
   # extract the month of september
-  filter(month == 9)
+  filter(month == 9) |>
+  mutate(
+    status = "active"
+  )
+
+worker_inactive <- worker_inactive_list |>
+  map(
+    \(data){
+      data |>
+        harmonize_columns(dictionary_worker)
+    }
+  ) |>
+  bind_rows() |>
+  # extract the month of september
+  filter(month == 9) |>
+  mutate(
+    status = "inactive"
+  )
+
+worker <- worker_active |>
+  bind_rows(
+    worker_inactive
+  )
 
 # we need to create quality-checks that are specific to each standardized column
 # does it match our expectations
-worker_active <- worker_active |>
+worker <- worker |>
   mutate(
     birth_date = as_date(
       as.numeric(birth_date), origin = "1899-12-30"
@@ -137,7 +159,7 @@ worker_active <- worker_active |>
   )
 
 # check age
-worker_active <- worker_active |>
+worker <- worker |>
   mutate(
     age = if_else(
       age <= 17 & is.na(educat7),
@@ -147,7 +169,7 @@ worker_active <- worker_active |>
   )
 
 # check for uniqueness per year
-worker_quality_check <- create_agent(tbl = worker_active) |>
+worker_quality_check <- create_agent(tbl = worker) |>
   rows_distinct(
     columns = contract_id,
     segments = vars(year),
@@ -166,7 +188,7 @@ worker_quality_check |>
 
 # deduplicate -------------------------------------------------------------
 # matricula is the contract ID
-worker_id <- worker_active |>
+worker_id <- worker |>
   distinct(
     contract_id,
     worker_id
@@ -194,7 +216,7 @@ contract_id_duplicate_national <- worker_id |>
 
 # decision: override national id with the first national id for each contract_id
 # 98 national ids affected
-worker_active <- worker_active |>
+worker <- worker |>
   left_join(
     contract_id_duplicate_national,
     by = "contract_id"
@@ -223,7 +245,7 @@ worker_active <- worker_active |>
 #   - Race (race)
 #   - Status (active/retired)
 # deduplicate gender
-worker_module_gender <- worker_active |>
+worker_module_gender <- worker |>
   dedup_value_panel(
     gender,
     worker_id,
@@ -231,14 +253,15 @@ worker_module_gender <- worker_active |>
   )
 
 # if the number of rows for both match, left join
-worker_module <- worker_active |>
+worker_module <- worker |>
   left_join(
     worker_module_gender,
     by = c("worker_id", "ref_date")
   ) |>
-  mutate(
-    status = "active"
-  )
+  rename(
+    gender = gender.y
+  ) |>
+  select(-gender.x)
 
 # create a function that does a conformity assessment
 # and fill out missing columns with NA
