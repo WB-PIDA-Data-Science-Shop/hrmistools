@@ -13,6 +13,8 @@ library(writexl)
 library(pointblank)
 library(labourR)
 
+devtools::load_all()
+
 # read-in data ------------------------------------------------------------
 file_path <- "//egvpi/egvpi/data/harmonization/HRM/BRA/data-raw/6. Wage Bill AL/3. Microdados"
 
@@ -138,7 +140,7 @@ contract_alagoas_tbl <-
         contract_id = MATRICULA,
         worker_id = CPF,
         org_id = paste(ORGAO, COD_ORGAO, ANO_PAGAMENTO, sep = "-"),
-        org_date = as.Date(paste(ANO_PAGAMENTO, MES_REFERENCIA, "01", sep = "-")),
+        ref_date = as.Date(paste(ANO_PAGAMENTO, MES_REFERENCIA, "01", sep = "-")),
         year = as.numeric(ANO_PAGAMENTO),
         base_salary_lcu = SALARIO_BASE,
         allowance_lcu = ABONO_PERMANENCIA,
@@ -163,7 +165,7 @@ contract_alagoas_tbl <-
         contract_id = MATRICULA,
         worker_id = CPF,
         org_id = paste(ORGAO, "000000", sep = "-"),
-        org_date = as.Date(paste(ANO_PAGAMENTO, MES_REFERENCIA, "01", sep = "-")),
+        ref_date = as.Date(paste(ANO_PAGAMENTO, MES_REFERENCIA, "01", sep = "-")),
         year = as.numeric(ANO_PAGAMENTO),
         base_salary_lcu = NA,
         allowance_lcu = NA,
