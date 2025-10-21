@@ -1,7 +1,13 @@
 ---
-title: "standard_hrmis_assessment"
-output: word_document
+title: "HRMIS Analytics: Standard Report"
+author: "Galileu Kim"
+date: "October 20, 2025"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
 ---
+
 
 ```{r message=FALSE, warning=FALSE, echo=FALSE}
 # reference:
@@ -87,13 +93,41 @@ knitr::opts_chunk$set(
 )
 ```
 
+# Introduction {.tabset}
+
+This report provides a standard set of indicators and visualizations on HRMIS analytics, building on the World Bank's [Public Sector and Employment Assessment Framework](https://documents1.worldbank.org/curated/en/324801640074379484/pdf/Public-Sector-Employment-and-Compensation-An-Assessment-Framework.pdf). The objective of this assessment is to conduct public sector employment and compensation assessments that can help develop evidence-based reforms.
+
+The assessment framework consists of two parts. The first part assesses both the institutional and behavioral aspects of employment and compensation practices. It comprises six dimensions:
+
+1. Wage bill planning.
+2. Wage bill controls.
+3. Employment levels and distribution of the public sector workforce.
+4. Wage competitiveness of the public sector.
+5. Wage equity.
+6. Wage incentives.
+
+The second part assesses the impact of these employment and compensation practices on:
+
+1. Fiscal sustainability.
+2. Public sector productivity.
+3. Labor allocation between the public and private sectors.
+
+## 3.6. Wage incentives {.tabset}
+
+The extent to which wage increases are explicitly linked to performance is important for both employee motivation and public sector productivity. This section provide some key stylized facts that provide evidence of the productivity and fiscal implications of pay incentives. These include: the magnitude of promotion-based and seniority-based annual wage increases, expected wage increases over an employee's career and the coverage and key design features of performance bonuses.
+
+Guidance questions for the assessment:
+
+1. What wage growth is typical for public sector employees in different occupational groups over the course of their career? How of much of this wage growth is dependent on promotions and how much can occur “within grade”?
+2. Does the annual performance management system distinguish between high and low performers? Are promotion decisions largely seniority based and/or automatic?
+3. Are there performance bonus schemes and if so what occupation groups and percentage of the staff receive them; and how large is the bonus that staff are expected to receive?
+4. Is there targeted, significant additional pay for essential workers to serve in hard-to-staff locations such as rural areas?
+
+### 3.6.1. Percentage of staff receiving highest performance ratings
+
+### 3.6.2. The size of annual, within-grade pay increases
 
 ```{r}
-# analysis ----------------------------------------------------------------
-# 3.6. wage incentives ----------------------------------------------------
-# 3.6.1. percentage of staff receiving highest performance ratings
-# N/A
-
 # 3.6.2. annual, within-grade pay increases
 contract_ppp |>
   filter(
@@ -158,7 +192,11 @@ wage_bill_change |>
     y = "Annual Change (%)",
     title = "Annual Change in Median Salary by Paygrade"
   )
+```
 
+### 3.6.3. percentage of staff receiving a performance bonus
+
+```{r}
 # 3.6.3. percentage of staff receiving a performance bonus
 performance_bonus_worker <- contract |>
   filter(
@@ -194,7 +232,13 @@ contract |>
     y = "Share of personnel"
   )
 
-# 3.6.4. performance bonus as a percentage of basic pay
+# 3.6.6. hardship allowance and percentage of staff receiving it
+# n/a: no data on hardship available
+```
+
+###  3.6.4. Performance bonus as a percentage of basic pay
+
+```{r}
 contract_summary_ppp |>
   mutate(
     share_allowance = allowance_ppp_mean/base_salary_ppp_mean
@@ -220,19 +264,31 @@ contract_summary_ppp |>
     x = "Year",
     y = "Share of personnel"
   )
+```
 
-# 3.6.6. hardship allowance and percentage of staff receiving it
-# n/a: no data on hardship available
+## 4.1. Fiscal sustainability {.tabset}
 
-# fiscal sustainability ---------------------------------------------------
-# 4.1.1. correlation between wage bill growth and fiscal balances
+The wage bill can potentially have a major effect on fiscal balances, but there are no simple benchmarks for the “right” size of the wage bill. In fact, cross-national evidence suggests that there is no strong correlation between the size of the wage bill and fiscal balance. Wage bill dynamics are a better predictor of fiscal sustainability. In general, increases in the wage bill are associated with worsening of the fiscal balance. In addition, wage expenditures are pro-cyclical, rising during periods of economic growth, but not falling as much during downturns due to structural rigidity.
+
+Guidance questions for the assessment:
+
+1. What are the wage bill dynamics and how are changes in the wage bill being financed - i.e. through deficits, raising revenues, or reducing other expenditures?
+2. What are the main drivers of wage bill growth?
+3. What are the wage bill projections for baseline and different policy option scenarios based on wage bill modeling?
+
+### 4.1.1. Correlation between wage bill growth and fiscal balances
+
+```{r}
 contract_annual_growth |>
   ggplot() +
   geom_point(
     aes(growth_median_wage_ppp, fiscal_balance)
   )
+```
 
-# 4.1.2.Correlation between wage bill growth and changes in capital and non-wage recurrent expenditures
+### 4.1.2.Correlation between wage bill growth and changes in capital and non-wage recurrent expenditures
+
+```{r}
 contract_annual_growth |>
   ggplot(
     aes(
@@ -245,8 +301,11 @@ contract_annual_growth |>
     x = "Government Expenditure (Share of GDP)",
     y = "Wage growth"
   )
+```
 
-# 4.1.3. Decomposition of wage growth: employment and wages
+### 4.1.3. Decomposition of wage growth: employment and wages
+
+```{r}
 contract_annual_growth |>
   filter(year <= 2017) |>
   transmute(
@@ -263,21 +322,52 @@ contract_annual_growth |>
     value,
     group = Indicator
   )
+```
 
-# 4.2. public sector productivity -----------------------------------------
-# 4.2.1. Correlation between wage bill growth and public-sector outputs and outcomes.
+## 4.2. Public sector productivity {.tabset}
+
+A key question is whether the public sector workforce is performing well and delivering high quality infrastructure, services, and regulations, which is really a question of public sector labor productivity. Productivity measures the efficiency with which inputs, like labor, are converted into outputs, and is a more precise and economically meaningful concept than “performance,” since presumably performance can be improved by spending more while productivity measures whether more is produced and delivered for a given wage bill.
+
+Measuring labor productivity in government is challenging, mainly because of the difficulty in defining and measuring government outputs. For example, functions such as defense, foreign relations, and environmental protection are difficult to quantify with respect to prices, as well as services for which there are no market transactions. Given these challenges, a diversified approach to measuring outputs must be used. These alternative measures can be distinguished into macro approaches, which provide information at the level of an organization, sector, or service as a whole; and micro approaches, which be applied to the individual employee, task, project, and process.
+
+Guidance questions for the assessment.
+
+1. Is total labor expenditure in the sector, including staff wages, outsourced labor costs, and external consultancy fees,correlated with sector-specific improvements in public-sector outputs and outcomes, so that productivity measures are stable or increasing within sector over time?
+2. Using subnational data, if available, are there any outliers in the current distribution of total labor expenditure, publicsector output measures, outcome measures, or measures of productivity? Are there any outliers in the trends of these
+subnational measures—for example, recent rapid growth or declines in a particular subnational entity)? What might be the underlying features explaining the existence of such outliers?
+3. Are total labor expenditures and public sector wages correlated with measures of institutional quality over time? Measures of institutional quality include the Worldwide Governance Indicators, perceptions of the quality of governance through household surveys – such as Eurobarometer, Afrobarometer, or World Values Surveys – the OECD’s Government at a Glance Indicators, the Quality of Government Index, and the World Bank’s Doing Business Indicators. With household level data and any other subnational data on measures of institutional quality, are there any outliers across subnational entities in the current distribution of institutional quality or outliers in the trends of measures of institutional quality?
+
+### 4.2.1. Correlation between wage bill growth and public-sector outputs and outcomes.
+
+```{r, eval = FALSE}
 # confidence in government
 # challenge: confidence in government is measured at the national level and
 # generally for only a few years
 # not representative at the institutional level
+
 contract_annual_growth |>
   inner_join(
     social_sustainability,
     by = c("country_code", "year")
   )
 
-# 4.3. labor allocation between public and private sectors ----------------
-# 4.3.1. public sector wage premium
+```
+
+## 4.3. Labor allocation between public and private sectors {.tabset}
+
+Public sector employment and compensation policies
+can have major impacts on the entire labor market,
+particularly in low- and middle-income countries where the public sector is the dominant formal sector employer. Globally, the public sector accounts for 38
+percent of formal employment, reaching almost 50 percent for low-income and lower-middle and countries. This large labor market presence, combined with public sector wage premia and job security, can lead to unemployment, particularly for fresh university graduates who queue for public sector entry level job openings and reject private sector job offers.
+
+Guidance questions:
+
+1. Is the public sector crowding out the labor market, impeding private-sector job growth for specific skills, occupation, demographic, and geographical groups?
+2. Is the public sector having a distortionary impact on younger cohorts, particularly fresh university graduates, causing them to queue for public sector jobs and reject private sector jobs?
+
+### 4.3.1. Public sector wage premium
+
+```{r}
 wwbi |>
   filter(country_code == "BRA") |>
   ggplot_point_line(
@@ -313,13 +403,14 @@ wwbi |>
     value,
     group = name
   )
+```
 
-# 4.3.2. Number of applications per position
-# N/A
+### 4.3.2. Number of applications per position
+N/A
 
-# 4.3.3. Correlation between public sector employment growth or recruitment patterns and
-# private-sector employment growth or recruitment patterns (by skill, demographic, occupation,
-# and geographical groups)
+### 4.3.3. Correlation between public sector employment growth or recruitment patterns and private-sector employment growth or recruitment patterns (by skill, demographic, occupation, and geographical groups)
+
+```{r}
 contract_annual_growth |>
   transmute(
     year,
@@ -339,8 +430,10 @@ contract_annual_growth |>
     x = "Year",
     y = "Index (2007 = 100)"
   )
+```
 
-# 4.3.4. Trends in educational profiles of public-sector workers relative to private-sector workers (by demographic, occupation, and geographical groups)
+### 4.3.4. Trends in educational profiles of public-sector workers relative to private-sector workers (by demographic, occupation, and geographical groups)
+```{r}
 worker |>
   mutate(
     year = year(ref_date)
@@ -362,9 +455,11 @@ worker |>
     value,
     group = name
   )
+```
 
-# 4.3.5. Correlation between public-sector wage premium and relative employment
-# growth in the public sector (by skill, demographic, occupation, and geographical groups)
+### 4.3.5. Correlation between public-sector wage premium and relative employment growth in the public sector (by skill, demographic, occupation, and geographical groups)
+
+```{r}
 contract_annual_growth |>
   group_by(country_code) |>
   compute_change(
@@ -384,8 +479,11 @@ contract_annual_growth |>
     x = "Public Sector Wage Premium",
     y = "Growth in headcount"
   )
+```
 
-# 4.3.6. Skills shortages in the private sector (from firm surveys)
+### 4.3.6. Skills shortages in the private sector (from firm surveys)
+
+```{r}
 enterprise_surveys |>
   filter(country_code == "BRA")
 ```
