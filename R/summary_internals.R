@@ -188,7 +188,52 @@ define_fns <- function(){
 
 
 
-
+#' Apply multiple functions to multiple variables (data.table compatible)
+#'
+#' @description
+#' A lightweight helper function that applies a list of functions to a set of variables,
+#' mimicking the behavior of `dplyr::summarise_at()`, but designed for use within
+#' `data.table` syntax. This is useful when you want to compute several summary
+#' statistics (e.g., mean, sd) over a subset of columns defined by `.SD` and
+#' `.SDcols`.
+#'
+#' @param var A vector, list, or data frame-like object (e.g., `.SD` inside a
+#'   `data.table` call) containing the variables to which the functions should
+#'   be applied.
+#' @param funs A character vector of function names (e.g., `"mean"`, `"sd"`, `"sum"`)
+#'   or a list of function objects to be applied to each element of `var`.
+#' @param ... Additional arguments passed to each function call (e.g., `na.rm = TRUE`).
+#'
+#' @return A named list where each element corresponds to a combination of variable
+#'   and function (e.g., `Sepal.Length_mean`, `Sepal.Length_sd`), suitable for
+#'   use inside `data.table::lapply()`.
+#'
+#' @examples
+#' library(data.table)
+#' iris_dt <- as.data.table(iris)
+#'
+#' # Compute mean and sd for Sepal variables by Species
+#' iris_dt[, lapply_at(.SD, c("mean", "sd"), na.rm = TRUE),
+#'         .SDcols = patterns("^Sepal"),
+#'         by = Species]
+#'
+#' @seealso [dplyr::summarise_at()], [data.table::lapply()]
+#'
+#' @export
+lapply_at <- function(var, funs, ...) {
+  results <- sapply(var, function(var) {
+    lapply(funs, do.call, list(var, ...))
+  })
+  names(results) <- vapply(
+    names(var),
+    paste,
+    funs,
+    sep = "_",
+    FUN.VALUE = character(length(funs)),
+    USE.NAMES = FALSE
+  )
+  results
+}
 
 
 
