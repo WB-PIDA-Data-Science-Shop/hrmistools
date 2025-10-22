@@ -6,3 +6,4 @@
 ^data-raw$
 ^spielplatz$
 ^\.github$
+^codecov\.yml$

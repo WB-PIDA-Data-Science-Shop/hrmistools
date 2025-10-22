@@ -3,6 +3,7 @@
 
 <!-- badges: start -->
 [![R-CMD-check](https://github.com/WB-PIDA-Data-Science-Shop/hrmistools/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/WB-PIDA-Data-Science-Shop/hrmistools/actions/workflows/R-CMD-check.yaml)
+[![Codecov test coverage](https://codecov.io/gh/WB-PIDA-Data-Science-Shop/hrmistools/graph/badge.svg)](https://app.codecov.io/gh/WB-PIDA-Data-Science-Shop/hrmistools)
 <!-- badges: end -->
 
 The goal of hrmistools is to ...
