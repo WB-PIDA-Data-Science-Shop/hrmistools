@@ -209,4 +209,57 @@
 #' @keywords datasets
 "contract_harmonized"
 
+#' HRMIS Harmonization Data Dictionary
+#'
+#' A structured metadata dictionary describing variables harmonized across
+#' the Human Resource Management Information System (HRMIS) modules:
+#' Organization, Worker, and Contract. The dictionary follows
+#' SDMX-style documentation standards and specifies variable names,
+#' identifiers, data types (in R), relationships, and other metadata fields
+#' used in HRMIS data harmonization.
+#'
+#' @format A tibble with 48 rows and 9 variables:
+#' \describe{
+#' \item{Concept Name}{Variable or concept name as used in the HRMIS module.}
+#' \item{Concept ID}{Short machine-readable variable name used in datasets.}
+#' \item{Description}{Detailed explanation of the variable or concept.}
+#' \item{Data Type}{R data type assigned to the variable (e.g., \code{character}, \code{numeric}, \code{Date}).}
+#' \item{Representation (Code list / Format)}{Expected format, code list, or data representation.}
+#' \item{Primary Key}{Indicates whether the variable uniquely identifies a record (\code{"Yes"} or \code{"No"}).}
+#' \item{Relationship}{Describes any relational links to other modules or variables.}
+#' \item{Module}{The HRMIS module the variable belongs to: \code{"Organization"}, \code{"Worker"}, or \code{"Contract"}.}
+#' \item{Example Value}{Illustrative example value for the variable.}
+#' }
+#'
+#' @details
+#' The dictionary integrates all HRMIS modules into a single metadata table.
+#' It was designed for use in R-based harmonization workflows and
+#' conforms to SDMX Content-Oriented Guidelines (COG) for defining
+#' concepts, code lists, and roles.
+#'
+#' @references
+#' SDMX Technical Standards v3.0 — Data Structure Definition (DSD):
+#' \url{https://sdmx.org/?page_id=5008}
 
+#'
+#' SDMX Content-Oriented Guidelines (COG):
+#' \url{https://sdmx.org/?page_id=4345}
+
+#'
+#' Eurostat SDMX Metadata Reference Manual:
+#' \url{https://ec.europa.eu/eurostat/web/metadata/reference-metadata-reporting-standards}
+
+#'
+#' @examples
+#'
+#' library(dplyr)
+#' data(harmonization_dict)
+#'
+#' # View structure
+#' glimpse(harmonization_dict)
+#'
+#'# Filter dictionary by module
+#' harmonization_dict |>
+#' filter(Module == "Worker")
+#'
+"harmonization_dict"
