@@ -178,10 +178,9 @@ detect_retirement <- function(data) {
 #'   - `org_id_nested`: List-column of organization IDs for that worker and date.
 #'   - `type_event`: `"reallocation"` or `"no reallocation"`.
 #'
-#' @importFrom dplyr arrange select group_by mutate ungroup distinct filter anti_join
+#' @importFrom dplyr arrange select group_by mutate ungroup distinct filter anti_join lag
 #' @importFrom tidyr nest
 #' @importFrom purrr map2_chr
-#' @importFrom stats lag
 #'
 #' @examples
 #' \dontrun{

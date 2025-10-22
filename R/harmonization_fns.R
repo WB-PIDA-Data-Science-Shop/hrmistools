@@ -187,7 +187,7 @@ detect_inconsistent_cols <- function(data, inconsistent_cols) {
 #'
 #' @import dplyr
 #' @importFrom purrr set_names
-#' @importFrom rlang := !!!
+#' @importFrom rlang !!!
 #' @export
 harmonize_columns <- function(data, dictionary) {
   # If a data frame is supplied as dict, convert to named vector

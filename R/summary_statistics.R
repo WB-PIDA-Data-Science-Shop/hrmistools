@@ -603,7 +603,6 @@ compute_fastshare <- function(data,
 #'
 #' @importFrom dplyr arrange mutate if_else lag
 #' @importFrom tidyr complete
-#' @importFrom rlang := !!
 #' @importFrom tibble tibble
 #'
 #' @examples
