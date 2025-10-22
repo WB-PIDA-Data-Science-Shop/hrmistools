@@ -409,7 +409,7 @@ compute_share <- function(data,
     ratio_df <-
       ratio_df |>
       distinct() |>  # prevent duplicates
-      dplyr::select(join_vars, indicator, value) |>
+      dplyr::select(all_of(join_vars), indicator, value) |>
       pivot_wider(names_from = indicator,
                   values_from = value) |>
       left_join(keep_df, by = join_vars)
@@ -532,9 +532,9 @@ compute_fastshare <- function(data,
   ratio_dt <- merge(long_macro, long_summary,
                     by = join_vars,
                     allow.cartesian = TRUE)[
-                      , `:=`(
-                        indicator = paste0(summary_var, "_per_", macro_var),
-                        value = summary_value / macro_value
+                      , c("indicator", "value") := .(
+                        paste0(summary_var, "_per_", macro_var),
+                        summary_value / macro_value
                       )
                     ][
                       , .SD,
@@ -575,57 +575,61 @@ compute_fastshare <- function(data,
 
 
 
-#' Calculate annual growth rates for a numeric column
+#' Compute Year-over-Year Growth for a Numeric Column
 #'
-#' @description
-#' Computes the year-over-year growth rate of a numeric column in a data frame.
-#' The function first completes the date sequence using `tidyr::complete()` to
-#' ensure all years between the minimum and maximum are represented, then
-#' calculates the growth rate using lagged values.
+#' This function calculates the year-over-year growth rate for a specified numeric
+#' column in a data frame or tibble. It automatically completes missing time periods
+#' based on the range of the date column, ensuring continuous sequences before
+#' computing growth. Growth is computed only for consecutive years where both
+#' the current and previous values are available. If a year is missing in the sequence,
+#' the growth for the next available year is set to `NA`.
 #'
-#' @param data A data frame or tibble containing the data.
-#' @param col A numeric column (unquoted) for which the growth rate will be calculated.
-#' @param date_col A date column (unquoted) used to order the data and define the time sequence.
-#'
-#' @return A tibble with two columns:
-#' \itemize{
-#'   \item The `date_col` column (yearly sequence from min to max).
-#'   \item A new column named `"growth_<col>"` containing the calculated
-#'   year-over-year growth rates.
-#' }
+#' @param data A data frame or tibble containing the variables of interest.
+#' @param col The numeric column for which to compute growth (unquoted).
+#' @param date_col The date or year column used to order and complete the data (unquoted).
 #'
 #' @details
-#' - The function uses `tidyr::complete()` to fill in missing years in the date sequence.
-#'   Missing values in `col` will result in `NA` for the corresponding growth rate.
-#' - The first observation (or any where the lag is missing) will have `NA`.
-#' - Grouping is by the date column to summarise across the entire dataset; if you
-#'   have multiple series (e.g., countries), consider grouping beforehand.
+#' The function uses `tidyr::complete()` to fill missing time periods between
+#' `min(date_col)` and `max(date_col)`, and `dplyr::mutate()` to compute growth as:
+#' \deqn{growth_t = \frac{x_t}{x_{t-1}} - 1}
+#'
+#' However, growth is only computed when the difference between consecutive
+#' periods equals 1 (i.e., consecutive years). If the time gap is greater than one year,
+#' the growth value is set to `NA`.
+#'
+#' @return
+#' A tibble containing the original columns plus a new column that
+#' holds the computed year-over-year growth rates.
+#'
+#' @importFrom dplyr arrange mutate if_else lag
+#' @importFrom tidyr complete
+#' @importFrom rlang := !!
+#' @importFrom tibble tibble
 #'
 #' @examples
-#' library(dplyr)
-#' library(tidyr)
-#'
-#' df <- tibble(
+#' # Example data
+#' df <- tibble::tibble(
 #'   year = c(2020, 2021, 2023),
 #'   gdp = c(100, 110, 130)
 #' )
 #'
+#' # Compute year-over-year growth
 #' compute_change(df, gdp, year)
 #'
+#'
 #' @export
-compute_change <- function(data, col, date_col){
-  data |>
-    complete(
-      {{date_col}} := min({{date_col}}):max({{date_col}})
-    ) |>
-    transmute(
-      {{date_col}},
-      {{col}},
-      "{{col}}_growth" := {{col}}/lag({{col}}) - 1,
-      .groups = "drop"
-    ) |>
-    dplyr::select(-.groups)
+compute_change <- function(data, col, date_col) {
+  col_name <- deparse(substitute(col))
 
+  tbl <-
+  data %>%
+    tidyr::complete({{ date_col }} := full_seq(min({{ date_col }}):max({{ date_col }}), 1)) %>%
+    dplyr::arrange({{ date_col }}) %>%
+    dplyr::mutate(
+      "{col_name}_growth" := {{ col }} / dplyr::lag({{ col }}) - 1
+    )
+
+  return(tbl)
 }
 
 
@@ -692,7 +696,7 @@ compute_fastchange <- function(data, col, date_col) {
                    by = date_col, all.x = TRUE)
 
   # Compute year-over-year growth
-  growth_col <- paste0("growth_", col)
+  growth_col <- paste0(col, "_growth")
   dt_full[, (growth_col) := get(col) / shift(get(col)) - 1]
 
   return(dt_full)

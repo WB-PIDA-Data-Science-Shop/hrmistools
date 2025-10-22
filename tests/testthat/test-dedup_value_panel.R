@@ -20,7 +20,7 @@ test_that("deduplication works", {
     ref_date = as.Date(
       c("2023-01-01", "2023-01-02", "2023-01-01", "2023-01-02", "2023-01-03")
     ),
-    gender = c(NA, "F", "F", NA, "F")
+    gender = c(NA, "M", "F", NA, "M")
   )
 
   expect_equal(
