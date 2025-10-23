@@ -4,7 +4,13 @@
 \alias{compute_summary}
 \title{Compute grouped summary statistics for multiple variables}
 \usage{
-compute_summary(data, cols, fns = NULL, groups, output = c("long", "wide"))
+compute_summary(
+  data,
+  cols,
+  fns = NULL,
+  groups = NULL,
+  output = c("long", "wide")
+)
 }
 \arguments{
 \item{data}{A data frame or tibble containing the variables to summarize.}
