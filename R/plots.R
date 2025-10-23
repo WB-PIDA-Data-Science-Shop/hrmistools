@@ -26,6 +26,7 @@
 #' @import ggplot2
 #' @importFrom ggrepel geom_text_repel
 #' @importFrom ggthemes scale_color_solarized
+#' @importFrom rlang enquo
 #'
 #' @export
 ggplot_point_line <- function(data,

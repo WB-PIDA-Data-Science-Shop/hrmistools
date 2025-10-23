@@ -1,106 +1,6 @@
 ################################################################################
 ######### SOME FUNCTIONS TO SUPPORT HARMONIZATION OF HRMIS DATA ################
 ################################################################################
-
-#' A function to translate a vector to language of choice
-#'
-#' This function vectorizes the `polyglotr::google_translate()` function to support
-#' translation from `source_language` to any `target_language` of choice.
-#'
-#' @param vector object containing the list of characters to be translated
-#' @param target_language two letter ISO language name for `vector` to be translated
-#' into
-#' @param source_language two letter ISO language name for `vector` to be translated
-#' from
-#'
-#' @import polyglotr
-#'
-#' @export
-vectorize_gt <- function(vector,
-                         target_language = "en",
-                         source_language) {
-  trans_obj <-
-    lapply(
-      X = vector,
-      FUN = function(x) {
-        yy <- google_translate(
-          text = x,
-          target_language = target_language,
-          source_language = source_language
-        )
-
-        return(yy)
-
-      }
-    ) |>
-    unlist()
-
-
-  return(trans_obj)
-}
-
-
-#' Parallelized Google Translate Wrapper
-#'
-#' This function wraps `polyglotr::google_translate()` and adds support for
-#' parallel processing. The input vector is split into chunks, which are
-#' translated in parallel using `future.apply::future_lapply()`. This can be
-#' useful for large vectors or when API rate limits allow concurrent requests.
-#'
-#' @param vector Character vector to be translated.
-#' @param target_language Two-letter ISO language code for the translation target.
-#'   Defaults to `"en"`.
-#' @param source_language Two-letter ISO language code for the translation source.
-#'   Required.
-#' @param workers Integer. Number of parallel workers to use. Defaults to `4`.
-#' @param chunk_size Integer. Number of elements in each chunk (batch) to send per
-#'   request. Defaults to `50`.
-#'
-#' @return A character vector of translated text, in the same order as the input.
-#'
-#' @details
-#' The function splits the input vector into chunks of size `chunk_size` and
-#' sends each chunk to `polyglotr::google_translate()`. Each chunk is translated
-#' in parallel across `workers` processes. This approach reduces API overhead
-#' compared to sending one request per element.
-#'
-#' Note: Using parallel workers will open multiple sessions. Be mindful of API
-#' usage limits or quotas when increasing `workers`.
-#'
-#' @examples
-#' \dontrun{
-#' # Translate a few Spanish phrases into English in parallel
-#' phrases <- c("hola", "buenos días", "¿cómo estás?")
-#' vectorize_gt_parallel(phrases, target_language = "en", source_language = "es")
-#' }
-#'
-#' @import polyglotr
-#' @importFrom future.apply future_lapply
-#' @importFrom future plan multisession
-#' @export
-
-
-vectorize_gt_parallel <- function(vector,
-                                  target_language = "en",
-                                  source_language,
-                                  workers = 4,
-                                  chunk_size = 50) {
-  future::plan(future::multisession, workers = workers)
-
-  chunks <- split(vector, ceiling(seq_along(vector) / chunk_size))
-
-  res <- future.apply::future_lapply(chunks, function(chunk) {
-    google_translate(
-      text = chunk,
-      target_language = target_language,
-      source_language = source_language
-    )
-  }, future.seed = TRUE)
-
-  unlist(res, use.names = FALSE)
-
-}
-
 #' A function to identify inconsistent column names across data frames
 #'
 #' This function checks for consistency in column names across a list of data frames.
@@ -187,7 +87,7 @@ detect_inconsistent_cols <- function(data, inconsistent_cols) {
 #'
 #' @import dplyr
 #' @importFrom purrr set_names
-#' @importFrom rlang := !!!
+#' @importFrom rlang !!!
 #' @export
 harmonize_columns <- function(data, dictionary) {
   # If a data frame is supplied as dict, convert to named vector
@@ -479,52 +379,3 @@ merge_wrapper <- function(...){
 }
 
 
-#' Calculate annual growth rates for a numeric column
-#'
-#' @description
-#' Computes the year-over-year growth rate of a numeric column in a data frame.
-#' The function first completes the date sequence using `tidyr::complete()` to
-#' ensure all years between the minimum and maximum are represented, then
-#' calculates the growth rate using lagged values.
-#'
-#' @param data A data frame or tibble containing the data.
-#' @param col A numeric column (unquoted) for which the growth rate will be calculated.
-#' @param date_col A date column (unquoted) used to order the data and define the time sequence.
-#'
-#' @return A tibble with two columns:
-#' \itemize{
-#'   \item The `date_col` column (yearly sequence from min to max).
-#'   \item A new column named `"growth_<col>"` containing the calculated
-#'   year-over-year growth rates.
-#' }
-#'
-#' @details
-#' - The function uses `tidyr::complete()` to fill in missing years in the date sequence.
-#'   Missing values in `col` will result in `NA` for the corresponding growth rate.
-#' - The first observation (or any where the lag is missing) will have `NA`.
-#' - Grouping is by the date column to summarise across the entire dataset; if you
-#'   have multiple series (e.g., countries), consider grouping beforehand.
-#'
-#' @examples
-#' library(dplyr)
-#' library(tidyr)
-#'
-#' df <- tibble(
-#'   year = c(2020, 2021, 2023),
-#'   gdp = c(100, 110, 130)
-#' )
-#'
-#' compute_change(df, gdp, year)
-#'
-#' @export
-compute_change <- function(data, col, date_col){
-  data |>
-    complete(
-      {{date_col}} := min({{date_col}}):max({{date_col}})
-    ) |>
-    transmute(
-      {{date_col}},
-      "{{col}}_growth" := {{col}}/lag({{col}}) - 1,
-      .groups = "drop"
-    )
-}

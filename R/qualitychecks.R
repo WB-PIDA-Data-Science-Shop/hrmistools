@@ -161,10 +161,10 @@ qualitycheck_orgmod <- function(org_tbl) {
     org_tbl |>
     create_agent(label = "QCheck for Organization Module",
                  actions = al) |>
-    col_exists(columns = required_vars) |>
+    col_exists(columns = all_of(required_vars)) |>
     rows_distinct(columns = vars(org_id)) |>
-    col_vals_not_null(columns = required_vars) |>
-    col_is_character(columns = required_vars) |>
+    col_vals_not_null(columns = all_of(required_vars)) |>
+    col_is_character(columns = all_of(required_vars)) |>
     col_vals_in_set(columns = vars(country_code),
                     set = unique(na.omit(countrycode::codelist$iso3c)))
 

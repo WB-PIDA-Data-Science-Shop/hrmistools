@@ -144,3 +144,122 @@
 #' @source World Bank
 #' \url{https://data360.worldbank.org/en/int/indicator/WB_ES_T_WK10}
 "enterprise_surveys"
+
+
+#' Harmonized Public Sector Employment Contracts (Sample)
+#'
+#' @description
+#' A harmonized dataset of 10,000 anonymized public sector employment contracts
+#' for Brazil. The data illustrate how administrative human resource (HR)
+#' information can be structured for analysis within the
+#' **Public Institutions Data and Analytics** framework. Variables include
+#' identifiers for contracts, workers, and organizations; employment dates;
+#' compensation measures; and occupational classifications.
+#'
+#' @format A tibble with 10,000 rows and 21 variables:
+#' \describe{
+#'   \item{contract_id}{Numeric. Unique identifier for the employment contract.}
+#'   \item{worker_id}{Numeric. Unique identifier for the worker (anonymized).}
+#'   \item{org_id}{Character. Name and code of the employing organization.}
+#'   \item{org_date}{Date. Date when the employing organization was established or recorded.}
+#'   \item{year}{Numeric. Reference year of the contract record.}
+#'   \item{base_salary_lcu}{Numeric. Base salary expressed in local currency units (LCU).}
+#'   \item{gross_salary_lcu}{Numeric. Gross salary including allowances and bonuses (LCU).}
+#'   \item{net_salary_lcu}{Numeric. Net salary after deductions (LCU).}
+#'   \item{whours}{Numeric. Weekly contracted working hours.}
+#'   \item{country_code}{Character. ISO3 country code (here, `"BRA"` for Brazil).}
+#'   \item{country_name}{Character. Country name.}
+#'   \item{adm1_name}{Character. Name of the first administrative division (e.g., state).}
+#'   \item{adm1_code}{Character. Administrative division code (e.g., `"AL"` for Alagoas).}
+#'   \item{start_date}{Date. Contract start date.}
+#'   \item{end_date}{Numeric. Contract end date (may be `NA` for ongoing contracts).}
+#'   \item{paygrade}{Character. Pay grade or salary level associated with the contract.}
+#'   \item{seniority}{Character. Seniority or position classification code.}
+#'   \item{occupation_native}{Character. Original occupation title in the source language (Portuguese).}
+#'   \item{occupation_english}{Character. English translation of the occupation title.}
+#'   \item{occupation_iscocode}{Numeric. ISCO-08 occupation code, where available.}
+#'   \item{occupation_isconame}{Character. ISCO-08 occupation group name.}
+#' }
+#'
+#' @details
+#' This dataset provides a harmonized structure for analyzing public employment
+#' and compensation across government entities. It is intended as a demonstration
+#' dataset for testing data pipelines, HR analytics tools, and summary functions
+#' such as [compute_summary()].
+#'
+#' The variables follow a consistent schema used for HRMIS-type administrative
+#' data within the World Bank’s Governance GP. Salary variables are expressed
+#' in **local currency units (LCU)** and are not adjusted for inflation.
+#'
+#' @examples
+#' data(contract_harmonized)
+#'
+#' dplyr::glimpse(contract_harmonized)
+#'
+#' # Example: Compute mean salary by occupation group
+#' compute_summary(contract_harmonized,
+#'                 cols = c("gross_salary_lcu"),
+#'                 groups = c("occupation_isconame"),
+#'                 fns = c("mean"))
+#'
+#' @source
+#' Synthetic dataset generated for illustrative purposes by ChatGPT (2025),
+#' based on typical administrative HR data structures used in public sector analytics.
+#'
+#' @keywords datasets
+"contract_harmonized"
+
+#' HRMIS Harmonization Data Dictionary
+#'
+#' A structured metadata dictionary describing variables harmonized across
+#' the Human Resource Management Information System (HRMIS) modules:
+#' Organization, Worker, and Contract. The dictionary follows
+#' SDMX-style documentation standards and specifies variable names,
+#' identifiers, data types (in R), relationships, and other metadata fields
+#' used in HRMIS data harmonization.
+#'
+#' @format A tibble with 48 rows and 9 variables:
+#' \describe{
+#' \item{Concept Name}{Variable or concept name as used in the HRMIS module.}
+#' \item{Concept ID}{Short machine-readable variable name used in datasets.}
+#' \item{Description}{Detailed explanation of the variable or concept.}
+#' \item{Data Type}{R data type assigned to the variable (e.g., \code{character}, \code{numeric}, \code{Date}).}
+#' \item{Representation (Code list / Format)}{Expected format, code list, or data representation.}
+#' \item{Primary Key}{Indicates whether the variable uniquely identifies a record (\code{"Yes"} or \code{"No"}).}
+#' \item{Relationship}{Describes any relational links to other modules or variables.}
+#' \item{Module}{The HRMIS module the variable belongs to: \code{"Organization"}, \code{"Worker"}, or \code{"Contract"}.}
+#' \item{Example Value}{Illustrative example value for the variable.}
+#' }
+#'
+#' @details
+#' The dictionary integrates all HRMIS modules into a single metadata table.
+#' It was designed for use in R-based harmonization workflows and
+#' conforms to SDMX Content-Oriented Guidelines (COG) for defining
+#' concepts, code lists, and roles.
+#'
+#' @references
+#' SDMX Technical Standards v3.0 — Data Structure Definition (DSD):
+#' \url{https://sdmx.org/?page_id=5008}
+
+#'
+#' SDMX Content-Oriented Guidelines (COG):
+#' \url{https://sdmx.org/?page_id=4345}
+
+#'
+#' Eurostat SDMX Metadata Reference Manual:
+#' \url{https://ec.europa.eu/eurostat/web/metadata/reference-metadata-reporting-standards}
+
+#'
+#' @examples
+#'
+#' library(dplyr)
+#' data(harmonization_dict)
+#'
+#' # View structure
+#' glimpse(harmonization_dict)
+#'
+#'# Filter dictionary by module
+#' harmonization_dict |>
+#' filter(Module == "Worker")
+#'
+"harmonization_dict"
