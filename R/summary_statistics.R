@@ -79,7 +79,7 @@
 compute_summary <- function(data,
                             cols,
                             fns = NULL,
-                            groups,
+                            groups = NULL,
                             output = c("long", "wide")) {
 
   # --- 0. Match output argument ---
