@@ -1,23 +1,36 @@
 
-contract_df <- readRDS("spielplatz/bra_hrmis_contract.rds")
-worker_df <- readRDS("inst/extdata/bra_hrmis_worker.rds")
-
 ### 3.1
 wage_vars <- c("gross_salary_lcu",
                "net_salary_lcu",
                "base_salary_lcu")
 
+lcu_vars <- colnames(macro_indicators)[grepl("_lcu",
+                                             colnames(macro_indicators))]
+
+contract_harmonized <-
+  contract_harmonized |>
+  mutate(year = lubridate::year(ref_date)) |>
+  as.data.table()
+
+
 # wage bill by gdp, expenditures, revenues by year
-# compute_share(data = contract_df,
-#               cols = list(vars = c("gross_salary_lcu",
-#                                    "net_salary_lcu",
-#                                    "base_salary_lcu"),
-#                           groups = c("country_code","year")),
+# compute_share(data = contract_harmonized,
+#               cols = wage_vars,
+#               groups = c("country_code", "year"),
 #               macro_cols = c("gdp_lcu", "pexpenditure_lcu",
 #                              "prevenue_lcu", "taxrevenue_lcu"),
 #               fns = list(default = c("sum", "mean")),
 #               output = "long")
 
+wagebill_shares_df <-
+compute_fastshare(data = contract_harmonized,
+                  cols = wage_vars,
+                  macro_cols = lcu_vars,
+                  groups = c("country_code", "year"),
+                  fns = "sum",
+                  output = "long")
+
+wagebill_decomp <-
 compute_summary(data = contract_harmonized,
                 cols = wage_vars,
                 fns = c("sum", "mean"),

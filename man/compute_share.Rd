@@ -9,7 +9,7 @@ compute_share(
   macro_data = macro_indicators,
   macro_cols,
   cols,
-  groups = c("country_code", "ref_date"),
+  groups,
   fns,
   output = c("long", "wide")
 )
