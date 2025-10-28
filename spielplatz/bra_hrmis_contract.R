@@ -12,6 +12,8 @@ library(furrr)
 library(writexl)
 library(pointblank)
 library(labourR)
+library(polyglotr)
+library(furrr)
 
 devtools::load_all()
 
@@ -67,14 +69,32 @@ occup_df <-
       dplyr::select(CARREIRA, CARGO) |>
       mutate(status = "inactive")
   ) |>
-  unique() |>
-  mutate(
-    occupation_native  = tolower(CARREIRA),
-    occupation_english = tolower(
-      vectorize_gt_parallel(vector = CARREIRA, source_language = "pt")
-    )
-  )
+  unique()
 
+# Step 1: get unique careers
+unique_carreiras <- unique(occup_df$CARREIRA)
+
+# # Step 2: translate unique careers safely
+# translations <- sapply(unique_carreiras, function(x) {
+#   tryCatch(
+#     polyglotr::google_translate(x, source_language = "pt"),
+#     error = function(e) NA_character_
+#   )
+# })
+
+ct_list <- google_translate(unique_carreiras, source_language = "pt")
+
+add_dt <- bind_cols(unique_carreiras, ct_list)
+
+colnames(add_dt) <- c("CARREIRA", "occupation_english")
+
+
+# Step 3: merge translations back
+occup_df <-
+  occup_df |>
+  merge(add_dt, by = "CARREIRA", all.x = TRUE) |>
+  as_tibble() |>
+  mutate(occupation_native = tolower(CARREIRA))
 
 class_occup_df <-
   occup_df |>
@@ -141,7 +161,6 @@ contract_alagoas_tbl <-
         worker_id = CPF,
         org_id = paste(ORGAO, COD_ORGAO, ANO_PAGAMENTO, sep = "-"),
         ref_date = as.Date(paste(ANO_PAGAMENTO, MES_REFERENCIA, "01", sep = "-")),
-        year = as.numeric(ANO_PAGAMENTO),
         base_salary_lcu = SALARIO_BASE,
         allowance_lcu = ABONO_PERMANENCIA,
         gross_salary_lcu = SALARIO_BRUTO,
@@ -158,7 +177,13 @@ contract_alagoas_tbl <-
         occupation_native = occupation_native,
         occupation_english = occupation_english,
         occupation_iscocode = occupation_iscocode,
-        occupation_isconame = occupation_isconame
+        occupation_isconame = occupation_isconame,
+        contract_type_native = TIPO_CONTRATO,
+        contract_type_code = case_when(TIPO_CONTRATO %in% c("EFETIVO", "EFETIVO COMISSIONADO") ~ "perm",
+                                       TIPO_CONTRATO == "EXCLUSIVAMENTE COMISSIONADO" ~ "fterm",
+                                       TIPO_CONTRATO %in% c("TEMPORÁRIO", "TEMPOR¡RIO") ~ "temp",
+                                       is.na(TIPO_CONTRATO) ~ NA_character_,
+                                       TRUE ~ "other")
       ),
     inactive_alagoas_tbl |>
       transmute(
@@ -166,7 +191,6 @@ contract_alagoas_tbl <-
         worker_id = CPF,
         org_id = paste(ORGAO, "000000", sep = "-"),
         ref_date = as.Date(paste(ANO_PAGAMENTO, MES_REFERENCIA, "01", sep = "-")),
-        year = as.numeric(ANO_PAGAMENTO),
         base_salary_lcu = NA,
         allowance_lcu = NA,
         gross_salary_lcu = VALOR_BRUTO,
@@ -183,7 +207,12 @@ contract_alagoas_tbl <-
         occupation_native = occupation_native,
         occupation_english = occupation_english,
         occupation_iscocode = occupation_iscocode,
-        occupation_isconame = occupation_isconame
+        occupation_isconame = occupation_isconame,
+        contract_type_native = TIPO_CONTRATO,
+        contract_type_code = case_when(TIPO_CONTRATO == "INATIVO" ~ "inactive",
+                                       TIPO_CONTRATO == "PENSIONISTA" ~ "pensioner",
+                                       is.na(TIPO_CONTRATO) ~ NA_character_,
+                                       TRUE ~ "other")
       )
   )
 

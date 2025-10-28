@@ -8,6 +8,7 @@ library(readxl)
 library(purrr)
 library(furrr)
 library(writexl)
+library(here)
 
 plan(multisession, workers = 6)
 set.seed(1789)
@@ -139,8 +140,8 @@ alagoas_org_tbl <-
   merge(
     tibble(
       org_name_native = unique(alagoas_org_tbl$org_name_native),
-      org_name_en = vectorize_gt(
-        vector = unique(alagoas_org_tbl$org_name_native),
+      org_name_en = polyglotr::google_translate(
+        text = unique(alagoas_org_tbl$org_name_native),
         source_language = "pt"
       )
     ),
@@ -173,7 +174,7 @@ alagoas_org_tbl <-
 #### write results
 alagoas_org_tbl |>
   write_rds(
-    here("data", "bra", "bra_hrmis_organization.rds"),
+    here("spielplatz", "bra_hrmis_organization.rds"),
     compress = "gz"
   )
 

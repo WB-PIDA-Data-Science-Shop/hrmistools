@@ -279,6 +279,6 @@ worker_module_clean <- worker_module |>
 
 worker_module_clean |>
   write_rds(
-    here("inst", "extdata", "bra_hrmis_worker.rds"),
+    here("spielplatz", "bra_hrmis_worker.rds"),
     compress = "gz"
   )
