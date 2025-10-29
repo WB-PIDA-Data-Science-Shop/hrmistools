@@ -9,6 +9,7 @@ library(purrr)
 library(furrr)
 library(polyglotr)
 library(writexl)
+library(here)
 
 plan(multisession, workers = 6)
 set.seed(1789)

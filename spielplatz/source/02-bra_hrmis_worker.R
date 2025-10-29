@@ -11,6 +11,7 @@ library(here)
 library(readr)
 library(ggplot2)
 library(data.table)
+library(here)
 
 devtools::load_all()
 set.seed(1789)
@@ -232,13 +233,13 @@ worker_birthdate_inconsistency_df <- worker_df |>
 # establish protocol that if there are inconsistencies,
 # we use the highest frequency value to override the inconsistencies
 # fix birthdate
-worker_df <- worker_df |>
-  mutate(
-    birth_date =
-  )
+# worker_df <- worker_df |>
+#   mutate(
+#     birth_date =
+#   )
 
 # only one worker per reference date per status
-worker_df <- worker_df |>
+worker_module <- worker_df |>
   distinct(
     worker_id,
     ref_date,
