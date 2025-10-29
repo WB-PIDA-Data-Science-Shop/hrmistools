@@ -230,14 +230,21 @@ worker_birthdate_inconsistency_df <- worker_df |>
   ]
 
 # establish protocol that if there are inconsistencies,
-# we use the highest frequency value to override the inconsistencies\
+# we use the highest frequency value to override the inconsistencies
+# fix birthdate
+worker_df <- worker_df |>
+  mutate(
+    birth_date =
+  )
 
 # only one worker per reference date per status
-worker_df |>
+worker_df <- worker_df |>
   distinct(
     worker_id,
     ref_date,
-    status
+    status,
+    gender,
+    educat7
   )
 
 # extract worker_df module ---------------------------------------------------
@@ -245,7 +252,7 @@ worker_df |>
 #   - Reference date (ref_date)
 #   - worker_df ID (contract_id)
 #   - Date of Birth (birth_date)
-#   - Gender (gender)
+#   - Gender (gender): standardize to english
 #   - Education Attainment (educat7)
 #   - Tribe (tribe)
 #   - Race (race)
