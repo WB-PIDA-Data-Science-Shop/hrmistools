@@ -28,9 +28,10 @@ Imports:
     ggrepel,
     ggthemes,
     data.table
-RoxygenNote: 7.3.2
+RoxygenNote: 7.3.3
 Suggests: 
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
 Depends: 
     R (>= 3.5)
+URL: https://wb-pida-data-science-shop.github.io/hrmistools/
