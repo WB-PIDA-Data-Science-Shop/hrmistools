@@ -34,3 +34,4 @@ Suggests:
 Config/testthat/edition: 3
 Depends: 
     R (>= 3.5)
+URL: https://wb-pida-data-science-shop.github.io/hrmistools/
