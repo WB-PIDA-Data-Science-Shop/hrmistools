@@ -93,8 +93,24 @@ cp_ratio <- function(x, upper = 0.9, lower = 0.1, na.rm = TRUE){
 
 
 
+prop <- function(x) {
+  # Count nonmissing values of x within each group
+  tbl <- data.table::data.table(val = x)[, .N, by = val]
+  tbl[, prop := N / sum(N)]
+
+  # Map back to the original vector
+  tbl$prop[match(x, tbl$val)]
+}
 
 
+count_unique <- function(x){
+
+  x <- x[!is.na(x)]
+  y <- length(unique(x))
+
+  return(y)
+
+}
 
 #' Define Default Summary Functions
 #'
@@ -173,8 +189,10 @@ define_fns <- function(){
     min = ~min(.x, na.rm = TRUE),
     max = ~max(.x, na.rm = TRUE),
     count = ~length(.x),
-    count_unique = ~dplyr::n_distinct(.x),
-    prop_na = ~mean(is.na(x)),
+    prop = ~prop(.x),
+    dtprop = ~.N / sum(.N),
+    count_unique = ~count_unique(.x),
+    prop_na = ~mean(is.na(.x)),
     prop_zero = ~mean(.x == 0, na.rm = TRUE),
     p25 = ~quantile(.x, 0.25, na.rm = TRUE),
     p75 = ~quantile(.x, 0.75, na.rm = TRUE),

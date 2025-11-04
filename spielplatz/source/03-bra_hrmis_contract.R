@@ -148,7 +148,6 @@ contract_alagoas_tbl <-
         worker_id = CPF,
         org_id = paste(ORGAO, COD_ORGAO, ANO_PAGAMENTO, sep = "-"),
         ref_date = as.Date(paste(ANO_PAGAMENTO, MES_REFERENCIA, "01", sep = "-")),
-        year = as.numeric(ANO_PAGAMENTO),
         base_salary_lcu = SALARIO_BASE,
         allowance_lcu = ABONO_PERMANENCIA,
         gross_salary_lcu = SALARIO_BRUTO,
@@ -165,7 +164,13 @@ contract_alagoas_tbl <-
         occupation_native = occupation_native,
         occupation_english = occupation_english,
         occupation_iscocode = occupation_iscocode,
-        occupation_isconame = occupation_isconame
+        occupation_isconame = occupation_isconame,
+        contract_type_native = TIPO_CONTRATO,
+        contract_type_code = case_when(TIPO_CONTRATO %in% c("EFETIVO", "EFETIVO COMISSIONADO") ~ "perm",
+                                       TIPO_CONTRATO == "EXCLUSIVAMENTE COMISSIONADO" ~ "fterm",
+                                       TIPO_CONTRATO %in% c("TEMPORÁRIO", "TEMPOR¡RIO") ~ "temp",
+                                       is.na(TIPO_CONTRATO) ~ NA_character_,
+                                       TRUE ~ "other")
       ),
     inactive_alagoas_tbl |>
       transmute(
@@ -173,7 +178,6 @@ contract_alagoas_tbl <-
         worker_id = CPF,
         org_id = paste(ORGAO, "000000", sep = "-"),
         ref_date = as.Date(paste(ANO_PAGAMENTO, MES_REFERENCIA, "01", sep = "-")),
-        year = as.numeric(ANO_PAGAMENTO),
         base_salary_lcu = NA,
         allowance_lcu = NA,
         gross_salary_lcu = VALOR_BRUTO,
@@ -190,7 +194,12 @@ contract_alagoas_tbl <-
         occupation_native = occupation_native,
         occupation_english = occupation_english,
         occupation_iscocode = occupation_iscocode,
-        occupation_isconame = occupation_isconame
+        occupation_isconame = occupation_isconame,
+        contract_type_native = TIPO_CONTRATO,
+        contract_type_code = case_when(TIPO_CONTRATO == "INATIVO" ~ "inactive",
+                                       TIPO_CONTRATO == "PENSIONISTA" ~ "pensioner",
+                                       is.na(TIPO_CONTRATO) ~ NA_character_,
+                                       TRUE ~ "other")
       )
   )
 

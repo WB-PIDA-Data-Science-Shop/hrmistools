@@ -1,81 +1,143 @@
+################################################################################
+################## COMPUTE THE INDICATORS FOR OUR MODELS #######################
+################################################################################
+library(lubridate)
+library(data.table)
+library(dplyr)
 
-contract_df <- readRDS("spielplatz/bra_hrmis_contract.rds")
-worker_df <- readRDS("inst/extdata/bra_hrmis_worker.rds")
+
+contract_dt <- readRDS("spielplatz/bra_hrmis_contract.rds") |> as.data.table()
+worker_dt <- readRDS("spielplatz/bra_hrmis_worker.rds") |> as.data.table()
+org_dt <- readRDS("spielplatz/bra_hrmis_organization.rds") |> as.data.table()
 
 ### 3.1
 wage_vars <- c("gross_salary_lcu",
                "net_salary_lcu",
                "base_salary_lcu")
 
+lcu_vars <- colnames(macro_indicators)[grepl("_lcu",
+                                             colnames(macro_indicators))]
+
+contract_dt[, year := lubridate::year(ref_date)]
+
+
 # wage bill by gdp, expenditures, revenues by year
-# compute_share(data = contract_df,
-#               cols = list(vars = c("gross_salary_lcu",
-#                                    "net_salary_lcu",
-#                                    "base_salary_lcu"),
-#                           groups = c("country_code","year")),
+# compute_share(data = contract_harmonized,
+#               cols = wage_vars,
+#               groups = c("country_code", "year"),
 #               macro_cols = c("gdp_lcu", "pexpenditure_lcu",
 #                              "prevenue_lcu", "taxrevenue_lcu"),
 #               fns = list(default = c("sum", "mean")),
 #               output = "long")
 
-compute_summary(data = contract_harmonized,
-                cols = wage_vars,
-                fns = c("sum", "mean"),
-                groups = c("occupation_isconame", "occupation_iscocode", "year"),
-                output = "long")
+wagebill_shares_dt <-
+compute_fastshare(data = contract_dt,
+                  cols = wage_vars,
+                  macro_cols = lcu_vars,
+                  groups = c("country_code", "year"),
+                  fns = "sum",
+                  output = "long")
 
-# wage bill decomposed by administrative and industrial classification
-compute_summary(data = contract_df,
-                cols = list(vars = wage_vars,
-                            groups = c("year", "occupation_isconame",
-                                       "occupation_iscocode")),
-                fns = list(default = c("sum", "mean", "median", "cv"),
-                           user = NULL),
-                output = "long")
+### public sector employment as a share of total employment
+worker_dt[, year := lubridate::year(ref_date)]
 
-# industry and occupational distribution of public sector employment
-compute_summary(data = contract_df,
-                cols = list(vars = "worker_id",
-                            groups = c("year", "occupation_isconame",
-                                       "occupation_iscocode")),
-                fns = list(default = NULL,
-                           user = list(n_unique_workers = ~dplyr::n_distinct(.x, na.rm = T))),
-                output = "long")
+pubempshare_dt <-
+compute_fastshare(data = contract_dt,
+                  macro_cols = "labor_force_total",
+                  cols = "worker_id",
+                  groups = c("country_code", "year"),
+                  fns = "count_unique",
+                  output = "long")
 
 
-# public sector employment share of total employment, paid employment, formal paid employment
-compute_share(data = contract_df,
-              cols = list(vars = "worker_id",
-                          groups = c("country_code","year")),
-              macro_cols = c("emp_pop", "salaried_pop"),
-              fns = list(user = list(n_unique_workers = ~dplyr::n_distinct(.x, na.rm = T))),
-              output = "long")
+wagebill_iscodecomp_dt <-
+  compute_fastsummary(data = contract_dt,
+                      cols = wage_vars,
+                      fns = c("sum", "mean", "cp_ratio"),
+                      groups = c("occupation_isconame", "occupation_iscocode", "year"),
+                      output = "long")
+
+wagebill_occupdecomp_dt <-
+  compute_fastsummary(data = contract_dt,
+                      cols = wage_vars,
+                      fns = c("sum", "mean"),
+                      groups = c("occupation_native", "occupation_english", "year"),
+                      output = "long")
+
+wagebill_orgdecomp_dt <-
+  compute_fastsummary(data = contract_dt,
+                      cols = wage_vars,
+                      fns = c("sum", "mean"),
+                      groups = c("org_id", "year"),
+                      output = "long")
+
+### compute annual recruitment patterns over time (still need to compute the reallocations, ask Gali!)
+recruitment_dt <-
+  bind_rows(detect_worker_event(data = worker_dt,
+                                id_col = "worker_id",
+                                event_type = "hire",
+                                start_date = min(worker_dt$ref_date, na.rm = TRUE),
+                                end_date = max(worker_dt$ref_date, na.rm = TRUE)),
+            detect_worker_event(data = worker_dt,
+                                id_col = "worker_id",
+                                event_type = "fire",
+                                start_date = min(worker_dt$ref_date, na.rm = TRUE),
+                                end_date = max(worker_dt$ref_date, na.rm = TRUE)),
+            detect_retirement(data = worker_dt))
 
 
-## educational profile of public-sector workers
-compute_summary(
-  data = worker_df,
-  cols = list(vars = "worker_id",
-              groups = c("educat7", "gender")),
-  fns = list(user = list(n_workers = ~dplyr::n_distinct(.x)))
-)
+## decomposition of public sector employment by industry and occupational group
+
+empdecomp_dt <-
+  compute_fastsummary(data = contract_dt,
+                      cols = "worker_id",
+                      groups = c("year", "occupation_isconame", "occupation_iscocode"),
+                      output = "long",
+                      fns = "count_unique") |>
+  merge(isco,
+        by.y = c("unit", "description"),
+        by.x = c("occupation_iscocode", "occupation_isconame"),
+        all.x = TRUE) |>
+  rename(count = "value") %>%
+  .[, prop := count / sum(count, na.rm = TRUE), by = "year"]
+
+orgdecomp_dt <-
+  compute_fastsummary(data = contract_dt,
+                      cols = "worker_id",
+                      groups = c("year", "org_id"),
+                      output = "long",
+                      fns = "count_unique") |>
+  rename(count = "value") %>%
+  .[, prop := count / sum(count, na.rm = TRUE), by = "year"]
+
+
+## educational profile of public sector workers by gender and perhaps occupation (find out about which
+## rates we need to compute)
+
+combine_dt <- worker_dt[contract_dt, on = c("worker_id", "ref_date", "year")]
+
+educprofile_dt <- combine_dt[, .N, by = .(year, gender, educat7,
+                                          occupation_iscocode, occupation_native)]
 
 ## distribution of public sector workers by pay grade
-compute_summary(
-  data = contract_df,
-  cols = list(vars = "worker_id",
-              groups = c("paygrade", "year")),
-  fns = list(user = list(n_workers = ~dplyr::n_distinct(.x)))
-)
+mobilityprofile_dt <- combine_dt[, .N, by = .(year, gender, paygrade, seniority, occupation_native, occupation_iscocode)]
 
-## public sector compression ratios
-compute_summary(data = contract_df,
-                cols = list(vars = wage_vars,
-                            groups = c("year", "occupation_isconame",
-                                       "occupation_iscocode")),
-                fns = list(default = c("cv"),
-                           user = list(cp_ratio = ~cp_ratio(.x))),
-                output = "wide")
+
+## to do:
+
+#1: compute the occupation/industry transition rates
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

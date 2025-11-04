@@ -145,10 +145,9 @@ alagoas_org_tbl <-
   merge(
     tibble(
       org_name_native = unique(alagoas_org_tbl$org_name_native),
-      org_name_en = google_translate(
+      org_name_en = polyglotr::google_translate(
         text = unique(alagoas_org_tbl$org_name_native),
-        source_language = "pt",
-        target_language = "en"
+        source_language = "pt"
       )
     ),
     by = "org_name_native",
