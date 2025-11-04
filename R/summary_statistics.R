@@ -246,10 +246,14 @@ compute_fastsummary <- function(data,
     stop("`fns` must be NULL, a character vector, or a list of formulas.")
   }
 
-  stats_dt <-
-    data[, lapply_at(.SD, fns),
-         .SDcols = cols,
-         by = groups]
+  stats_dt <- data[, lapply_at(.SD, fns), .SDcols = cols, by = groups]
+
+  # # --- compute summaries ---
+  # stats_dt <- data[, lapply(.SD, function(col)
+  #   sapply(selected_fns, function(fn) fn(col))),
+  #   .SDcols = cols,
+  #   by = groups]
+
 
   # --- 3. Optionally pivot to long format ---
   if (output == "long") {
@@ -271,6 +275,52 @@ compute_fastsummary <- function(data,
 
 }
 
+# compute_fastsummary <- function(data,
+#                                  cols,
+#                                  fns = NULL,
+#                                  groups,
+#                                  output = c("long", "wide"),
+#                                  tbl = FALSE) {
+#
+#   output <- match.arg(output)
+#   default_fns <- define_fns()
+#
+#   # --- resolve which functions to use ---
+#   if (is.null(fns)) {
+#     selected_fns <- default_fns
+#   } else if (is.character(fns)) {
+#     unknown <- setdiff(fns, names(default_fns))
+#     if (length(unknown) > 0)
+#       stop(glue::glue("Unknown function name(s): {toString(unknown)}"))
+#     selected_fns <- default_fns[fns]
+#   } else if (is.list(fns)) {
+#     char_fns <- fns[sapply(fns, is.character)]
+#     formula_fns <- fns[sapply(fns, rlang::is_formula)]
+#     selected_fns <- c(
+#       default_fns[intersect(unlist(char_fns), names(default_fns))],
+#       formula_fns
+#     )
+#   } else stop("`fns` must be NULL, a character vector, or a list of formulas.")
+#
+#   # --- convert formulas into actual functions ---
+#   selected_fns <- lapply(selected_fns, rlang::as_function)
+#
+#   # --- compute summaries ---
+#   stats_dt <- data[, lapply(.SD, function(col)
+#     sapply(selected_fns, function(fn) fn(col))),
+#     .SDcols = cols,
+#     by = groups]
+#
+#   if (output == "long") {
+#     stats_dt <- data.table::melt(stats_dt,
+#                                  id.vars = groups,
+#                                  variable.name = "indicator",
+#                                  value.name = "value")
+#   }
+#
+#   if (tbl) stats_dt <- tibble::as_tibble(stats_dt)
+#   return(stats_dt)
+# }
 
 
 
@@ -346,7 +396,7 @@ compute_share <- function(data,
                           macro_data = macro_indicators,
                           macro_cols,
                           cols,
-                          groups = c("country_code", "ref_date"),
+                          groups,
                           fns,
                           output = c("long", "wide")) {
   ## ensure valid argument
@@ -630,8 +680,6 @@ compute_change <- function(data, col, date_col) {
 
   return(tbl)
 }
-
-
 
 #' Calculate year-over-year growth for a numeric column (data.table version)
 #'

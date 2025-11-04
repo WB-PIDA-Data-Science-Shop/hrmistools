@@ -17,7 +17,7 @@ if (getRversion() >= "2.15.1"){
     "govcount", "indicator", "isco", "isco_share", "macro_indicators",
     "macro_value", "macro_var", "num_teachers", "total", "totals",
     "ts_ratio", "value", "wage_value", "wage_var", ".", "sd",
-    "summary_value", "summary_var", ".groups", ":="
+    "summary_value", "summary_var", ".groups", ":=", "val", "N"
   ))
 
 }

@@ -146,68 +146,52 @@
 "enterprise_surveys"
 
 
-#' Harmonized Public Sector Employment Contracts (Sample)
+#' Harmonized Contract-Level Dataset (Zambia)
 #'
-#' @description
-#' A harmonized dataset of 10,000 anonymized public sector employment contracts
-#' for Brazil. The data illustrate how administrative human resource (HR)
-#' information can be structured for analysis within the
-#' **Public Institutions Data and Analytics** framework. Variables include
-#' identifiers for contracts, workers, and organizations; employment dates;
-#' compensation measures; and occupational classifications.
+#' The contract_harmonized dataset contains 50,000 synthetic contract-level observations
+#' consistent with the harmonization dictionary for the "Contract" module. Each record represents
+#' an employment contract for a worker within an organization, capturing key information on
+#' compensation, contract characteristics, and administrative geography.
+#' All records pertain to Zambia (ISO3: ZMB).
 #'
-#' @format A tibble with 10,000 rows and 21 variables:
+#' @format A data frame with 50,000 rows and 21 variables:
 #' \describe{
-#'   \item{contract_id}{Numeric. Unique identifier for the employment contract.}
-#'   \item{worker_id}{Numeric. Unique identifier for the worker (anonymized).}
-#'   \item{org_id}{Character. Name and code of the employing organization.}
-#'   \item{org_date}{Date. Date when the employing organization was established or recorded.}
-#'   \item{year}{Numeric. Reference year of the contract record.}
-#'   \item{base_salary_lcu}{Numeric. Base salary expressed in local currency units (LCU).}
-#'   \item{gross_salary_lcu}{Numeric. Gross salary including allowances and bonuses (LCU).}
-#'   \item{net_salary_lcu}{Numeric. Net salary after deductions (LCU).}
-#'   \item{whours}{Numeric. Weekly contracted working hours.}
-#'   \item{country_code}{Character. ISO3 country code (here, `"BRA"` for Brazil).}
-#'   \item{country_name}{Character. Country name.}
-#'   \item{adm1_name}{Character. Name of the first administrative division (e.g., state).}
-#'   \item{adm1_code}{Character. Administrative division code (e.g., `"AL"` for Alagoas).}
-#'   \item{start_date}{Date. Contract start date.}
-#'   \item{end_date}{Numeric. Contract end date (may be `NA` for ongoing contracts).}
-#'   \item{paygrade}{Character. Pay grade or salary level associated with the contract.}
-#'   \item{seniority}{Character. Seniority or position classification code.}
-#'   \item{occupation_native}{Character. Original occupation title in the source language (Portuguese).}
-#'   \item{occupation_english}{Character. English translation of the occupation title.}
-#'   \item{occupation_iscocode}{Numeric. ISCO-08 occupation code, where available.}
-#'   \item{occupation_isconame}{Character. ISCO-08 occupation group name.}
+#' \item{contract_id}{Character. Unique identifier for each contract (e.g., "C000001").}
+#' \item{worker_id}{Character. Identifier for the worker associated with the contract (e.g., "W03583").}
+#' \item{org_id}{Character. Employer organization associated with the contract (e.g., "ORG0194").}
+#' \item{ref_date}{Date. Date of contract record entry in YYYY-MM-DD format.}
+#' \item{base_salary_lcu}{Numeric. Basic pay before allowances and deductions.}
+#' \item{gross_salary_lcu}{Numeric. Total compensation before taxes and deductions.}
+#' \item{net_salary_lcu}{Numeric. Take-home pay after taxes and deductions.}
+#' \item{contract_type}{Character. Type of employment contract — one of "Short-term", "Open-term", or "Permanent".}
+#' \item{occupation_native}{Character. Worker’s occupation title in the native language (e.g., "Comptable", "Analyste").}
+#' \item{occupation_english}{Character. Worker’s occupation title in English (e.g., "Accountant", "Engineer").}
+#' \item{occupation_isconame}{Character. Occupation name mapped to the ISCO-08 classification (e.g., "Technicians").}
+#' \item{occupation_iscocode}{Character. ISCO-08 occupation code (e.g., "2411", "2141", "8322").}
+#' \item{start_date}{Date. Start date of the employment contract (YYYY-MM-DD).}
+#' \item{end_date}{Date. End date of the employment contract, if applicable (YYYY-MM-DD).}
+#' \item{whours}{Numeric. Total weekly or monthly working hours as per contract.}
+#' \item{paygrade}{Character. Pay grade or salary scale classification (e.g., "G7", "P1").}
+#' \item{seniority}{Numeric. Number of years in service or tenure within the organization.}
+#' \item{country_code}{Character. ISO 3-letter country code ("ZMB").}
+#' \item{country_name}{Character. Country name ("Zambia").}
+#' \item{adm1_name}{Character. Subnational administrative division name (e.g., "Lusaka Province").}
+#' \item{adm1_code}{Character. Code corresponding to the administrative division (e.g., "ZMB02").}
 #' }
 #'
 #' @details
-#' This dataset provides a harmonized structure for analyzing public employment
-#' and compensation across government entities. It is intended as a demonstration
-#' dataset for testing data pipelines, HR analytics tools, and summary functions
-#' such as [compute_summary()].
+#' The dataset was synthetically generated to reflect realistic distributions of salary levels,
+#' contract types, and geographic coverage within Zambia. Salaries are internally consistent such
+#' that \code{gross_salary ≥ base_salary ≥ net_salary}.
 #'
-#' The variables follow a consistent schema used for HRMIS-type administrative
-#' data within the World Bank’s Governance GP. Salary variables are expressed
-#' in **local currency units (LCU)** and are not adjusted for inflation.
+#' @source Synthetic data generated using Python for demonstration purposes.
 #'
 #' @examples
 #' data(contract_harmonized)
-#'
 #' dplyr::glimpse(contract_harmonized)
-#'
-#' # Example: Compute mean salary by occupation group
-#' compute_summary(contract_harmonized,
-#'                 cols = c("gross_salary_lcu"),
-#'                 groups = c("occupation_isconame"),
-#'                 fns = c("mean"))
-#'
-#' @source
-#' Synthetic dataset generated for illustrative purposes by ChatGPT (2025),
-#' based on typical administrative HR data structures used in public sector analytics.
-#'
-#' @keywords datasets
+#' dplyr::count(contract_harmonized, contract_type)
 "contract_harmonized"
+
 
 #' HRMIS Harmonization Data Dictionary
 #'

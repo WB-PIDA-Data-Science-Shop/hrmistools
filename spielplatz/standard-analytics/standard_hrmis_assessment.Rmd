@@ -93,7 +93,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-# Introduction {.tabset}
+# Introduction {.tabset-dropdown}
 
 This report provides a standard set of indicators and visualizations on HRMIS analytics, building on the World Bank's [Public Sector and Employment Assessment Framework](https://documents1.worldbank.org/curated/en/324801640074379484/pdf/Public-Sector-Employment-and-Compensation-An-Assessment-Framework.pdf). The objective of this assessment is to conduct public sector employment and compensation assessments that can help develop evidence-based reforms.
 
@@ -112,7 +112,7 @@ The second part assesses the impact of these employment and compensation practic
 2. Public sector productivity.
 3. Labor allocation between the public and private sectors.
 
-## 3.6. Wage incentives {.tabset}
+## 3.6. Wage incentives {.tabset-dropdown}
 
 The extent to which wage increases are explicitly linked to performance is important for both employee motivation and public sector productivity. This section provide some key stylized facts that provide evidence of the productivity and fiscal implications of pay incentives. These include: the magnitude of promotion-based and seniority-based annual wage increases, expected wage increases over an employee's career and the coverage and key design features of performance bonuses.
 
@@ -266,7 +266,7 @@ contract_summary_ppp |>
   )
 ```
 
-## 4.1. Fiscal sustainability {.tabset}
+## 4.1. Fiscal sustainability {.tabset-dropdown}
 
 The wage bill can potentially have a major effect on fiscal balances, but there are no simple benchmarks for the “right” size of the wage bill. In fact, cross-national evidence suggests that there is no strong correlation between the size of the wage bill and fiscal balance. Wage bill dynamics are a better predictor of fiscal sustainability. In general, increases in the wage bill are associated with worsening of the fiscal balance. In addition, wage expenditures are pro-cyclical, rising during periods of economic growth, but not falling as much during downturns due to structural rigidity.
 
@@ -324,7 +324,7 @@ contract_annual_growth |>
   )
 ```
 
-## 4.2. Public sector productivity {.tabset}
+## 4.2. Public sector productivity {.tabset-dropdown}
 
 A key question is whether the public sector workforce is performing well and delivering high quality infrastructure, services, and regulations, which is really a question of public sector labor productivity. Productivity measures the efficiency with which inputs, like labor, are converted into outputs, and is a more precise and economically meaningful concept than “performance,” since presumably performance can be improved by spending more while productivity measures whether more is produced and delivered for a given wage bill.
 
@@ -353,7 +353,7 @@ contract_annual_growth |>
 
 ```
 
-## 4.3. Labor allocation between public and private sectors {.tabset}
+## 4.3. Labor allocation between public and private sectors {.tabset-dropdown}
 
 Public sector employment and compensation policies
 can have major impacts on the entire labor market,
