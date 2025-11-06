@@ -226,6 +226,36 @@ detect_reallocation <- function(data, worker_hire) {
   return(data_reallocation)
 }
 
+detect_reallocation2 <- function(data, worker_hire) {
+  data_nested <- data %>%
+    arrange(worker_id, ref_date, org_id) %>%
+    select(worker_id, ref_date, org_id) %>%
+    group_by(worker_id, ref_date) %>%
+    summarise(org_id_nested = list(unique(org_id)), .groups = "drop")
+
+  data_reallocation <- data_nested %>%
+    group_by(worker_id) %>%
+    mutate(
+      org_from = lag(org_id_nested),
+      org_to   = org_id_nested,
+      type_event = map2_chr(org_to, org_from,
+                            ~ ifelse(!identical(.x, .y),
+                                     "reallocation",
+                                     "no reallocation"))
+    ) %>%
+    ungroup() %>%
+    anti_join(
+      worker_hire %>% distinct(worker_id, ref_date),
+      by = c("worker_id", "ref_date")
+    ) %>%
+    group_by(worker_id) %>%
+    filter(ref_date > min(ref_date) & type_event == "reallocation") %>%
+    ungroup() %>%
+    select(worker_id, ref_date, org_from, org_to, type_event)
+
+  return(data_reallocation)
+}
+
 #' Complete Panel Data by Identifier and Reference Dates
 #'
 #' Expands a dataset to include all combinations of identifiers and reference
