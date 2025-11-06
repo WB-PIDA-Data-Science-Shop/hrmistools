@@ -1,0 +1,89 @@
+# set-up ------------------------------------------------------------------
+library(readr)
+library(dplyr)
+library(lubridate)
+library(stringr)
+library(tidyr)
+library(here)
+
+devtools::load_all()
+
+dir.create(
+  here("inst", "extdata"),
+  recursive = TRUE
+)
+
+# read-in data ------------------------------------------------------------
+contract_df <- read_rds(
+  here("spielplatz", "data", "bra_hrmis_contract.rds")
+)
+
+worker_df <- read_rds(
+  here("spielplatz", "data", "bra_hrmis_worker.rds")
+)
+
+# infer movement ----------------------------------------------------------
+# the movement table should have:
+# 1) contract_id
+# 2) ref_date
+# 3) event type: hire, dismissal, retirement, reallocation.
+
+# 1. infer hire
+# a hire is defined as a new contract when the worker_df
+# was not present in the dataset in the previous period
+worker_hire_df <- worker_df |>
+  detect_worker_event(
+    id_col = "worker_id",
+    event_type = "hire",
+    start_date = "2007-09-01",
+    end_date = "2018-09-01"
+  )
+
+# 2. infer fire
+worker_fire_df <- worker_df |>
+  detect_worker_event(
+    id_col = "worker_id",
+    event_type = "fire",
+    start_date = "2007-09-01",
+    end_date = "2018-09-01"
+  )
+
+# 3. infer retirement
+# if the worker_df appears as retired in the next ref_date, this is a retirement
+worker_retired_df <- worker_df |>
+  detect_retirement()
+
+# 4. infer movement
+# rename orgao id
+contract_rename_org_df <- contract_df |>
+  inner_join(
+    worker_df |> filter(status == "active"),
+    by = c("worker_id", "ref_date"),
+    relationship = "many-to-many"
+  ) |>
+  mutate(
+    org_id = str_remove_all(org_id, "\\d+|-")
+  )
+
+worker_reallocation_df <- contract_rename_org_df |>
+  detect_reallocation(
+    worker_hire = worker_hire_df
+  )
+
+# join all
+worker_movement_df <- list(
+  worker_hire_df,
+  worker_fire_df,
+  worker_retired_df,
+  worker_reallocation_df
+) |>
+  reduce(
+    bind_rows
+  )
+
+# write-out ---------------------------------------------------------------
+worker_movement_df |>
+  write_rds(
+    here("spielplatz", "data", "worker_movement.rds")
+  )
+

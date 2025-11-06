@@ -97,17 +97,29 @@ detect_worker_event <- function(data,
 
   # Add lag/lead and event detection
   if (event_type == "hire") {
-    expanded_active_workers_dt[, type_event := ifelse(
-      status == "active" & is.na(data.table::shift(status, type = "lag")),
-      "hire",
-      "no hire"
+    expanded_active_workers_dt[
+      ,
+      type_event := ifelse(
+        status == "active" & is.na(data.table::shift(status, type = "lag")),
+        "hire",
+        "no hire"
     ), by = id_col]
+
+    expanded_active_workers_dt <- expanded_active_workers_dt[
+      ref_date > lubridate::ymd(start_date),
+    ]
   } else {
-    expanded_active_workers_dt[, type_event := ifelse(
-      status == "active" & is.na(data.table::shift(status, type = "lead")),
-      "fire",
-      "no fire"
+    expanded_active_workers_dt[
+      ,
+      type_event := ifelse(
+        status == "active" & is.na(data.table::shift(status, type = "lead")),
+        "fire",
+        "no fire"
     ), by = id_col]
+
+    expanded_active_workers_dt <- expanded_active_workers_dt[
+      ref_date < lubridate::ymd(end_date),
+    ]
   }
 
   expanded_active_workers_dt <- expanded_active_workers_dt[
@@ -210,6 +222,7 @@ detect_reallocation <- function(data, worker_hire) {
         ~ ifelse(!identical(.x, .y), "reallocation", "no reallocation")
       )
     ) %>%
+    select(-org_id_nested) |>
     ungroup() %>%
 
     # Remove hire events

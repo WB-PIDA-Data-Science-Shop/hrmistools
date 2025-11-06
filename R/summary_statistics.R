@@ -681,8 +681,6 @@ compute_change <- function(data, col, date_col) {
   return(tbl)
 }
 
-
-
 #' Calculate year-over-year growth for a numeric column (data.table version)
 #'
 #' @description
