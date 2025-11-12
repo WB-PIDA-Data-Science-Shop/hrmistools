@@ -1,0 +1,30 @@
+---
+title: "HRMIS Harmonization"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    theme: united
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Overview
+
+This article describes the standard approach for harmonizing human resource management information system (HRMIS) data, organized into three main modules: Organization, Worker, and Contract. The contents of each module are described in `vignette("standard_dictionary")`
+
+# A demo data
+
+Suppose the Government of Zambia shared with us an extraction of their HRMIS data. First, let's take a closer look at the data.
+
+```{r}
+library(hrmistools)
+library(reactable)
+
+reactable(
+  contract_harmonized
+)
+```
+

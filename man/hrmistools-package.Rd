@@ -15,4 +15,13 @@ Useful links:
 }
 
 }
+\author{
+\strong{Maintainer}: Galileu Kim \email{galileukim@worldbank.org}
+
+Authors:
+\itemize{
+  \item Ifeanyi Edochie \email{iedochie@worldbank.org}
+}
+
+}
 \keyword{internal}

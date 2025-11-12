@@ -1,4 +1,12 @@
 url: https://wb-pida-data-science-shop.github.io/hrmistools/
 template:
   bootstrap: 5
-
+  bootswatch: superhero
+authors:
+  Ifeanyi Edochie:
+    href: https://github.com/ifeanyi588
+  Galileu Kim:
+    href: https://github.com/galileukim
+  footer:
+    roles: [cre, aut]
+    text: "Developed and maintained by"
