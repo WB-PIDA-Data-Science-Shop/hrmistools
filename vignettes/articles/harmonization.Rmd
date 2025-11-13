@@ -24,7 +24,7 @@ library(hrmistools)
 library(reactable)
 
 reactable(
-  bra_hrmis
+  head(bra_hrmis, 1e3)
 )
 ```
 
