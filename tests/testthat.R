@@ -7,6 +7,6 @@
 # * https://testthat.r-lib.org/articles/special-files.html
 
 library(testthat)
-library(hrmistools)
+library(govhr)
 
-test_check("hrmistools")
+test_check("govhr")
