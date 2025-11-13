@@ -1,0 +1,112 @@
+# Detect Career Transitions Based on Contract Attributes
+
+Identifies transitions in specified job-related attributes (e.g., pay
+grade, seniority) for each worker over time. The function first
+determines the "dominant" contract per worker and reference date based
+on a decision variable (e.g., highest base salary), and then detects
+when the selected attributes change across time.
+
+## Usage
+
+``` r
+detect_career_transitions(contract_dt, vars, decision_var, decision_fn = max)
+```
+
+## Arguments
+
+- contract_dt:
+
+  A \`data.table\`, \`data.frame\` object containing contract level
+  records. Must include columns for \`worker_id\`, \`ref_date\`, the
+  variables listed in \`vars\`, and the \`decision_var\`.
+
+- vars:
+
+  A character vector of attribute names (column names) to monitor for
+  changes (e.g., \`c("paygrade", "seniority")\`).
+
+- decision_var:
+
+  A string specifying the column name used to identify the dominant
+  contract per worker and date (e.g., \`"base_salary_lcu"\`).
+
+- decision_fn:
+
+  A function defining the decision rule for selecting the dominant
+  contract within each worker-date group (default: \`max\`). Typically
+  \`max\`, \`min\`, or a custom summary function.
+
+## Value
+
+A \`data.table\` with the following columns:
+
+- worker_id:
+
+  Unique worker identifier.
+
+- start_date:
+
+  Date of the previous contract before the change.
+
+- ref_date:
+
+  Date when the new attribute value takes effect.
+
+- attribute:
+
+  Name of the attribute that changed.
+
+- from:
+
+  Previous value of the attribute.
+
+- to:
+
+  New value of the attribute.
+
+## Details
+
+The function:
+
+1.  Sorts contracts by \`worker_id\`, \`ref_date\`, and the decision
+    variable.
+
+2.  Selects the dominant contract per worker-date combination using
+    \`decision_fn\`.
+
+3.  For each attribute in \`vars\`, compares its value to the previous
+    record (by worker) and detects any changes.
+
+4.  Returns all transitions, including the attribute name, previous and
+    new values, and the start and end dates for the transition.
+
+The function assumes that higher values of \`decision_var\` represent
+more dominant contracts when \`decision_fn = max\`. If ties occur, the
+first instance is selected.
+
+## Examples
+
+``` r
+library(data.table)
+dt <- data.table(
+  worker_id = c(1, 1, 1, 2, 2),
+  ref_date = as.Date(c("2020-01-01", "2021-01-01", "2022-01-01",
+                       "2020-06-01", "2021-06-01")),
+  paygrade = c("A", "A", "B", "C", "D"),
+  seniority = c(1, 2, 3, 1, 2),
+  base_salary_lcu = c(50000, 55000, 60000, 40000, 42000)
+)
+
+detect_career_transitions(
+  contract_dt = dt,
+  vars = c("paygrade", "seniority"),
+  decision_var = "base_salary_lcu"
+)
+#>    worker_id worker_id start_date   ref_date attribute   from     to
+#>        <num>     <num>     <Date>     <Date>    <char> <char> <char>
+#> 1:         1         1       <NA> 2022-01-01  paygrade      A      B
+#> 2:         2         2       <NA> 2021-06-01  paygrade      C      D
+#> 3:         1         1       <NA> 2021-01-01 seniority      1      2
+#> 4:         1         1 2021-01-01 2022-01-01 seniority      2      3
+#> 5:         2         2       <NA> 2021-06-01 seniority      1      2
+```

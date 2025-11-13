@@ -13,7 +13,7 @@ Suppose the Government of Brazil shared with us an extraction of their
 HRMIS data. First, let’s take a closer look at the data.
 
 ``` r
-library(hrmistools)
+library(govhr)
 library(reactable)
 
 reactable(

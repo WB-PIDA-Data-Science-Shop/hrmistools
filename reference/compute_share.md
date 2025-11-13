@@ -39,7 +39,7 @@ compute_share(
 - cols:
 
   A named list passed to
-  [`compute_summary()`](https://wb-pida-data-science-shop.github.io/hrmistools/reference/compute_summary.md),
+  [`compute_summary()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_summary.md),
   specifying which variables to summarize (e.g.
   `list(vars = "varname")`).
 
@@ -51,7 +51,7 @@ compute_share(
 - fns:
 
   A list of summary functions passed to
-  [`compute_summary()`](https://wb-pida-data-science-shop.github.io/hrmistools/reference/compute_summary.md),
+  [`compute_summary()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_summary.md),
   typically defined as formulas (e.g.
   `list(mean = ~mean(.x, na.rm = TRUE))`).
 
@@ -84,7 +84,7 @@ column.
 The function proceeds in five steps:
 
 1.  Summarizes the microdata using
-    [`compute_summary()`](https://wb-pida-data-science-shop.github.io/hrmistools/reference/compute_summary.md).
+    [`compute_summary()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_summary.md).
 
 2.  Automatically detects join keys shared between the summary and macro
     data.
@@ -103,7 +103,7 @@ values used to compute them.
 
 ## See also
 
-[`compute_summary`](https://wb-pida-data-science-shop.github.io/hrmistools/reference/compute_summary.md)
+[`compute_summary`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_summary.md)
 
 ## Examples
 

@@ -90,14 +90,14 @@ compute_summary(data = df,
 #> # A tibble: 8 × 4
 #>   country  year indicator        value
 #>   <chr>   <int> <chr>            <dbl>
-#> 1 A        2020 income_mean      1589.
-#> 2 A        2020 expenditure_mean  995.
-#> 3 A        2021 income_mean      1469.
-#> 4 A        2021 expenditure_mean 1034.
-#> 5 B        2020 income_mean      1364.
-#> 6 B        2020 expenditure_mean  930.
-#> 7 B        2021 income_mean      1481.
-#> 8 B        2021 expenditure_mean 1055.
+#> 1 A        2020 income_mean      1576.
+#> 2 A        2020 expenditure_mean  955.
+#> 3 A        2021 income_mean      1636.
+#> 4 A        2021 expenditure_mean 1190.
+#> 5 B        2020 income_mean      1166.
+#> 6 B        2020 expenditure_mean 1161.
+#> 7 B        2021 income_mean      1517.
+#> 8 B        2021 expenditure_mean  959.
 
  # Select specific functions
  compute_summary(data = df,
@@ -108,8 +108,8 @@ compute_summary(data = df,
 #> # A tibble: 2 × 3
 #>   country income_mean income_sd
 #>   <chr>         <dbl>     <dbl>
-#> 1 A             1541.      397.
-#> 2 B             1434.      295.
+#> 1 A             1600.      346.
+#> 2 B             1377.      280.
 
  # Custom function
  compute_summary(df,
@@ -120,8 +120,8 @@ compute_summary(data = df,
 #> # A tibble: 4 × 3
 #>   country indicator     value
 #>   <chr>   <chr>         <dbl>
-#> 1 A       income_cv     0.258
+#> 1 A       income_cv     0.216
 #> 2 A       income_q90 1885.   
-#> 3 B       income_cv     0.206
-#> 4 B       income_q90 1693.   
+#> 3 B       income_cv     0.203
+#> 4 B       income_q90 1668.   
 ```

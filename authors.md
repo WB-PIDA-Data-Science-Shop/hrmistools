@@ -8,14 +8,14 @@
 
 ## Citation
 
-Kim G, Edochie I (2025). *hrmistools: What the Package Does (Title
-Case)*. R package version 0.1.0,
-<https://wb-pida-data-science-shop.github.io/hrmistools/>.
+Kim G, Edochie I (2025). *govhr: What the Package Does (Title Case)*. R
+package version 0.1.0,
+<https://wb-pida-data-science-shop.github.io/govhr/>.
 
     @Manual{,
-      title = {hrmistools: What the Package Does (Title Case)},
+      title = {govhr: What the Package Does (Title Case)},
       author = {Galileu Kim and Ifeanyi Edochie},
       year = {2025},
       note = {R package version 0.1.0},
-      url = {https://wb-pida-data-science-shop.github.io/hrmistools/},
+      url = {https://wb-pida-data-science-shop.github.io/govhr/},
     }

@@ -91,12 +91,12 @@ A named list of \`data.table\` objects containing:
 The function integrates contract, worker, and organizational datasets to
 compute a standardized HRMIS statistical report. It relies on supporting
 helper functions such as:
-[`convert_constant_ppp()`](https://wb-pida-data-science-shop.github.io/hrmistools/reference/convert_constant_ppp.md),
-[`compute_fastshare()`](https://wb-pida-data-science-shop.github.io/hrmistools/reference/compute_fastshare.md),
-[`compute_fastsummary()`](https://wb-pida-data-science-shop.github.io/hrmistools/reference/compute_fastsummary.md),
-[`detect_worker_event()`](https://wb-pida-data-science-shop.github.io/hrmistools/reference/detect_worker_event.md),
+[`convert_constant_ppp()`](https://wb-pida-data-science-shop.github.io/govhr/reference/convert_constant_ppp.md),
+[`compute_fastshare()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_fastshare.md),
+[`compute_fastsummary()`](https://wb-pida-data-science-shop.github.io/govhr/reference/compute_fastsummary.md),
+[`detect_worker_event()`](https://wb-pida-data-science-shop.github.io/govhr/reference/detect_worker_event.md),
 and
-[`detect_retirement()`](https://wb-pida-data-science-shop.github.io/hrmistools/reference/detect_retirement.md).
+[`detect_retirement()`](https://wb-pida-data-science-shop.github.io/govhr/reference/detect_retirement.md).
 
 Each sub-table in the output list can be used directly in dashboards,
 reports, or further analytical aggregation.

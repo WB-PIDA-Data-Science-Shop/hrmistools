@@ -1,4 +1,4 @@
 # License
 
     YEAR: 2025
-    COPYRIGHT HOLDER: hrmistools authors
+    COPYRIGHT HOLDER: govhr authors
