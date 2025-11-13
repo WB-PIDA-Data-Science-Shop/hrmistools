@@ -2,8 +2,12 @@
 <url><loc>https://wb-pida-data-science-shop.github.io/hrmistools/404.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/hrmistools/LICENSE-text.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/hrmistools/LICENSE.html</loc></url>
+<url><loc>https://wb-pida-data-science-shop.github.io/hrmistools/articles/harmonization.html</loc></url>
+<url><loc>https://wb-pida-data-science-shop.github.io/hrmistools/articles/index.html</loc></url>
+<url><loc>https://wb-pida-data-science-shop.github.io/hrmistools/articles/standard_dictionary.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/hrmistools/authors.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/hrmistools/index.html</loc></url>
+<url><loc>https://wb-pida-data-science-shop.github.io/hrmistools/reference/bra_hrmis.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/hrmistools/reference/calculate_date_intervals.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/hrmistools/reference/complete_columns.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/hrmistools/reference/complete_dates.html</loc></url>
@@ -11,6 +15,7 @@
 <url><loc>https://wb-pida-data-science-shop.github.io/hrmistools/reference/compute_fastchange.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/hrmistools/reference/compute_fastshare.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/hrmistools/reference/compute_fastsummary.html</loc></url>
+<url><loc>https://wb-pida-data-science-shop.github.io/hrmistools/reference/compute_hrmreport_stats.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/hrmistools/reference/compute_share.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/hrmistools/reference/compute_summary.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/hrmistools/reference/contract_harmonized.html</loc></url>

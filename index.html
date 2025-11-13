@@ -32,6 +32,13 @@
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
 <li class="nav-item"><a class="nav-link" href="reference/index.html">Reference</a></li>
+<li class="nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
+<li><a class="dropdown-item" href="articles/harmonization.html">HRMIS Harmonization</a></li>
+    <li><a class="dropdown-item" href="articles/standard_dictionary.html">HRMIS Standard Data Dictionary</a></li>
+  </ul>
+</li>
       </ul>
 <ul class="navbar-nav">
 <li class="nav-item"><form class="form-inline" role="search">
@@ -49,14 +56,20 @@
 </h1></div>
 <!-- badges: start -->
 
-<p>The goal of hrmistools is to …</p>
+<p>The goal of <code>hrmistools</code> is to provide a set of open-source tolls that:</p>
+<ol style="list-style-type: decimal">
+<li>Standardize and efficiently clean human resource management information system (HRMIS) data.</li>
+<li>Produce analytical insights in a standard, but customizable, format.</li>
+<li>Quality assures both 1 and 2.</li>
+</ol>
+<p><code>hrmistool</code> is based on the <a href="https://documents1.worldbank.org/curated/en/324801640074379484/pdf/Public-Sector-Employment-and-Compensation-An-Assessment-Framework.pdf#page=37.23" class="external-link">Public Sector Employment and Compensation Assessment Framework</a> developed by the World Bank.</p>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
-<p>You can install the development version of hrmistools from <a href="https://github.com/" class="external-link">GitHub</a> with:</p>
+<p>You can install the development version of <code>hrmistools</code> from <a href="https://github.com/" class="external-link">GitHub</a> with:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># install.packages("pak")</span></span>
-<span><span class="fu">pak</span><span class="fu">::</span><span class="fu"><a href="https://pak.r-lib.org/reference/pak.html" class="external-link">pak</a></span><span class="op">(</span><span class="st">"WB-PIDA-Data-Science-Shop/hrmistools"</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="co"># install.packages("remotes")</span></span>
+<span><span class="fu">remotes</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"WB-PIDA-Data-Science-Shop/hrmistools"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="example">Example<a class="anchor" aria-label="anchor" href="#example"></a>
@@ -86,7 +99,10 @@
 <div class="developers">
 <h2 data-toc-skip>Developers</h2>
 <ul class="list-unstyled">
-<li>The package maintainer <br><small class="roles"> Maintainer </small>   </li>
+<li>
+<a href="https://github.com/galileukim" class="external-link">Galileu Kim</a> <br><small class="roles"> Author, maintainer </small>   </li>
+<li>
+<a href="https://github.com/ifeanyi588" class="external-link">Ifeanyi Edochie</a> <br><small class="roles"> Author </small>   </li>
 </ul>
 </div>
 
@@ -103,11 +119,11 @@
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by The package maintainer.</p>
+  <p>Developed by <a href="https://github.com/galileukim" class="external-link">Galileu Kim</a>, <a href="https://github.com/ifeanyi588" class="external-link">Ifeanyi Edochie</a>.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer>
