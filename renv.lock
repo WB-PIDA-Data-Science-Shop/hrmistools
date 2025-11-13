@@ -2945,6 +2945,52 @@
       "Maintainer": "Kirill Müller <kirill@cynkra.com>",
       "Repository": "CRAN"
     },
+    "hrmistools": {
+      "Package": "hrmistools",
+      "Version": "0.1.0",
+      "Source": "unknown",
+      "Type": "Package",
+      "Title": "What the Package Does (Title Case)",
+      "Description": "More about what it does (maybe more than one line) Use four spaces when indenting paragraphs within the Description.",
+      "License": "MIT + file LICENSE",
+      "Encoding": "UTF-8",
+      "LazyData": "true",
+      "LazyDataCompression": "xz",
+      "Imports": [
+        "dplyr",
+        "purrr",
+        "tibble",
+        "tidyselect",
+        "rlang",
+        "pointblank",
+        "stringr",
+        "tidyr",
+        "countrycode",
+        "glue",
+        "httr",
+        "janitor",
+        "jsonlite",
+        "lubridate",
+        "ggplot2",
+        "ggrepel",
+        "ggthemes",
+        "data.table"
+      ],
+      "RoxygenNote": "7.3.3",
+      "Suggests": [
+        "testthat (>= 3.0.0)"
+      ],
+      "Config/testthat/edition": "3",
+      "Depends": [
+        "R (>= 4.1.0)"
+      ],
+      "URL": "https://wb-pida-data-science-shop.github.io/hrmistools/",
+      "Config/Needs/website": "rmarkdown",
+      "Authors@R": "c( person(\"Galileu\", \"Kim\", , \"galileukim@worldbank.org\", role = c(\"aut\", \"cre\")), person(\"Ifeanyi\", \"Edochie\", , \"iedochie@worldbank.org\", role = c(\"aut\")) )",
+      "NeedsCompilation": "no",
+      "Author": "Galileu Kim [aut, cre], Ifeanyi Edochie [aut]",
+      "Maintainer": "Galileu Kim <galileukim@worldbank.org>"
+    },
     "htmltools": {
       "Package": "htmltools",
       "Version": "0.5.8.1",

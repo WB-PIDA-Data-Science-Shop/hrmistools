@@ -1,4 +1,4 @@
-Package: hrmistools
+Package: govhr
 Type: Package
 Title: What the Package Does (Title Case)
 Version: 0.1.0
@@ -33,7 +33,7 @@ Suggests:
 Config/testthat/edition: 3
 Depends: 
     R (>= 3.5)
-URL: https://wb-pida-data-science-shop.github.io/hrmistools/
+URL: https://wb-pida-data-science-shop.github.io/govhr/
 Config/Needs/website: rmarkdown
 Authors@R: c(
     person("Galileu", "Kim", , "galileukim@worldbank.org", role = c("aut", "cre")),
