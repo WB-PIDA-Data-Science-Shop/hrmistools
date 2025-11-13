@@ -213,5 +213,5 @@ contract_alagoas_tbl <-
 qualitycheck_contractmod(contract_tbl = contract_alagoas_tbl)
 
 saveRDS(
-  contract_alagoas_tbl, "spielplatz/data/bra_hrmis_contract.rds"
+  contract_alagoas_tbl, "spielplatz/bra_hrmis_contract.rds"
 )
