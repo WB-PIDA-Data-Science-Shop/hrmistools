@@ -1,7 +1,7 @@
 url: https://wb-pida-data-science-shop.github.io/hrmistools/
 template:
   bootstrap: 5
-  bootswatch: superhero
+  bootswatch: sandstone
 authors:
   Ifeanyi Edochie:
     href: https://github.com/ifeanyi588

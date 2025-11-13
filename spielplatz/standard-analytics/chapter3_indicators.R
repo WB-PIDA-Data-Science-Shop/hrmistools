@@ -72,12 +72,18 @@ wagebill_orgdecomp_dt <-
                       output = "long")
 
 ### compute annual recruitment patterns over time (still need to compute the reallocations, ask Gali!)
+
+hire_dt <- detect_worker_event(data = worker_dt,
+                               id_col = "worker_id",
+                               event_type = "hire",
+                               start_date = min(worker_dt$ref_date, na.rm = TRUE),
+                               end_date = max(worker_dt$ref_date, na.rm = TRUE))
+
+# reallocation_dt <- detect_reallocation(data = worker_dt,
+#                                        worker_hire = hire_dt)
+
 recruitment_dt <-
-  bind_rows(detect_worker_event(data = worker_dt,
-                                id_col = "worker_id",
-                                event_type = "hire",
-                                start_date = min(worker_dt$ref_date, na.rm = TRUE),
-                                end_date = max(worker_dt$ref_date, na.rm = TRUE)),
+  bind_rows(hire_dt,
             detect_worker_event(data = worker_dt,
                                 id_col = "worker_id",
                                 event_type = "fire",
