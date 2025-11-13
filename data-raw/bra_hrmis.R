@@ -3,6 +3,7 @@ library(readxl)
 library(furrr)
 library(writexl)
 library(digest)
+library(labourR)
 library(here)
 
 devtools::load_all()
@@ -54,6 +55,11 @@ bra_hrmis <- bra_hrmis |>
   mutate(
     CPF = map_chr(CPF, digest, algo = "sha256")
   )
+
+# contract module ---------------------------------------------------------\
+
+# worker module
+
 
 # write-out ---------------------------------------------------------------
 usethis::use_data(bra_hrmis, overwrite = TRUE)

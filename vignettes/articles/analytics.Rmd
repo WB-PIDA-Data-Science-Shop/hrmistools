@@ -21,10 +21,56 @@ Suppose the Government of Brazil shared with us an extraction of their HRMIS dat
 
 ```{r}
 library(govhr)
-library(reactable)
+library(dplyr)
+library(ggplot2)
+```
 
-reactable(
-  head(bra_hrmis, 1e3)
-)
+
+```{r, include = FALSE}
+library(stringr)
+library(polyglotr)
+
+bra_hrmis_contract <- bra_hrmis |>
+  mutate(
+    occupation_native  = str_to_lower(CARREIRA),
+    occupation_english = str_to_lower(
+      google_translate(
+        text = CARREIRA,
+        source_language = "pt",
+        target_language = "en"
+      )
+    )
+  ) |>
+  transmute(
+    contract_id = MATRICULA,
+    worker_id = CPF,
+    org_id = paste(ORGAO, COD_ORGAO, ANO_PAGAMENTO, sep = "-"),
+    ref_date = as.Date(paste(ANO_PAGAMENTO, MES_REFERENCIA, "01", sep = "-")),
+    base_salary_lcu = SALARIO_BASE,
+    allowance_lcu = ABONO_PERMANENCIA,
+    gross_salary_lcu = SALARIO_BRUTO,
+    net_salary_lcu = SALARIO_LIQUIDO,
+    whours = as.numeric(JORNADA),
+    country_code = "BRA",
+    country_name = "Brazil",
+    adm1_name = "Alagoas",
+    adm1_code = "AL",
+    start_date = as.Date(as.integer(DATA_ADMISSAO), origin = "1899-12-30"),
+    end_date = NA,
+    paygrade = CLASSE,
+    seniority = NIVEL,
+    occupation_native = occupation_native,
+    occupation_english = occupation_english,
+    occupation_iscocode = occupation_iscocode,
+    occupation_isconame = occupation_isconame,
+    contract_type_native = TIPO_CONTRATO,
+    contract_type_code = case_when(
+      TIPO_CONTRATO %in% c("EFETIVO", "EFETIVO COMISSIONADO") ~ "perm",
+      TIPO_CONTRATO == "EXCLUSIVAMENTE COMISSIONADO" ~ "fixed_term",
+      TIPO_CONTRATO %in% c("TEMPORÁRIO", "TEMPOR¡RIO") ~ "temp",
+      is.na(TIPO_CONTRATO) ~ NA_character_,
+      TRUE ~ "other"
+    )
+  )
 ```
 
