@@ -99,7 +99,7 @@ detect_worker_event <- function(data,
   if (event_type == "hire") {
     expanded_active_workers_dt[
       ,
-      type_event := ifelse(
+      type_event := fifelse(
         status == "active" & is.na(data.table::shift(status, type = "lag")),
         "hire",
         "no hire"
@@ -238,6 +238,184 @@ detect_reallocation <- function(data, worker_hire) {
 
   return(data_reallocation)
 }
+
+
+#' Add Contract Information to Event Records
+#'
+#' @description
+#' This function merges contract information into an event dataset (such as hires, terminations, or transfers)
+#' by matching on `worker_id` and `ref_date`. It ensures that selected variables from the contract dataset
+#' are attached to corresponding events without duplicating records.
+#'
+#' @param event_dt A data.table containing worker event records. Must include the columns
+#'   `worker_id` and `ref_date`.
+#' @param contract_dt A data.table containing contract information, also including `worker_id`
+#'   and `ref_date`. The contract dataset provides additional attributes describing the worker's
+#'   contractual context on each reference date.
+#' @param keep_vars A character vector of variable names in `contract_dt` to be merged into the
+#'   event dataset. These typically describe contract-level attributes such as position, department,
+#'   or employment type.
+#'
+#' @return
+#' A data.table identical to `event_dt`, but with the specified variables from `contract_dt`
+#' joined in by matching on `worker_id` and `ref_date`.
+#'
+#' @details
+#' The function performs a *right join* operation of the `contract_dt` onto `event_dt`
+#' (via `data.table`'s `on` syntax). Only unique combinations of `worker_id`, `ref_date`,
+#' and `keep_vars` are retained from the contract dataset prior to the join, preventing
+#' duplicate key matches.
+#'
+#' This function is particularly useful when enriching HR event logs with contextual information
+#' about the employee’s contract at the time of each event.
+#'
+#' @examples
+#' \dontrun{
+#' library(data.table)
+#'
+#' event_dt <- data.table(
+#'   worker_id = c(1, 2, 3),
+#'   ref_date = as.IDate(c("2020-01-01", "2020-02-01", "2020-03-01")),
+#'   type_event = c("hire", "fire", "hire")
+#' )
+#'
+#' contract_dt <- data.table(
+#'   worker_id = c(1, 2, 3),
+#'   ref_date = as.IDate(c("2020-01-01", "2020-02-01", "2020-03-01")),
+#'   department = c("Finance", "HR", "IT"),
+#'   contract_type = c("permanent", "temporary", "consultant")
+#' )
+#'
+#' enriched_events <- add_contract_to_event(
+#'   event_dt,
+#'   contract_dt,
+#'   keep_vars = c("department", "contract_type")
+#' )
+#' }
+#'
+#' @seealso [data.table::merge()], [data.table::unique()]
+#' @export
+
+add_contract_to_event <- function(event_dt,
+                                  contract_dt,
+                                  keep_vars){
+
+  contract_dt <- unique(contract_dt[, c("worker_id", "ref_date", keep_vars), with = FALSE])
+
+  event_dt <- contract_dt[event_dt, on = c("worker_id", "ref_date")]
+
+  return(event_dt)
+
+}
+
+#' Detect Career Transitions Based on Contract Attributes
+#'
+#' @description
+#' Identifies transitions in specified job-related attributes (e.g., pay grade, seniority)
+#' for each worker over time. The function first determines the "dominant" contract
+#' per worker and reference date based on a decision variable (e.g., highest base salary),
+#' and then detects when the selected attributes change across time.
+#'
+#' @param contract_dt A `data.table`, `data.frame` object containing contract level records.
+#' Must include columns for `worker_id`, `ref_date`, the variables listed in `vars`,
+#' and the `decision_var`.
+#' @param vars A character vector of attribute names (column names) to monitor for changes
+#' (e.g., `c("paygrade", "seniority")`).
+#' @param decision_var A string specifying the column name used to identify the dominant
+#' contract per worker and date (e.g., `"base_salary_lcu"`).
+#' @param decision_fn A function defining the decision rule for selecting the dominant
+#' contract within each worker-date group (default: `max`). Typically `max`, `min`, or
+#' a custom summary function.
+#'
+#' @details
+#' The function:
+#' \enumerate{
+#'   \item Sorts contracts by `worker_id`, `ref_date`, and the decision variable.
+#'   \item Selects the dominant contract per worker-date combination using `decision_fn`.
+#'   \item For each attribute in `vars`, compares its value to the previous record
+#'   (by worker) and detects any changes.
+#'   \item Returns all transitions, including the attribute name, previous and new values,
+#'   and the start and end dates for the transition.
+#' }
+#'
+#' The function assumes that higher values of `decision_var` represent more dominant
+#' contracts when `decision_fn = max`. If ties occur, the first instance is selected.
+#'
+#' @return A `data.table` with the following columns:
+#' \describe{
+#'   \item{worker_id}{Unique worker identifier.}
+#'   \item{start_date}{Date of the previous contract before the change.}
+#'   \item{ref_date}{Date when the new attribute value takes effect.}
+#'   \item{attribute}{Name of the attribute that changed.}
+#'   \item{from}{Previous value of the attribute.}
+#'   \item{to}{New value of the attribute.}
+#' }
+#'
+#' @examples
+#' library(data.table)
+#' dt <- data.table(
+#'   worker_id = c(1, 1, 1, 2, 2),
+#'   ref_date = as.Date(c("2020-01-01", "2021-01-01", "2022-01-01",
+#'                        "2020-06-01", "2021-06-01")),
+#'   paygrade = c("A", "A", "B", "C", "D"),
+#'   seniority = c(1, 2, 3, 1, 2),
+#'   base_salary_lcu = c(50000, 55000, 60000, 40000, 42000)
+#' )
+#'
+#' detect_career_transitions(
+#'   contract_dt = dt,
+#'   vars = c("paygrade", "seniority"),
+#'   decision_var = "base_salary_lcu"
+#' )
+#'
+#' @export
+
+
+detect_career_transitions <- function(contract_dt,
+                                      vars,
+                                      decision_var,
+                                      decision_fn = max) {
+
+  # Keep only needed columns
+  contract_dt <- contract_dt[, c("worker_id", "ref_date", vars, decision_var), with = FALSE]
+
+  # Sort by worker, date, and decision variable
+  setorderv(contract_dt, c("worker_id", "ref_date", decision_var), order = c(1, 1, -1))
+
+  # Apply decision rule: pick the dominant job for each worker-date
+  # We assume decision_fn = max by default (i.e. highest of whatever decision_var)
+  contract_main <- contract_dt[
+    , .SD[get(decision_var) == decision_fn(get(decision_var))][1],
+    by = .(worker_id, ref_date)
+  ]
+
+  # Now detect transitions for each variable
+  detect_transitions <- function(attr) {
+    # Add previous value by worker
+    contract_main[, paste0(attr, "_prev") := shift(get(attr)), by = worker_id]
+
+    # Keep rows where the attribute changed
+    transitions <- contract_main[get(attr) != get(paste0(attr, "_prev")),
+                                 .(worker_id,
+                                   start_date = shift(ref_date, 1L, type = "lag"),
+                                   ref_date,
+                                   attribute = attr,
+                                   from = get(paste0(attr, "_prev")),
+                                   to = get(attr)),
+                                 by = worker_id]
+
+    return(transitions[])
+  }
+
+  # Apply transition detection across all attributes
+  transitions_list <- lapply(vars, detect_transitions)
+
+  # Combine all attributes into one long data.table
+  transitions_dt <- data.table::rbindlist(transitions_list, use.names = TRUE)
+
+  return(transitions_dt[])
+}
+
 
 #' Complete Panel Data by Identifier and Reference Dates
 #'

@@ -751,4 +751,336 @@ compute_fastchange <- function(data, col, date_col) {
 }
 
 
+################################################################################
+##################### PUBLIC SECTOR REPORTING FUNCTIONS ########################
+################################################################################
+
+#' Compute Core HRMIS Analytical Tables
+#'
+#' This function generates a suite of standardized analytical tables for HRMIS (Human Resource Management Information System) reports.
+#' It combines contract-level, worker-level, and organizational data to compute wage bill summaries, employment shares, decompositions,
+#' and profiles by occupation, pay grade, organization, education, and seniority.
+#'
+#' @param contract_dt A `data.table` containing individual employment contracts with variables such as `worker_id`, `ref_date`,
+#' wage variables (`gross_salary_lcu`, `net_salary_lcu`, `base_salary_lcu`), and job attributes.
+#' @param worker_dt A `data.table` containing worker-level panel data, including `worker_id`, `ref_date`, demographic and employment information.
+#' @param org_dt A `data.table` containing organizational information (e.g., institution identifiers, types, or sectors).
+#'
+#' @return A named list of `data.table` objects containing:
+#' \describe{
+#'   \item{wagebill_shares}{Wage bill components as shares of macro indicators.}
+#'   \item{publicemployment_share}{Public employment as a share of total employment.}
+#'   \item{wagebill_occupisco}{Wage bill decomposition by ISCO occupation group.}
+#'   \item{wagebill_occupnative}{Wage bill decomposition by native occupational titles.}
+#'   \item{wagebill_orgdecomp}{Wage bill decomposition by organization.}
+#'   \item{wagebill_allowshare_paygrade}{Allowance rate by pay grade.}
+#'   \item{wagebill_allowshare_seniority}{Allowance rate by seniority.}
+#'   \item{workerevent}{Worker-level hiring, firing, and retirement events over time.}
+#'   \item{employment_decomp}{Employment decomposition by occupation and ISCO group.}
+#'   \item{org_decomp}{Employment decomposition by organization.}
+#'   \item{education_profile}{Distribution of public sector workers by education, gender, and occupation.}
+#'   \item{mobilityprofile}{Distribution of public sector workers by pay grade, seniority, gender, and occupation.}
+#' }
+#'
+#' @details
+#' The function integrates contract, worker, and organizational datasets to compute a standardized HRMIS statistical report.
+#' It relies on supporting helper functions such as:
+#' \code{convert_constant_ppp()}, \code{compute_fastshare()}, \code{compute_fastsummary()},
+#' \code{detect_worker_event()}, and \code{detect_retirement()}.
+#'
+#' Each sub-table in the output list can be used directly in dashboards, reports, or further analytical aggregation.
+#'
+#' @examples
+#' \dontrun{
+#' hrm_stats <- compute_hrmreport_stats(contract_dt = contract_data,
+#'                                      worker_dt = worker_data,
+#'                                      org_dt = org_data)
+#' names(hrm_stats)
+#' }
+#'
+#' @importFrom lubridate year
+#' @importFrom data.table :=
+#' @importFrom data.table fifelse
+#' @importFrom data.table setnames
+#' @importFrom dplyr rename
+#' @importFrom dplyr bind_rows
+#'
+#' @export
+
+compute_hrmreport_stats <- function(contract_dt,
+                                    worker_dt,
+                                    org_dt){
+
+  ### 3.1
+  wage_vars <- c("gross_salary_lcu",
+                 "net_salary_lcu",
+                 "base_salary_lcu")
+
+  lcu_vars <- colnames(macro_indicators)[grepl("_lcu",
+                                               colnames(macro_indicators))]
+
+  contract_dt[, year := lubridate::year(ref_date)]
+
+  ### compute ppp variables
+  contract_dt <-
+  convert_constant_ppp(data = contract_dt,
+                       cols = wage_vars,
+                       macro_indicators = macro_indicators)
+
+  ppp_vars <- colnames(contract_dt)[grepl("_ppp", colnames(contract_dt))]
+
+
+  wagebill_shares_dt <-
+    compute_fastshare(data = contract_dt,
+                      cols = wage_vars,
+                      macro_cols = lcu_vars,
+                      groups = c("country_code", "year"),
+                      fns = "sum",
+                      output = "long")
+
+  ### public sector employment as a share of total employment
+  worker_dt[, year := lubridate::year(ref_date)]
+
+  pubempshare_dt <-
+    compute_fastshare(data = contract_dt,
+                      macro_cols = "labor_force_total",
+                      cols = "worker_id",
+                      groups = c("country_code", "year"),
+                      fns = "count_unique",
+                      output = "long")
+
+
+  wagebill_iscodecomp_dt <-
+    compute_fastsummary(data = contract_dt,
+                        cols = c(wage_vars, ppp_vars),
+                        fns = c("sum", "mean", "cp_ratio", "cv"),
+                        groups = c("occupation_isconame", "occupation_iscocode", "year"),
+                        output = "long")
+
+  wagebill_occupdecomp_dt <-
+    compute_fastsummary(data = contract_dt,
+                        cols = c(wage_vars, ppp_vars),
+                        fns = c("sum", "mean"),
+                        groups = c("occupation_native", "occupation_english", "year"),
+                        output = "long")
+
+  wagebill_orgdecomp_dt <-
+    compute_fastsummary(data = contract_dt,
+                        cols = c(wage_vars, ppp_vars),
+                        fns = c("sum", "mean"),
+                        groups = c("org_id", "year"),
+                        output = "long")
+
+  wagebill_paygrade_dt <-
+    compute_fastsummary(data = contract_dt,
+                        cols = c(wage_vars, ppp_vars),
+                        fns = "sum",
+                        groups = "paygrade")
+
+  wagebill_seniority_dt <-
+    compute_fastsummary(data = contract_dt,
+                        cols = c(wage_vars, ppp_vars),
+                        fns = "sum",
+                        groups = "seniority")
+
+  ## lets look into allowance a little
+  contract_dt[, allowance_ind := fifelse(allowance_lcu > 0, 1, 0)]
+
+  wagebill_allowpaygrade_dt <-
+    contract_dt[, mean(allowance_ind, na.rm = T), by = c("paygrade", "year")] |>
+    setnames(old = "V1", new = "allowance_rate")
+
+  wagebill_allowseniority_dt <-
+    contract_dt[, mean(allowance_ind, na.rm = T), by = c("seniority", "year")] |>
+    setnames(old = "V1", new = "allowance_rate")
+
+  ### allowance as a share of each salary type
+  allowsalary_share_dt <-
+    contract_dt[, allowshare := allowance_lcu / base_salary_lcu] %>%
+    .[, mean(allowshare, na.rm = TRUE), by = c("country_code", "year", "paygrade")]
+
+
+  ### compute annual recruitment patterns over time (still need to compute the reallocations, ask Gali!)
+
+  hire_dt <- detect_worker_event(data = worker_dt,
+                                 id_col = "worker_id",
+                                 event_type = "hire",
+                                 start_date = min(worker_dt$ref_date, na.rm = TRUE),
+                                 end_date = max(worker_dt$ref_date, na.rm = TRUE))
+
+
+  worker_active_dt <- worker_dt[status == "active"]
+
+  contract_rename_org_dt <- merge(contract_dt,
+                                  worker_active_dt,
+                                  by = c("worker_id", "ref_date"),
+                                  allow.cartesian = TRUE)
+
+  worker_reallocation_dt <- detect_reallocation(data = contract_rename_org_dt,
+                                                worker_hire = hire_dt)
+
+  workerevent_dt <-
+    bind_rows(hire_dt,
+              detect_worker_event(data = worker_dt,
+                                  id_col = "worker_id",
+                                  event_type = "fire",
+                                  start_date = min(worker_dt$ref_date, na.rm = TRUE),
+                                  end_date = max(worker_dt$ref_date, na.rm = TRUE)),
+              detect_retirement(data = worker_dt))
+
+
+
+  ## decomposition of public sector employment by industry and occupational group
+
+  empdecomp_dt <-
+    compute_fastsummary(data = contract_dt,
+                        cols = "worker_id",
+                        groups = c("year", "occupation_isconame", "occupation_iscocode"),
+                        output = "long",
+                        fns = "count_unique") |>
+    merge(isco,
+          by.y = c("unit", "description"),
+          by.x = c("occupation_iscocode", "occupation_isconame"),
+          all.x = TRUE) |>
+    rename(count = "value") %>%
+    .[, prop := count / sum(count, na.rm = TRUE), by = "year"]
+
+  orgdecomp_dt <-
+    compute_fastsummary(data = contract_dt,
+                        cols = "worker_id",
+                        groups = c("year", "org_id"),
+                        output = "long",
+                        fns = "count_unique") |>
+    rename(count = "value") %>%
+    .[, prop := count / sum(count, na.rm = TRUE), by = "year"]
+
+
+  ## educational profile of public sector workers by gender and perhaps occupation (find out about which
+  ## rates we need to compute)
+
+  combine_dt <- worker_dt[contract_dt, on = c("worker_id", "ref_date", "year")]
+
+  educprofile_dt <- combine_dt[, .N, by = .(year, gender, educat7,
+                                            occupation_iscocode, occupation_native)]
+
+  ## distribution of public sector workers by pay grade
+  mobilityprofile_dt <- combine_dt[, .N, by = .(year, gender, paygrade, seniority, occupation_native, occupation_iscocode)]
+
+
+
+  hrm_list <- list(wagebill_shares = wagebill_shares_dt,
+                   publicemployment_share = pubempshare_dt,
+                   wagebill_occupisco = wagebill_iscodecomp_dt,
+                   wagebill_occupnative = wagebill_occupdecomp_dt,
+                   wagebill_orgdecomp = wagebill_orgdecomp_dt,
+                   wagebill_allowshare_paygrade = wagebill_allowpaygrade_dt,
+                   wagebill_allowshare_seniority = wagebill_allowseniority_dt,
+                   worker_movements = workerevent_dt,
+                   employment_decomp = empdecomp_dt,
+                   org_decomp = orgdecomp_dt,
+                   education_profile = educprofile_dt,
+                   mobilityprofile = mobilityprofile_dt)
+
+  return(hrm_list)
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
