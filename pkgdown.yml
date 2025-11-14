@@ -2,9 +2,11 @@ pandoc: 3.1.11
 pkgdown: 2.2.0
 pkgdown_sha: ~
 articles:
+  articles/analytics: analytics.html
   articles/harmonization: harmonization.html
   articles/standard_dictionary: standard_dictionary.html
-last_built: 2025-11-13T20:58Z
+  articles/standard_report: standard_report.html
+last_built: 2025-11-14T23:56Z
 urls:
   reference: https://wb-pida-data-science-shop.github.io/govhr/reference
   article: https://wb-pida-data-science-shop.github.io/govhr/articles

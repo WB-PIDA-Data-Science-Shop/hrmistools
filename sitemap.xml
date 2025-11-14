@@ -2,13 +2,18 @@
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/404.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/LICENSE-text.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/LICENSE.html</loc></url>
+<url><loc>https://wb-pida-data-science-shop.github.io/govhr/articles/analytics.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/articles/harmonization.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/articles/index.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/articles/standard_dictionary.html</loc></url>
+<url><loc>https://wb-pida-data-science-shop.github.io/govhr/articles/standard_report.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/authors.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/index.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/add_contract_to_event.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/bra_hrmis.html</loc></url>
+<url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/bra_hrmis_contract.html</loc></url>
+<url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/bra_hrmis_org.html</loc></url>
+<url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/bra_hrmis_worker.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/calculate_date_intervals.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/complete_columns.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/complete_dates.html</loc></url>
@@ -22,6 +27,7 @@
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/contract_harmonized.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/convert_constant_ppp.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/convert_data.html</loc></url>
+<url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/count_unique.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/countryclass.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/cp_ratio.html</loc></url>
 <url><loc>https://wb-pida-data-science-shop.github.io/govhr/reference/cv.html</loc></url>

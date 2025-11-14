@@ -47,22 +47,19 @@ individual public sector employees.
 
 ### Fields
 
-| Field Name                           | Variable Name  | Description                                      |
-|--------------------------------------|----------------|--------------------------------------------------|
-| Worker ID                            | `worker_id`    | Unique identifier for the worker                 |
-| Organization ID                      | `org_id`       | Foreign key linking to Organization module       |
-| Reference Date                       | `ref_date`     | Timestamp for the worker record                  |
-| Date of Birth                        | `birth_day`    | Worker’s date of birth                           |
-| Gender                               | `gender`       | Worker’s gender                                  |
-| Education Attainment (5 categories)  | `educat5`      | Education level using 5-category classification  |
-| Education Attainment (10 categories) | `educat10`     | Education level using 10-category classification |
-| Tribe                                | `tribe`        | Tribal affiliation (where applicable)            |
-| Race                                 | `race`         | Racial/ethnic classification                     |
-| Employment Status                    | `status`       | Current status (active/retired)                  |
-| Country Code                         | `country_code` | Official World Bank ISO-3 country code           |
-| Country Name                         | `country_name` | Official World Bank country name                 |
-| Administration 1 Name                | `adm1_name`    | First-level administrative division name         |
-| Administration 1 Code                | `adm1_code`    | First-level administrative division code         |
+| Field Name                          | Variable Name  | Description                                     |
+|-------------------------------------|----------------|-------------------------------------------------|
+| Worker ID                           | `worker_id`    | Unique identifier for the worker                |
+| Organization ID                     | `org_id`       | Foreign key linking to Organization module      |
+| Reference Date                      | `ref_date`     | Timestamp for the worker record                 |
+| Date of Birth                       | `birth_day`    | Worker’s date of birth                          |
+| Gender                              | `gender`       | Worker’s gender                                 |
+| Education Attainment (7 categories) | `educat7`      | Education level using 7-category classification |
+| Tribe                               | `tribe`        | Tribal affiliation (where applicable)           |
+| Race                                | `race`         | Racial/ethnic classification                    |
+| Employment Status                   | `status`       | Current status (active/retired)                 |
+| Country Code                        | `country_code` | Official World Bank ISO-3 country code          |
+| Country Name                        | `country_name` | Official World Bank country name                |
 
 ### Notes
 

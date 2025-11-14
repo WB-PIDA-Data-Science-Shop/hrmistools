@@ -6,6 +6,12 @@
   : Add Contract Information to Event Records
 - [`bra_hrmis`](https://wb-pida-data-science-shop.github.io/govhr/reference/bra_hrmis.md)
   : Brazilian Public Employee Payroll Data
+- [`bra_hrmis_contract`](https://wb-pida-data-science-shop.github.io/govhr/reference/bra_hrmis_contract.md)
+  : Contract Dataset
+- [`bra_hrmis_org`](https://wb-pida-data-science-shop.github.io/govhr/reference/bra_hrmis_org.md)
+  : Organization Dataset
+- [`bra_hrmis_worker`](https://wb-pida-data-science-shop.github.io/govhr/reference/bra_hrmis_worker.md)
+  : Worker Dataset
 - [`calculate_date_intervals()`](https://wb-pida-data-science-shop.github.io/govhr/reference/calculate_date_intervals.md)
   : Calculate time intervals between reference dates
 - [`complete_columns()`](https://wb-pida-data-science-shop.github.io/govhr/reference/complete_columns.md)
@@ -34,6 +40,8 @@
   : Convert nominal wages to real PPP-adjusted wages (2021 base year)
 - [`convert_data()`](https://wb-pida-data-science-shop.github.io/govhr/reference/convert_data.md)
   : Convert Data to Match Original Class
+- [`count_unique()`](https://wb-pida-data-science-shop.github.io/govhr/reference/count_unique.md)
+  : Count Unique Non-Missing Values
 - [`countryclass`](https://wb-pida-data-science-shop.github.io/govhr/reference/countryclass.md)
   : World Bank Country and Lending Groups
 - [`cp_ratio()`](https://wb-pida-data-science-shop.github.io/govhr/reference/cp_ratio.md)

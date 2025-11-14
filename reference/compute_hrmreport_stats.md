@@ -10,7 +10,7 @@ seniority.
 ## Usage
 
 ``` r
-compute_hrmreport_stats(contract_dt, worker_dt, org_dt)
+compute_hrmreport_stats(contract_dt, worker_dt, org_dt, macro_indicators)
 ```
 
 ## Arguments
@@ -31,6 +31,10 @@ compute_hrmreport_stats(contract_dt, worker_dt, org_dt)
 
   A \`data.table\` containing organizational information (e.g.,
   institution identifiers, types, or sectors).
+
+- macro_indicators:
+
+  A data frame containing macro indicators.
 
 ## Value
 

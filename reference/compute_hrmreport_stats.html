@@ -22,8 +22,10 @@ and profiles by occupation, pay grade, organization, education, and seniority.">
       <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/harmonization.html">HRMIS Harmonization</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/analytics.html">HR Analytics</a></li>
+    <li><a class="dropdown-item" href="../articles/harmonization.html">HRMIS Harmonization</a></li>
     <li><a class="dropdown-item" href="../articles/standard_dictionary.html">HRMIS Standard Data Dictionary</a></li>
+    <li><a class="dropdown-item" href="../articles/standard_report.html">HR Analytics Standard Report</a></li>
   </ul></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
@@ -48,7 +50,7 @@ and profiles by occupation, pay grade, organization, education, and seniority.</
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">compute_hrmreport_stats</span><span class="op">(</span><span class="va">contract_dt</span>, <span class="va">worker_dt</span>, <span class="va">org_dt</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">compute_hrmreport_stats</span><span class="op">(</span><span class="va">contract_dt</span>, <span class="va">worker_dt</span>, <span class="va">org_dt</span>, <span class="va">macro_indicators</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -66,6 +68,10 @@ wage variables (`gross_salary_lcu`, `net_salary_lcu`, `base_salary_lcu`), and jo
 
 <dt id="arg-org-dt">org_dt<a class="anchor" aria-label="anchor" href="#arg-org-dt"></a></dt>
 <dd><p>A `data.table` containing organizational information (e.g., institution identifiers, types, or sectors).</p></dd>
+
+
+<dt id="arg-macro-indicators">macro_indicators<a class="anchor" aria-label="anchor" href="#arg-macro-indicators"></a></dt>
+<dd><p>A data frame containing macro indicators.</p></dd>
 
 </dl></div>
     <div class="section level2">
