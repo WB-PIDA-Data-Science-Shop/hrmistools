@@ -4,7 +4,7 @@
 \alias{compute_hrmreport_stats}
 \title{Compute Core HRMIS Analytical Tables}
 \usage{
-compute_hrmreport_stats(contract_dt, worker_dt, org_dt)
+compute_hrmreport_stats(contract_dt, worker_dt, org_dt, macro_indicators)
 }
 \arguments{
 \item{contract_dt}{A `data.table` containing individual employment contracts with variables such as `worker_id`, `ref_date`,
@@ -13,6 +13,8 @@ wage variables (`gross_salary_lcu`, `net_salary_lcu`, `base_salary_lcu`), and jo
 \item{worker_dt}{A `data.table` containing worker-level panel data, including `worker_id`, `ref_date`, demographic and employment information.}
 
 \item{org_dt}{A `data.table` containing organizational information (e.g., institution identifiers, types, or sectors).}
+
+\item{macro_indicators}{A data frame containing macro indicators.}
 }
 \value{
 A named list of `data.table` objects containing:

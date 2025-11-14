@@ -623,8 +623,6 @@ compute_fastshare <- function(data,
   return(ratio_dt)
 }
 
-
-
 #' Compute Year-over-Year Growth for a Numeric Column
 #'
 #' This function calculates the year-over-year growth rate for a specified numeric
@@ -765,6 +763,7 @@ compute_fastchange <- function(data, col, date_col) {
 #' wage variables (`gross_salary_lcu`, `net_salary_lcu`, `base_salary_lcu`), and job attributes.
 #' @param worker_dt A `data.table` containing worker-level panel data, including `worker_id`, `ref_date`, demographic and employment information.
 #' @param org_dt A `data.table` containing organizational information (e.g., institution identifiers, types, or sectors).
+#' @param macro_indicators A data frame containing macro indicators.
 #'
 #' @return A named list of `data.table` objects containing:
 #' \describe{
@@ -809,7 +808,14 @@ compute_fastchange <- function(data, col, date_col) {
 
 compute_hrmreport_stats <- function(contract_dt,
                                     worker_dt,
-                                    org_dt){
+                                    org_dt,
+                                    macro_indicators){
+
+  ## convert to data.table
+  contract_dt <-  as.data.table(contract_dt)
+  worker_dt <- as.data.table(worker_dt)
+  org_dt <- as.data.table(org_dt)
+
 
   ### 3.1
   wage_vars <- c("gross_salary_lcu",
@@ -849,6 +855,13 @@ compute_hrmreport_stats <- function(contract_dt,
                       fns = "count_unique",
                       output = "long")
 
+
+  wagebill_annual_dt <-
+    compute_fastsummary(data = contract_dt,
+                        cols = c(wage_vars, ppp_vars),
+                        fns = c("sum", "mean", "median"),
+                        groups = c("year"),
+                        output = "long")
 
   wagebill_iscodecomp_dt <-
     compute_fastsummary(data = contract_dt,
@@ -970,11 +983,14 @@ compute_hrmreport_stats <- function(contract_dt,
 
   hrm_list <- list(wagebill_shares = wagebill_shares_dt,
                    publicemployment_share = pubempshare_dt,
-                   wagebill_occupisco = wagebill_iscodecomp_dt,
-                   wagebill_occupnative = wagebill_occupdecomp_dt,
-                   wagebill_orgdecomp = wagebill_orgdecomp_dt,
-                   wagebill_allowshare_paygrade = wagebill_allowpaygrade_dt,
-                   wagebill_allowshare_seniority = wagebill_allowseniority_dt,
+                   wagebill = list(
+                     wagebill_annual = wagebill_annual_dt,
+                     wagebill_occupisco = wagebill_iscodecomp_dt,
+                     wagebill_occupnative = wagebill_occupdecomp_dt,
+                     wagebill_orgdecomp = wagebill_orgdecomp_dt,
+                     wagebill_allowshare_paygrade = wagebill_allowpaygrade_dt,
+                     wagebill_allowshare_seniority = wagebill_allowseniority_dt
+                   ),
                    worker_movements = workerevent_dt,
                    employment_decomp = empdecomp_dt,
                    org_decomp = orgdecomp_dt,
@@ -982,8 +998,6 @@ compute_hrmreport_stats <- function(contract_dt,
                    mobilityprofile = mobilityprofile_dt)
 
   return(hrm_list)
-
-
 }
 
 
