@@ -20,6 +20,8 @@ library(reactable)
 library(ggthemes)
 library(data.table)
 library(stringr)
+library(tidyr)
+library(purrr)
 
 # set default color palette with scale_color_brewer
 theme_set(
@@ -61,7 +63,7 @@ hrm_report_stats <- compute_hrmreport_stats(
 )
 ```
 
-## 4.1. Fiscal sustainability {.tabset-dropdown}
+## Fiscal sustainability {.tabset-dropdown}
 
 The wage bill can potentially have a major effect on fiscal balances, but there are no simple benchmarks for the “right” size of the wage bill. In fact, cross-national evidence suggests that there is no strong correlation between the size of the wage bill and fiscal balance. Wage bill dynamics are a better predictor of fiscal sustainability. In general, increases in the wage bill are associated with worsening of the fiscal balance. In addition, wage expenditures are pro-cyclical, rising during periods of economic growth, but not falling as much during downturns due to structural rigidity.
 
@@ -71,9 +73,12 @@ Guidance questions for the assessment:
 2. What are the main drivers of wage bill growth?
 3. What are the wage bill projections for baseline and different policy option scenarios based on wage bill modeling?
 
-### 4.1.1. Correlation between wage bill growth and fiscal balances
+### Correlation between wage bill growth and fiscal balances
 
 ```{r}
+#| fig.alt: >
+#|   Plot of correlation between wage bill growth and fiscal balances.
+
 wagebill_annual <- hrm_report_stats |>
   pluck(
     "wagebill"
@@ -112,6 +117,9 @@ wagebill_annual |>
 ### Decomposition of wage growth: employment and wages
 
 ```{r}
+#| fig.alt: >
+#|   Plot of decomposition of wage growth
+
 annual_headcount <- hrm_report_stats |> 
   pluck("publicemployment_share") |> 
   select(
@@ -124,7 +132,7 @@ wagebill_annual |>
     annual_headcount,
     by = "year"
   ) |> 
-  filter(year <= 2017) |>
+  # filter(year <= 2017) |>
   transmute(
     year,
     `Median Wage (PPP)` = value/value[year == min(year)] * 100,
@@ -145,7 +153,7 @@ wagebill_annual |>
   )
 ```
 
-## 6. Wage incentives {.tabset-dropdown}
+## Wage incentives {.tabset-dropdown}
 
 The extent to which wage increases are explicitly linked to performance is important for both employee motivation and public sector productivity. This section provide some key stylized facts that provide evidence of the productivity and fiscal implications of pay incentives. These include: the magnitude of promotion-based and seniority-based annual wage increases, expected wage increases over an employee's career and the coverage and key design features of performance bonuses.
 
@@ -156,10 +164,14 @@ Guidance questions for the assessment:
 3. Are there performance bonus schemes and if so what occupation groups and percentage of the staff receive them; and how large is the bonus that staff are expected to receive?
 4. Is there targeted, significant additional pay for essential workers to serve in hard-to-staff locations such as rural areas?
 
-### 6.1. Allowances as a share of gross pay
+### Allowances as a share of gross pay
 
 ```{r}
+#| fig.alt: >
+#|   Plot of allowance as a share of gross pay.
+
 hrm_report_stats |> 
+  pluck("wagebill") |>
   pluck("wagebill_allowshare_paygrade") |> 
   filter(
     paygrade %in% 1:4
@@ -175,42 +187,45 @@ hrm_report_stats |>
     title = "Allowance as Share of Gross Salary, by Paygrade"
   )
 ```
-### 6.2. Percentage of staff receiving a performance bonus
+<!-- ### Percentage of staff receiving a performance bonus -->
 
-```{r}
-# 3.6.3. percentage of staff receiving a performance bonus
-performance_bonus_worker <- govhr::bra_hrmis_contract |>
-  filter(
-    !is.na(allowance_lcu)
-  ) |>
-  group_by(year) |>
-  summarise(
-    total_performance = n_distinct(worker_id)
-  )
+<!-- ```{r} -->
+<!-- #| fig.alt: > -->
+<!-- #|   Plot of staff receiving a performance bonus -->
 
-govhr::bra_hrmis_contract |>
-  group_by(year) |>
-  summarise(
-    total = n_distinct(worker_id)
-  ) |>
-  left_join(
-    performance_bonus_worker,
-    by = "year"
-  ) |>
-  mutate(
-    year = as.numeric(year),
-    share_performance = total_performance/total
-  ) |>
-  ggplot_point_line(
-    year,
-    share_performance
-  ) +
-  scale_y_continuous(
-    labels = scales::percent_format()
-  ) +
-  labs(
-    x = "Year",
-    y = "Share of personnel"
-  )
-```
+<!-- performance_bonus_worker <- govhr::bra_hrmis_contract |> -->
+<!--   filter( -->
+<!--     !is.na(allowance_lcu) & -->
+<!--       lubridate::year(ref_date) <= 2017 -->
+<!--   ) |> -->
+<!--   group_by(year) |> -->
+<!--   summarise( -->
+<!--     total_performance = n_distinct(worker_id) -->
+<!--   ) -->
+
+<!-- govhr::bra_hrmis_contract |> -->
+<!--   group_by(year) |> -->
+<!--   summarise( -->
+<!--     total = n_distinct(worker_id) -->
+<!--   ) |> -->
+<!--   left_join( -->
+<!--     performance_bonus_worker, -->
+<!--     by = "year" -->
+<!--   ) |> -->
+<!--   mutate( -->
+<!--     year = as.numeric(year), -->
+<!--     share_performance = total_performance/total -->
+<!--   ) |> -->
+<!--   ggplot_point_line( -->
+<!--     year, -->
+<!--     share_performance -->
+<!--   ) + -->
+<!--   scale_y_continuous( -->
+<!--     labels = scales::percent_format() -->
+<!--   ) + -->
+<!--   labs( -->
+<!--     x = "Year", -->
+<!--     y = "Share of personnel" -->
+<!--   ) -->
+<!-- ``` -->
 
