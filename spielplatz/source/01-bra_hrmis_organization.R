@@ -8,16 +8,12 @@ library(readxl)
 library(purrr)
 library(furrr)
 library(polyglotr)
+library(tidyr)
 library(writexl)
 library(here)
 
 plan(multisession, workers = 6)
 set.seed(1789)
-
-dir.create(
-  here("inst", "extdata"),
-  recursive = TRUE
-)
 
 # read-in data ------------------------------------------------------------
 file_path <- "//egvpi/egvpi/data/harmonization/HRM/BRA/data-raw/6. Wage Bill AL/3. Microdados"
@@ -128,7 +124,7 @@ names(check_list) <- unique(active_alagoas_tbl$ANO_PAGAMENTO)
 alagoas_org_tbl <-
   active_alagoas_tbl |>
   transmute(
-    org_id = paste(ORGAO, COD_ORGAO, ANO_PAGAMENTO, sep = "-"),
+    org_id = ORGAO,
     org_name_native = ORGAO,
     country_code = "BRA",
     country_name = "Brazil",
@@ -162,7 +158,7 @@ alagoas_org_tbl <-
     alagoas_org_tbl,
     inactive_alagoas_tbl |>
       transmute(
-        org_id = paste(ORGAO, "000000", sep = "-"),
+        org_id = ORGAO,
         org_name_native = ORGAO,
         country_code = "BRA",
         country_name = "Brazil",
