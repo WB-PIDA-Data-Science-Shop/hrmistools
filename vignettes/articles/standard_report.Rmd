@@ -52,7 +52,7 @@ The second part assesses the impact of these employment and compensation practic
 
 We have designed a convenient function, `govhr::compute_hrmreport_stats`, that produces all summary statistics necessary to produce the standard report on HR. All you need to do is provide the three standard modules as inputs to the function.
 
-```{r}
+```{r, include = TRUE}
 library(govhr)
 
 hrm_report_stats <- compute_hrmreport_stats(
