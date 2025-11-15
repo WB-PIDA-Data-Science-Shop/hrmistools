@@ -107,7 +107,7 @@ institutions, including ministries, departments, and agencies.</p>
 </tr>
 <tr class="odd">
 <td>Organization Name (English)</td>
-<td><code>org_name_english</code></td>
+<td><code>org_name_en</code></td>
 <td>Organization name translated to English</td>
 </tr>
 <tr class="even">
@@ -203,39 +203,39 @@ about individual public sector employees.</p>
 <td>Foreign key linking to Organization module</td>
 </tr>
 <tr class="odd">
+<td>Organization Name</td>
+<td><code>org_name_native</code></td>
+<td>Foreign key linking to the Organization module</td>
+</tr>
+<tr class="even">
 <td>Reference Date</td>
 <td><code>ref_date</code></td>
 <td>Timestamp for the worker record</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Date of Birth</td>
-<td><code>birth_day</code></td>
+<td><code>birth_date</code></td>
 <td>Worker’s date of birth</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Gender</td>
 <td><code>gender</code></td>
 <td>Worker’s gender</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Education Attainment (7 categories)</td>
 <td><code>educat7</code></td>
-<td>Education level using 7-category classification</td>
-</tr>
-<tr class="odd">
-<td>Tribe</td>
-<td><code>tribe</code></td>
-<td>Tribal affiliation (where applicable)</td>
+<td>Education level using 10-category classification</td>
 </tr>
 <tr class="even">
+<td>Tribe</td>
+<td><code>tribe</code></td>
+<td>Tribal affiliation</td>
+</tr>
+<tr class="odd">
 <td>Race</td>
 <td><code>race</code></td>
 <td>Racial/ethnic classification</td>
-</tr>
-<tr class="odd">
-<td>Employment Status</td>
-<td><code>status</code></td>
-<td>Current status (active/retired)</td>
 </tr>
 <tr class="even">
 <td>Country Code</td>
@@ -246,6 +246,16 @@ about individual public sector employees.</p>
 <td>Country Name</td>
 <td><code>country_name</code></td>
 <td>Official World Bank country name</td>
+</tr>
+<tr class="even">
+<td>Administration 1 Name</td>
+<td><code>adm1_name</code></td>
+<td>First-level administrative division name</td>
+</tr>
+<tr class="odd">
+<td>Administration 1 Code</td>
+<td><code>adm1_code</code></td>
+<td>First-level administrative division code</td>
 </tr>
 </tbody>
 </table>
@@ -305,108 +315,126 @@ compensation, and job characteristics.</p>
 <td>Foreign key linking to Organization module</td>
 </tr>
 <tr class="even">
+<td>Organization Name</td>
+<td><code>org_name_native</code></td>
+<td>Foreign key linking to Organization module</td>
+</tr>
+<tr class="odd">
 <td>Reference Date</td>
 <td><code>ref_date</code></td>
 <td>Timestamp for the contract record</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Base Salary (LCU)</td>
-<td><code>base_salary</code></td>
+<td><code>base_salary_lcu</code></td>
 <td>Base compensation in local currency units</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Base Salary (PPP)</td>
 <td><code>base_salary_ppp</code></td>
-<td>Base compensation in constant international dollars</td>
+<td>Base compensation in constant 2021 international dollars</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Gross Salary (LCU)</td>
 <td><code>gross_salary_lcu</code></td>
 <td>Total compensation before deductions in local currency units</td>
 </tr>
+<tr class="odd">
+<td>Gross Salary (PPP)</td>
+<td><code>gross_salary_ppp</code></td>
+<td>Total compensation before deductions in constant 2021 international
+dollars</td>
+</tr>
 <tr class="even">
-<td>Net Salary (PPP)</td>
-<td><code>net_salary</code></td>
-<td>Compensation after deductions in constant international dollars</td>
+<td>Net Salary (LCU)</td>
+<td><code>net_salary_lcu</code></td>
+<td>Compensation after deductions in local currency units</td>
 </tr>
 <tr class="odd">
+<td>Net Salary (PPP)</td>
+<td><code>net_salary_ppp</code></td>
+<td>Compensation after deductions in constant 2021 international
+dollars</td>
+</tr>
+<tr class="even">
 <td>Allowances (LCU)</td>
 <td><code>allowance_lcu</code></td>
 <td>Allowances in local currency units</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Allowances (PPP)</td>
 <td>
-<code>allowance_ppp</code> Allowances in constant international
+<code>allowance_ppp</code> Allowances in constant 2021 international
 dollars</td>
 <td></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Contract Type</td>
 <td><code>contract_type</code></td>
-<td>Contract modality (short-term/open-term/permanent)</td>
+<td>Contract modality
+(short-term/open-term/permanent/inactive/retired)</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Occupation (Native)</td>
 <td><code>occupation_native</code></td>
 <td>Job title in local language</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Occupation (English)</td>
 <td><code>occupation_english</code></td>
 <td>Job title translated to English</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Occupation (ISCO Name)</td>
 <td><code>occupation_isconame</code></td>
 <td>ISCO standard occupation name</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Occupation (ISCO Code)</td>
 <td><code>occupation_iscocode</code></td>
 <td>ISCO standard occupation code</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Start Date</td>
 <td><code>start_date</code></td>
 <td>Contract start date</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>End Date</td>
 <td><code>end_date</code></td>
 <td>Contract end date (if applicable)</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Country Code</td>
 <td><code>country_code</code></td>
 <td>Official World Bank ISO-3 country code</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Country Name</td>
 <td><code>country_name</code></td>
 <td>Official World Bank country name</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Administration 1 Name</td>
 <td><code>adm1_name</code></td>
 <td>First-level administrative division name</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Administration 1 Code</td>
 <td><code>adm1_code</code></td>
 <td>First-level administrative division code</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Hours Worked</td>
 <td><code>whours</code></td>
 <td>Standard or actual hours worked</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Pay Grade</td>
 <td><code>paygrade</code></td>
 <td>Salary scale or grade level</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Seniority</td>
 <td><code>seniority</code></td>
 <td>Years of service or seniority level</td>
