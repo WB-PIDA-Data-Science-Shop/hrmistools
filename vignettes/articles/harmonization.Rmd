@@ -12,7 +12,6 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # Required packages for the vignette
 cran_pkgs <- c("polyglotr", "DT")
-github_pkgs <- c("https://github.com/AleKoure/labourR")  
 
 # Install missing CRAN packages
 for (pkg in cran_pkgs) {
@@ -26,7 +25,7 @@ if (!requireNamespace("labourR", quietly = TRUE)) {
   if (!requireNamespace("remotes", quietly = TRUE)) {
     install.packages("remotes")
   }
-  remotes::install_github(github_pkgs, force = TRUE)
+  remotes::install_github("AleKoure/labourR")
 }
 
 
