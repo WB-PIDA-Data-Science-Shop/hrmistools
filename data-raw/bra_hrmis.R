@@ -3,6 +3,7 @@ library(readxl)
 library(furrr)
 library(writexl)
 library(digest)
+library(labourR)
 library(here)
 
 devtools::load_all()
@@ -55,5 +56,27 @@ bra_hrmis <- bra_hrmis |>
     CPF = map_chr(CPF, digest, algo = "sha256")
   )
 
+# import clean data -------------------------------------------------------
+bra_hrmis_contract <- read_rds(
+  here("spielplatz", "data", "bra_hrmis_contract.rds")
+) |>
+  filter(year >= 2014)
+
+bra_hrmis_worker <- read_rds(
+  here("spielplatz", "data", "bra_hrmis_worker.rds")
+) |>
+  filter(
+    lubridate::year(ref_date) >= 2014
+  )
+
+bra_hrmis_org <- read_rds(
+  here("spielplatz", "data", "bra_hrmis_organization.rds")
+)
+
 # write-out ---------------------------------------------------------------
 usethis::use_data(bra_hrmis, overwrite = TRUE)
+
+# modules
+usethis::use_data(bra_hrmis_contract, overwrite = TRUE)
+usethis::use_data(bra_hrmis_worker, overwrite = TRUE)
+usethis::use_data(bra_hrmis_org, overwrite = TRUE)

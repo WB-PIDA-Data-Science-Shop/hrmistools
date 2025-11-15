@@ -103,13 +103,35 @@ prop <- function(x) {
 }
 
 
+#' Count Unique Non-Missing Values
+#'
+#' Returns the number of unique values in a vector, excluding missing values (NA).
+#'
+#' @param x A vector of any type (numeric, character, factor, etc.)
+#'
+#' @return An integer representing the count of unique non-missing values in `x`.
+#'
+#' @examples
+#' # Basic usage
+#' count_unique(c(1, 2, 2, 3, 3, 3))
+#'
+#' # With missing values
+#' count_unique(c(1, 2, NA, 2, 3, NA))
+#'
+#' # With character vector
+#' count_unique(c("a", "b", "a", "c"))
+#'
+#' # Empty vector
+#' count_unique(c())
+#'
+#' # All NA values
+#' count_unique(c(NA, NA, NA))
+#'
+#' @export
 count_unique <- function(x){
-
   x <- x[!is.na(x)]
   y <- length(unique(x))
-
   return(y)
-
 }
 
 #' Define Default Summary Functions

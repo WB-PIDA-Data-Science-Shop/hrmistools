@@ -145,7 +145,6 @@
 #' \url{https://data360.worldbank.org/en/int/indicator/WB_ES_T_WK10}
 "enterprise_surveys"
 
-
 #' Harmonized Contract-Level Dataset (Zambia)
 #'
 #' The contract_harmonized dataset contains 50,000 synthetic contract-level observations
@@ -191,7 +190,6 @@
 #' dplyr::glimpse(contract_harmonized)
 #' dplyr::count(contract_harmonized, contract_type)
 "contract_harmonized"
-
 
 #' HRMIS Harmonization Data Dictionary
 #'
@@ -302,3 +300,80 @@
 #' table(payroll_data$ORGAO)
 #' }
 "bra_hrmis"
+
+#' Contract Dataset
+#'
+#' This dataset contains detailed information about contracts, including salaries,
+#' allowances, occupation, work hours, and organizational context. Each row represents
+#' a unique contract record.
+#'
+#' @format A data frame with N rows and 24 variables:
+#' \describe{
+#'   \item{contract_id}{Unique identifier for the contract}
+#'   \item{worker_id}{Foreign key linking to Worker module}
+#'   \item{org_id}{Foreign key linking to Organization module}
+#'   \item{ref_date}{Timestamp for the contract record}
+#'   \item{base_salary_lcu}{Base compensation in local currency units (LCU)}
+#'   \item{gross_salary_lcu}{Total compensation before deductions in local currency units}
+#'   \item{net_salary_lcu}{Compensation after deductions in local currency units}
+#'   \item{allowance_lcu}{Allowances in local currency units}
+#'   \item{occupation_native}{Job title in the local language}
+#'   \item{occupation_english}{Job title translated to English}
+#'   \item{occupation_isconame}{ISCO standard occupation name}
+#'   \item{occupation_iscocode}{ISCO standard occupation code}
+#'   \item{start_date}{Contract start date}
+#'   \item{end_date}{Contract end date, if applicable}
+#'   \item{country_code}{Official World Bank ISO-3 country code}
+#'   \item{country_name}{Official World Bank country name}
+#'   \item{adm1_name}{First-level administrative division name}
+#'   \item{adm1_code}{First-level administrative division code}
+#'   \item{whours}{Standard or actual hours worked}
+#'   \item{paygrade}{Salary scale or grade level}
+#'   \item{seniority}{Years of service or seniority level}
+#'   \item{year}{Year of the record}
+#' }
+#'
+"bra_hrmis_contract"
+
+#' Worker Dataset
+#'
+#' This dataset contains demographic and employment information for workers,
+#' including identifiers, education, tribal/racial classification, employment status,
+#' and geographic context. Each row represents a unique worker record.
+#'
+#' @format A data frame with N rows and 9 variables:
+#' \describe{
+#'   \item{worker_id}{Unique identifier for the worker}
+#'   \item{birth_date}{Worker’s date of birth}
+#'   \item{gender}{Worker’s gender}
+#'   \item{educat7}{Education level using 7-category classification}
+#'   \item{tribe}{Tribal affiliation (where applicable)}
+#'   \item{race}{Racial/ethnic classification}
+#'   \item{status}{Current employment status (active/retired)}
+#'   \item{country_code}{Official World Bank ISO-3 country code}
+#'   \item{ref_date}{Timestamp for the worker record}
+#' }
+#'
+"bra_hrmis_worker"
+
+#' Organization Dataset
+#'
+#' This dataset contains information about public sector organizations, including
+#' identifiers, names, hierarchical relationships, and geographic context.
+#' Each row represents a unique organization record.
+#'
+#' @format A data frame with N rows and 9 variables:
+#' \describe{
+#'   \item{org_id}{Unique identifier for the organization}
+#'   \item{org_name_native}{Official organization name in local language}
+#'   \item{org_name_en}{Organization name translated to English}
+#'   \item{country_code}{Official World Bank ISO-3 country code}
+#'   \item{country_name}{Official World Bank country name}
+#'   \item{adm1_name}{First-level administrative division name}
+#'   \item{adm1_code}{First-level administrative division code}
+#'   \item{org_parent}{Identifier for parent organization in hierarchy}
+#'   \item{org_child}{Identifier for child organizations in hierarchy}
+#' }
+#'
+"bra_hrmis_org"
+
