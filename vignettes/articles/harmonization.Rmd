@@ -26,7 +26,7 @@ if (!requireNamespace("labourR", quietly = TRUE)) {
   if (!requireNamespace("remotes", quietly = TRUE)) {
     install.packages("remotes")
   }
-  remotes::install_github(github_pkgs)
+  remotes::install_github(github_pkgs, force = TRUE)
 }
 
 
