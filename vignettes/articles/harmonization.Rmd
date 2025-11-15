@@ -10,23 +10,23 @@ output:
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 
-# Required packages for the vignette
-cran_pkgs <- c("polyglotr", "DT")
-
-# Install missing CRAN packages
-for (pkg in cran_pkgs) {
-  if (!requireNamespace(pkg, quietly = TRUE)) {
-    install.packages(pkg)
-  }
-}
-
-# Install missing GitHub packages
-if (!requireNamespace("labourR", quietly = TRUE)) {
-  if (!requireNamespace("remotes", quietly = TRUE)) {
-    install.packages("remotes")
-  }
-  remotes::install_github("AleKoure/labourR")
-}
+# # Required packages for the vignette
+# cran_pkgs <- c("polyglotr", "DT")
+# 
+# # Install missing CRAN packages
+# for (pkg in cran_pkgs) {
+#   if (!requireNamespace(pkg, quietly = TRUE)) {
+#     install.packages(pkg)
+#   }
+# }
+# 
+# # Install missing GitHub packages
+# if (!requireNamespace("labourR", quietly = TRUE)) {
+#   if (!requireNamespace("remotes", quietly = TRUE)) {
+#     install.packages("remotes")
+#   }
+#   remotes::install_github("AleKoure/labourR")
+# }
 
 
 library(reactable)
