@@ -161,12 +161,17 @@ qualitycheck_orgmod <- function(org_tbl) {
     org_tbl |>
     create_agent(label = "QCheck for Organization Module",
                  actions = al) |>
-    col_exists(columns = all_of(required_vars)) |>
-    rows_distinct(columns = vars(org_id)) |>
-    col_vals_not_null(columns = all_of(required_vars)) |>
-    col_is_character(columns = all_of(required_vars)) |>
+    col_exists(columns = all_of(required_vars),
+               label = "All required variables were harmonized") |>
+    rows_distinct(columns = vars(org_id),
+                  label = "Data is unique at the organization level") |>
+    col_vals_not_null(columns = all_of(required_vars),
+                      label = "Column values are not null") |>
+    col_is_character(columns = all_of(required_vars),
+                     label = "Character variables are properly type set") |>
     col_vals_in_set(columns = vars(country_code),
-                    set = unique(na.omit(countrycode::codelist$iso3c)))
+                    set = unique(na.omit(countrycode::codelist$iso3c)),
+                    label = "the country_code variable belongs to the official ISO-3 codes")
 
   agent <- agent %>% interrogate()
 
